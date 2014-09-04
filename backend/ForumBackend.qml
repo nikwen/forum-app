@@ -42,6 +42,7 @@ Object {
     property int currentSessionIndex: -1
 
     property int postsPerPage: 10
+    property int topicsLoadCount: 20
 
     U1db.Index {
         database: db

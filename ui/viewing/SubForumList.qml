@@ -71,9 +71,9 @@ ListView {
         }
 
         Component.onCompleted: {
-            if (modelsHaveLoadedCompletely && hasTopics && mode === "" && index === forumListModel.count - 3 && forumListModel.count % 20 === categoryModel.count) {
+            if (modelsHaveLoadedCompletely && hasTopics && mode === "" && index === forumListModel.count - 3 && forumListModel.count % backend.topicsLoadCount === categoryModel.count) {
                 console.log("load more, index: " + index)
-                loadMore(20)
+                loadMore(backend.topicsLoadCount)
             }
         }
     }
@@ -273,9 +273,9 @@ ListView {
                     //TODO: Check if if is needed or if it won't be added twice even without the if
                     if (count === 1 && forumListModel.count > 0 && get(0).id.trim() === forumListModel.get(forumListModel.count - 1).id && forumListModel.get(forumListModel.count - 1).topic === true) {
                         //Do not add the element as it is a duplicate of the last one which was added
-                        //Happens if a forum contains n * 20 topics (with n = 2, 3, 4, ...) and loadMore() is called (sadly, that's how the API handles the request)
+                        //Happens if a forum contains n * backend.topicsLoadCount topics (with n = 2, 3, 4, ...) and loadMore() is called (sadly, that's how the API handles the request)
 
-                        console.log("Don't add duplicate topic (n * 20 posts)")
+                        console.log("Don't add duplicate topic (n * backend.topicsLoadCount posts)")
 
                         showNoMoreNotification()
                     } else {
@@ -369,7 +369,7 @@ ListView {
                 startEndParams += '<param><value><int>'+endNum+'</int></value></param>'
             } else {
                 startEndParams += '<param><value><int>0</int></value></param>'
-                startEndParams += '<param><value><int>19</int></value></param>'
+                startEndParams += '<param><value><int>' + (backend.topicsLoadCount - 1) + '</int></value></param>'
             }
 
             xhr.send('<?xml version="1.0"?><methodCall><methodName>get_topic</methodName><params><param><value>'+forumId+'</value></param>'+startEndParams+'<param><value>'+mode+'</value></param></params></methodCall>');
