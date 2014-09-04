@@ -1,0 +1,15 @@
+{
+    "name": "com.ubuntu.developer.nikwen.forum-app",
+    "description": "Forum Browser for Ubuntu",
+    "framework": "ubuntu-sdk-14.10-qml-dev3",
+    "architecture": "all",
+    "title": "Forum Browser",
+    "hooks": {
+        "forum-app": {
+            "apparmor": "forum-app.json",
+            "desktop": "forum-app.desktop"
+        }
+    },
+    "version": "0.1.0",
+    "maintainer": "Niklas Wenzel <nikwen.developer@gmail.com>"
+}

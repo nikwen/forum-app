@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Forum Browser
+Exec=qmlscene $@ forum-app.qml
+Icon=icon.png
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true
