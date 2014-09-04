@@ -39,7 +39,7 @@ Base {
         subLabel.text = 'Thread by: '+author
     }
 
-    __height: Math.max(middleVisuals.height, units.gu(6))
+    __height: Math.max(middleVisuals.height + units.gu(2), units.gu(6))
 
     property alias text: label.text
     property alias subText: subLabel.text
@@ -49,7 +49,6 @@ Base {
         height: units.gu(4)
         width: units.gu(4)
         color: "green"
-//        color: Qt.darker(mainView.backgroundColor, 1.1)
 
         visible: model.topic
 
@@ -64,11 +63,10 @@ Base {
             fontSize: 'medium'
             text: '0'
             color: "white"
-//            color: '#5c3001'
         }
     }
 
-    Item  {
+    Column  {
         id: middleVisuals
         anchors {
             left: model.topic?countContainer.right:parent.left
@@ -76,26 +74,19 @@ Base {
             verticalCenter: parent.verticalCenter
             leftMargin: model.topic?units.gu(2):0
         }
-        height: childrenRect.height + label.anchors.topMargin + subLabel.anchors.bottomMargin
+        height: childrenRect.height
 
         LabelVisual {
             id: label
+            width: parent.width
             selected: subtitledListItem.selected
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-            }
         }
         LabelVisual {
             id: subLabel
+            width: parent.width
             selected: subtitledListItem.selected
             secondary: !model.topic //No grey color when browsing through topics
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: label.bottom
-            }
+            visible: text !== ""
             fontSize: "small"
             wrapMode: Text.Wrap
             maximumLineCount: 5
