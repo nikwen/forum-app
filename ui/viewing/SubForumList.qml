@@ -233,11 +233,11 @@ ListView {
         }
 
         function __loadForums() {
-            console.log("load categories")
-
             if (parentForumId < 0 && !viewSubscriptions) {
                 return;
             }
+
+            console.log("loading categories")
 
             hasLoadedCompletely = false
 
@@ -361,11 +361,13 @@ ListView {
         onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) __loadTopics()
 
         function __loadTopics(startNum, endNum) {
-            hasLoadedCompletely = false
-
             if (forumId <= 0 && !viewSubscriptions) {
                 return;
             }
+
+            console.log("loading categories")
+
+            hasLoadedCompletely = false
 
             var xhr = new XMLHttpRequest;
             topicModel.xml="";
