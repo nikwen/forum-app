@@ -30,9 +30,11 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import '../components'
 
-Page {
+PageWithBottomEdge {
     id: forumsPage
     title: i18n.tr("Forums")
+
+    property alias viewSubscriptions: forumsList.viewSubscriptions //Not via mode for maintainability (e.g. you easily forget to add a && mode === "SUBS" when adding a mode === "" to an if-statement for basic topic list features)
 
     property alias current_forum: forumsList.current_forum
     property bool isForumOverview: current_forum === 0
@@ -41,6 +43,15 @@ Page {
 
     property alias loadingSpinnerRunning: loadingSpinner.running
     property bool showSections: false
+
+    bottomEdgeTitle: i18n.tr("Subscriptions")
+    bottomEdgeEnabled: current_forum >= 0 && backend.currentSession.loggedIn && !viewSubscriptions
+    bottomEdgePageSource: (current_forum >= 0 && !viewSubscriptions) ? Qt.resolvedUrl("SubForumPage.qml") : ""
+
+    onBottomEdgeReleased: {
+        bottomEdgePage.viewSubscriptions = true
+        bottomEdgePage.title = i18n.tr("Subscriptions")
+    }
 
     Action {
         id: reloadAction
@@ -68,7 +79,7 @@ Page {
         id: newTopicAction
         text: i18n.tr("New Topic")
         iconName: "compose"
-        visible: backend.currentSession.loggedIn && !isForumOverview && forumsList.canPost && forumsList.mode === "" && forumsList.hasTopics //hasTopics as a workaround for disabling posting in category-only subforums
+        visible: backend.currentSession.loggedIn && current_forum > 0 && forumsList.canPost && forumsList.mode === "" && forumsList.hasTopics //hasTopics as a workaround for disabling posting in category-only subforums; current_forum > 0 also disables the action when viewSubscriptions === true
         onTriggered: {
             component = Qt.createComponent("ThreadCreationPage.qml")
 
@@ -121,7 +132,7 @@ Page {
     Connections {
         target: forumsList
         onHasTopicsChanged: {
-            if (forumsList.hasTopics && forumsList.mode === "") {
+            if (forumsList.hasTopics && forumsList.mode === "" && !viewSubscriptions) {
                 showSections = true
             }
         }
@@ -161,7 +172,8 @@ Page {
 
     SubForumList {
         id: forumsList
-        anchors.fill: parent
+        height: parent.height //No anchors.fill due to bottom edge
+        width: parent.width
 
         mode: (forumsPage.head.sections.selectedIndex === 1) ? "TOP" : ((forumsPage.head.sections.selectedIndex === 2) ? "ANN" : "")
 
@@ -204,8 +216,8 @@ Page {
 
     Label {
         id: emptyView
-        text: (forumsList.mode === "") ? i18n.tr("No topics available here") : ((forumsList.mode === "TOP") ? i18n.tr("No stickies available here") : i18n.tr("No announcements available here"))
-        visible: forumsList.model.count === 0 && !loadingSpinnerRunning
+        text: viewSubscriptions ? i18n.tr("You are not subscribed to any topics or forums") : ((forumsList.mode === "") ? i18n.tr("No topics available here") : ((forumsList.mode === "TOP") ? i18n.tr("No stickies available here") : i18n.tr("No announcements available here")))
+        visible: forumsList.model.count === 0 && !loadingSpinnerRunning && (current_forum > 0 || viewSubscriptions)
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignHCenter

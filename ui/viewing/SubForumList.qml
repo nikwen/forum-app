@@ -44,6 +44,8 @@ ListView {
     property string mode: ""
     property bool moreLoading: false
 
+    property bool viewSubscriptions: false
+
     readonly property bool modelLoading: (categoryModel.status === XmlListModel.Loading) || (topicModel.status === XmlListModel.Loading)
     readonly property bool modelsHaveLoadedCompletely: categoryModel.hasLoadedCompletely && topicModel.hasLoadedCompletely
 
@@ -146,7 +148,8 @@ ListView {
         property bool hasLoadedCompletely: true
 
         property int parentForumId: -1
-        query: "/methodResponse/params/param/value/array/data/value/struct"
+        property bool viewSubscriptions: forumsList.viewSubscriptions
+        query: viewSubscriptions ? "/methodResponse/params/param/value/struct/member[name='forums']/value/array/data/value/struct" : "/methodResponse/params/param/value/array/data/value/struct"
 
         XmlRole { name: "id"; query: "member[name='forum_id']/value/string()" }
         XmlRole { name: "name"; query: "member[name='forum_name']/value/base64/string()" }
@@ -157,6 +160,7 @@ ListView {
 
         onStatusChanged: {
             if (status === 1) {
+//                console.log(xml) //Do not run on XDA home!!! (Too big, will freeze QtCreator)
                 if (!checkingForChildren) {
                     console.debug("categoryModel has: " + count + " items");
 
@@ -220,6 +224,7 @@ ListView {
         }
 
         onParentForumIdChanged: if (backend.currentSession.loginFinished) __loadForums()
+        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) __loadForums()
 
         function loadOnLoginDone(session) {
             if (session === backend.currentSession) {
@@ -245,7 +250,13 @@ ListView {
                     }
                 }
             }
-            xhr.send('<?xml version="1.0"?><methodCall><methodName>get_forum</methodName><params><param><value><boolean>true</boolean></value></param><param><value>'+parentForumId+'</value></param></params></methodCall>');
+            if (!viewSubscriptions) {
+                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_forum</methodName><params><param><value><boolean>true</boolean></value></param><param><value>'+parentForumId+'</value></param></params></methodCall>');
+            } else {
+                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_subscribed_forum</methodName></methodCall>')
+            }
+
+
         }
     }
 
@@ -256,11 +267,12 @@ ListView {
         property bool hasLoadedCompletely: true
 
         property int forumId: current_forum
+        property bool viewSubscriptions: forumsList.viewSubscriptions
         query: "/methodResponse/params/param/value/struct/member/value/array/data/value/struct"
 
         XmlRole { name: "id"; query: "member[name='topic_id']/value/string()" }
         XmlRole { name: "title"; query: "member[name='topic_title']/value/base64/string()" }
-        XmlRole { name: "description"; query: "member[name='short_content']/value/base64/string()" }
+//        XmlRole { name: "description"; query: "member[name='short_content']/value/base64/string()" }
         XmlRole { name: "author"; query: "member[name='topic_author_name']/value/base64/string()" }
         XmlRole { name: "posts"; query: "member[name='reply_number']/value/int/string()" }
         XmlRole { name: "has_new"; query: "member[name='new_post']/value/boolean/string()" }
@@ -287,7 +299,7 @@ ListView {
                             var element = get(i);
                             //We need to declare even unused properties here
                             //Needed when there are both topics and categories in a subforum
-                            forumListModel.append({"topic": true, "id": element.id.trim(), "name": element.title.trim(), "description": element.description.trim(), "logo": "", "author": element.author.trim(), "posts": element.posts.trim(), "has_new": element.has_new.trim()});
+                            forumListModel.append({"topic": true, "id": element.id.trim(), "name": element.title.trim(), "description": "" /*element.description.trim()*/, "logo": "", "author": element.author.trim(), "posts": element.posts.trim(), "has_new": element.has_new.trim()});
                         }
                     }
                 }
@@ -340,11 +352,12 @@ ListView {
         }
 
         onForumIdChanged: if (backend.currentSession.loginFinished) __loadTopics()
+        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) __loadTopics()
 
         function __loadTopics(startNum, endNum) {
             hasLoadedCompletely = false
 
-            if (forumId <= 0) {
+            if (forumId <= 0 && !viewSubscriptions) {
                 return;
             }
 
@@ -372,7 +385,11 @@ ListView {
                 startEndParams += '<param><value><int>' + (backend.topicsLoadCount - 1) + '</int></value></param>'
             }
 
-            xhr.send('<?xml version="1.0"?><methodCall><methodName>get_topic</methodName><params><param><value>'+forumId+'</value></param>'+startEndParams+'<param><value>'+mode+'</value></param></params></methodCall>');
+            if (!viewSubscriptions) {
+                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_topic</methodName><params><param><value>'+forumId+'</value></param>'+startEndParams+'<param><value>'+mode+'</value></param></params></methodCall>');
+            } else {
+                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_subscribed_topic</methodName><params>'+startEndParams+'</params></methodCall>');
+            }
         }
     }
 
