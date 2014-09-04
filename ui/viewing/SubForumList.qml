@@ -233,6 +233,12 @@ ListView {
         }
 
         function __loadForums() {
+            console.log("load categories")
+
+            if (parentForumId < 0 && !viewSubscriptions) {
+                return;
+            }
+
             hasLoadedCompletely = false
 
             var xhr = new XMLHttpRequest;

@@ -48,7 +48,7 @@ PageWithBottomEdge {
     bottomEdgeEnabled: current_forum >= 0 && backend.currentSession.loggedIn && !viewSubscriptions
     bottomEdgePageSource: (current_forum >= 0 && !viewSubscriptions) ? Qt.resolvedUrl("SubForumPage.qml") : ""
 
-    onBottomEdgeReleased: {
+    onBottomEdgeReleased: { //TODO: Bug => No loading spinner running when opening for the second time
         bottomEdgePage.viewSubscriptions = true
         bottomEdgePage.title = i18n.tr("Subscriptions")
     }
