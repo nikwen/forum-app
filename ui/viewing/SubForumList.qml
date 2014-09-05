@@ -204,7 +204,7 @@ ListView {
                 var element = get(i)
                 //We need to declare even unused properties here
                 //Needed when there are both topics and categories in a subforum
-                forumListModel.insert(i, {"topic": false, "id": element.id.trim(), "name": element.name.trim(), "description": element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": "-1", "has_new": "0"});
+                forumListModel.insert(i, {"topic": false, "id": element.id.trim(), "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": "-1", "has_new": "0"});
             }
 
             loadingFinished()
