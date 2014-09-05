@@ -237,7 +237,7 @@ ListView {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
                         console.log("still logged in: " + xhr.getResponseHeader("Mobiquo_is_login"))
-                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false") {
+                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
                             if (backend.currentSession.loginFinished) { //login might already have been started in topicModel
                                 backend.login() //Connection to loginDone will care about reloading afterwards
                             }
@@ -361,7 +361,7 @@ ListView {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
                         console.log("still logged in: " + xhr.getResponseHeader("Mobiquo_is_login"))
-                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false") {
+                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
                             if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
                                 backend.login() //Connection to loginDone will care about reloading afterwards
                             }
