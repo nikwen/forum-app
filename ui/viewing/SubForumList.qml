@@ -365,7 +365,7 @@ ListView {
                 return;
             }
 
-            console.log("loading categories")
+            console.log("loading topics")
 
             hasLoadedCompletely = false
 

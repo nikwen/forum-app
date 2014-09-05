@@ -34,6 +34,7 @@ PageWithBottomEdge {
     id: forumsPage
     title: i18n.tr("Forums")
 
+    property bool disableBottomEdge: false
     property alias viewSubscriptions: forumsList.viewSubscriptions //Not via mode for maintainability (e.g. you easily forget to add a && mode === "SUBS" when adding a mode === "" to an if-statement for basic topic list features)
 
     property alias current_forum: forumsList.current_forum
@@ -45,13 +46,16 @@ PageWithBottomEdge {
     property bool showSections: false
 
     bottomEdgeTitle: i18n.tr("Subscriptions")
-    bottomEdgeEnabled: current_forum >= 0 && backend.currentSession.loggedIn && !viewSubscriptions
-    bottomEdgePageSource: (current_forum >= 0 && !viewSubscriptions) ? Qt.resolvedUrl("SubForumPage.qml") : ""
+    bottomEdgeEnabled: !disableBottomEdge && current_forum >= 0 && backend.currentSession.loggedIn
+    bottomEdgePageSource: (!disableBottomEdge && current_forum >= 0) ? Qt.resolvedUrl("SubForumPage.qml") : ""
 
     onBottomEdgeReleased: {
-        bottomEdgePage.loadingSpinnerRunning = true
-        bottomEdgePage.viewSubscriptions = true
-        bottomEdgePage.title = i18n.tr("Subscriptions")
+        if (!isCollapsed) {
+            bottomEdgePage.loadingSpinnerRunning = true
+            bottomEdgePage.viewSubscriptions = true
+            bottomEdgePage.title = i18n.tr("Subscriptions")
+            bottomEdgePage.disableBottomEdge = true
+        }
     }
 
     Action {
@@ -120,7 +124,9 @@ PageWithBottomEdge {
 
             pageStack.pop()
 
-            forumsPage.destroy(500)
+            if (!viewSubscriptions) {
+                forumsPage.destroy(500)
+            }
         }
     }
 
@@ -191,7 +197,7 @@ PageWithBottomEdge {
         }
 
         function finishSubForumPageCreation() {
-            var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selected_forum, "loadingSpinnerRunning": true})
+            var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selected_forum, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge})
             pageStack.push(page)
         }
 

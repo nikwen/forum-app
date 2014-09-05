@@ -247,14 +247,14 @@ Page {
             height: bottomEdge.tipHeight
             y: -height
 
-            onReleased: {
-                page.bottomEdgeReleased()
+            onReleased: { //NOTE: Changed order here to be able to use isCollapsed in onBottomEdgeReleased
                 if (bottomEdge.y < (page.height - bottomEdgeExpandThreshold - bottomEdge.tipHeight)) {
                     bottomEdge.state = "expanded"
                 } else {
                     bottomEdge.state = "collapsed"
                     bottomEdge.y = bottomEdge.height
                 }
+                page.bottomEdgeReleased()
             }
 
             onClicked: {
