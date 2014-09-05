@@ -34,6 +34,7 @@ UbuntuShape {
     property string content
     property string avatar
     property string authorText
+    property string thanksInfo
 
     width: parent.width
     height: contentRect.height
@@ -78,6 +79,64 @@ UbuntuShape {
             }
         }
 
+        Rectangle {
+            id: thanksRect
+            width: units.gu(7)
+            height: units.gu(5)
+            color: "transparent"
+
+            anchors {
+                bottom: contentLabel.bottom
+                left: parent.left
+            }
+
+            UbuntuShape { //TODO: Replace with thumb-up image
+                id: thanksShape
+                width: units.gu(5)
+                height: width
+                anchors.centerIn: parent
+                color: "grey"
+            }
+
+            Label {
+                anchors.centerIn: thanksShape
+                wrapMode: Text.Wrap
+                color: "white"
+                visible: thanksInfo !== undefined
+                text: thanksCount
+                onLinkActivated: Qt.openUrlExternally(link)
+
+                property int thanksCount: occurrences(thanksInfo, "userid")
+
+                Component.onCompleted: {
+                    var sizes = ["small", "x-small", "xx-small"]
+                    var index = 0
+                    while (width > thanksShape.width - units.gu(1) && index < sizes.length) {
+                        fontSize = sizes[index]
+                        index++
+                    }
+                }
+
+                function occurrences(string, subString) {
+                    var n = 0
+                    var pos = 0
+                    var step = subString.length
+
+                    while (true) {
+                        pos = string.indexOf(subString,pos)
+                        if (pos >= 0) {
+                            n++
+                            pos += step
+                        } else {
+                            break
+                        }
+                    }
+                    return n
+                }
+            }
+
+        }
+
         Label {
             id: author
             text: authorText
@@ -108,6 +167,7 @@ UbuntuShape {
         }
 
         Label {
+            id: contentLabel
             text: parseBBCode(content)
             wrapMode: Text.Wrap
             color: "#808080"

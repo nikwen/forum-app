@@ -58,6 +58,7 @@ ListView {
         content: StringUtils.base64_decode(model.content)
         authorText: StringUtils.base64_decode(model.author)
         avatar: model.avatar
+        thanksInfo: model.thanks_info
     }
 
     function loadPosts(startNum, count) {
@@ -85,6 +86,7 @@ ListView {
         XmlRole { name: "content"; query: "member[name='post_content']/value/base64/string()" }
         XmlRole { name: "author"; query: "member[name='post_author_name']/value/base64/string()" }
         XmlRole { name: "avatar"; query: "member[name='icon_url']/value/string/string()" }
+        XmlRole { name: "thanks_info"; query: "member[name='thanks_info']/value/array/data/string()" }
 
         onStatusChanged: {
             if (status === 1) {
