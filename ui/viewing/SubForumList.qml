@@ -236,8 +236,14 @@ ListView {
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-//                        console.log(xhr.responseText)
-                        categoryModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
+                        console.log("still logged in: " + xhr.getResponseHeader("Mobiquo_is_login"))
+                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false") {
+                            if (backend.currentSession.loginFinished) { //login might already have been started in topicModel
+                                backend.login() //Connection to loginDone will care about reloading afterwards
+                            }
+                        } else {
+                            categoryModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
+                        }
                     } else {
                         notification.show(i18n.tr("Connection error"))
 
@@ -354,7 +360,14 @@ ListView {
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        topicModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
+                        console.log("still logged in: " + xhr.getResponseHeader("Mobiquo_is_login"))
+                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false") {
+                            if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
+                                backend.login() //Connection to loginDone will care about reloading afterwards
+                            }
+                        } else {
+                            topicModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
+                        }
                     } else {
                         notification.show(i18n.tr("Connection error"))
 
