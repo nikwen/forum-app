@@ -27,7 +27,7 @@
 import QtQuick 2.2
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
-import '../components'
+import "../components"
 
 Base {
     id: subtitledListItem
@@ -36,7 +36,7 @@ Base {
     property bool has_new: false
 
     onAuthorChanged: {
-        subLabel.text = 'Thread by: '+author
+        subLabel.text = "Thread by: " + author
     }
 
     __height: Math.max(middleVisuals.height + units.gu(2), units.gu(6))
@@ -60,9 +60,18 @@ Base {
         Label {
             id: counter
             anchors.centerIn: parent
-            fontSize: 'medium'
-            text: '0'
+            fontSize: "medium"
+            text: "0"
             color: "white"
+
+            Component.onCompleted: {
+                var sizes = ["small", "x-small", "xx-small"]
+                var index = 0
+                while (width > units.gu(3) && index < sizes.length) {
+                    fontSize = sizes[index]
+                    index++
+                }
+            }
         }
     }
 
