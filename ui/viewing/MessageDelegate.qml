@@ -46,7 +46,7 @@ UbuntuShape {
     Rectangle {
         id: contentRect
         width: parent.width
-        height: childrenRect.height + units.gu(1)
+        height: childrenRect.height + (thanksLabel.visible ? units.gu(1) : -units.gu(1))
         color: "transparent"
 
         Rectangle {
@@ -112,17 +112,16 @@ UbuntuShape {
             text: parseBBCode(content)
             wrapMode: Text.Wrap
             anchors {
-                top: title.visible?title.bottom:author.bottom
+                top: title.visible ? title.bottom : author.bottom
                 left: rect.right
                 right: parent.right
-                topMargin: units.gu(1)
-                leftMargin: units.gu(1)
-                rightMargin: units.gu(1)
+                margins: units.gu(1)
             }
             onLinkActivated: Qt.openUrlExternally(link)
         }
 
         Label {
+            id: thanksLabel
             wrapMode: Text.Wrap
             visible: thanksInfo !== undefined && thanksInfo !== "" && thanksCount > 0
             text: qsTr((thanksCount === 1) ? i18n.tr("%1 user thanked %2 for this useful post") : i18n.tr("%1 users thanked %2 for this useful post")).arg(thanksCount).arg(authorText)
@@ -131,9 +130,7 @@ UbuntuShape {
                 top: contentLabel.bottom
                 left: rect.right
                 right: parent.right
-                topMargin: units.gu(1)
-                leftMargin: units.gu(1)
-                rightMargin: units.gu(1)
+                margins: visible ? units.gu(1) : 0
             }
 
             property int thanksCount: occurrences(thanksInfo, "userid")
