@@ -79,64 +79,6 @@ UbuntuShape {
             }
         }
 
-        Rectangle {
-            id: thanksRect
-            width: units.gu(7)
-            height: units.gu(5)
-            color: "transparent"
-
-            anchors {
-                bottom: contentLabel.bottom
-                left: parent.left
-            }
-
-            UbuntuShape { //TODO: Replace with thumb-up image
-                id: thanksShape
-                width: units.gu(5)
-                height: width
-                anchors.centerIn: parent
-                color: "grey"
-            }
-
-            Label {
-                anchors.centerIn: thanksShape
-                wrapMode: Text.Wrap
-                color: "white"
-                visible: thanksInfo !== undefined
-                text: thanksCount
-                onLinkActivated: Qt.openUrlExternally(link)
-
-                property int thanksCount: occurrences(thanksInfo, "userid")
-
-                Component.onCompleted: {
-                    var sizes = ["small", "x-small", "xx-small"]
-                    var index = 0
-                    while (width > thanksShape.width - units.gu(1) && index < sizes.length) {
-                        fontSize = sizes[index]
-                        index++
-                    }
-                }
-
-                function occurrences(string, subString) {
-                    var n = 0
-                    var pos = 0
-                    var step = subString.length
-
-                    while (true) {
-                        pos = string.indexOf(subString,pos)
-                        if (pos >= 0) {
-                            n++
-                            pos += step
-                        } else {
-                            break
-                        }
-                    }
-                    return n
-                }
-            }
-
-        }
-
         Label {
             id: author
             text: authorText
@@ -154,7 +96,6 @@ UbuntuShape {
             id: title
             text: titleText
             wrapMode: Text.Wrap
-            color: "#808080"
             font.italic: true
             visible: titleText !== undefined && titleText !== ""
             anchors {
@@ -170,7 +111,6 @@ UbuntuShape {
             id: contentLabel
             text: parseBBCode(content)
             wrapMode: Text.Wrap
-            color: "#808080"
             anchors {
                 top: title.visible?title.bottom:author.bottom
                 left: rect.right
@@ -180,6 +120,40 @@ UbuntuShape {
                 rightMargin: units.gu(1)
             }
             onLinkActivated: Qt.openUrlExternally(link)
+        }
+
+        Label {
+            wrapMode: Text.Wrap
+            visible: thanksInfo !== undefined && thanksInfo !== "" && thanksCount > 0
+            text: qsTr((thanksCount === 1) ? i18n.tr("%1 user thanked %2 for this useful post") : i18n.tr("%1 users thanked %2 for this useful post")).arg(thanksCount).arg(authorText)
+            fontSize: "small"
+            anchors {
+                top: contentLabel.bottom
+                left: rect.right
+                right: parent.right
+                topMargin: units.gu(1)
+                leftMargin: units.gu(1)
+                rightMargin: units.gu(1)
+            }
+
+            property int thanksCount: occurrences(thanksInfo, "userid")
+
+            function occurrences(string, subString) {
+                var n = 0
+                var pos = 0
+                var step = subString.length
+
+                while (true) {
+                    pos = string.indexOf(subString,pos)
+                    if (pos >= 0) {
+                        n++
+                        pos += step
+                    } else {
+                        break
+                    }
+                }
+                return n
+            }
         }
     }
 
