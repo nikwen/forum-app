@@ -142,7 +142,13 @@ ListView {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     loadingSpinner.running=false;
                     if (xhr.status === 200) {
-                        threadModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
+                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
+                            if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
+                                backend.login() //Connection to loginDone will care about reloading afterwards
+                            }
+                        } else {
+                            threadModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
+                        }
                     } else {
                         notification.show(i18n.tr("Connection error"))
                     }
