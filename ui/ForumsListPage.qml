@@ -174,7 +174,11 @@ Page {
         onClicked: Qt.openUrlExternally("https://tapatalk.com")
 
         ListItem.ThinDivider {
-            anchors.top: parent.top
+            anchors {
+                top: parent.top
+                rightMargin: 0
+                leftMargin: 0
+            }
             width: parent.width
         }
 
