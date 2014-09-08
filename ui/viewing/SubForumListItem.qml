@@ -27,7 +27,7 @@
 import QtQuick 2.2
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
-import '../components'
+import "../components"
 
 Base {
     id: subtitledListItem
@@ -36,10 +36,10 @@ Base {
     property bool has_new: false
 
     onAuthorChanged: {
-        subLabel.text = 'Thread by: '+author
+        subLabel.text = "Thread by: " + author
     }
 
-    __height: Math.max(middleVisuals.height, units.gu(6))
+    __height: Math.max(middleVisuals.height + units.gu(2), units.gu(6))
 
     property alias text: label.text
     property alias subText: subLabel.text
@@ -49,7 +49,6 @@ Base {
         height: units.gu(4)
         width: units.gu(4)
         color: "green"
-//        color: Qt.darker(mainView.backgroundColor, 1.1)
 
         visible: model.topic
 
@@ -61,14 +60,22 @@ Base {
         Label {
             id: counter
             anchors.centerIn: parent
-            fontSize: 'medium'
-            text: '0'
+            fontSize: "medium"
+            text: "0"
             color: "white"
-//            color: '#5c3001'
+
+            Component.onCompleted: {
+                var sizes = ["small", "x-small", "xx-small"]
+                var index = 0
+                while (width > units.gu(3) && index < sizes.length) {
+                    fontSize = sizes[index]
+                    index++
+                }
+            }
         }
     }
 
-    Item  {
+    Column  {
         id: middleVisuals
         anchors {
             left: model.topic?countContainer.right:parent.left
@@ -76,26 +83,19 @@ Base {
             verticalCenter: parent.verticalCenter
             leftMargin: model.topic?units.gu(2):0
         }
-        height: childrenRect.height + label.anchors.topMargin + subLabel.anchors.bottomMargin
+        height: childrenRect.height
 
         LabelVisual {
             id: label
+            width: parent.width
             selected: subtitledListItem.selected
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-            }
         }
         LabelVisual {
             id: subLabel
+            width: parent.width
             selected: subtitledListItem.selected
             secondary: !model.topic //No grey color when browsing through topics
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: label.bottom
-            }
+            visible: text !== ""
             fontSize: "small"
             wrapMode: Text.Wrap
             maximumLineCount: 5
