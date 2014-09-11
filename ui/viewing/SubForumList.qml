@@ -158,6 +158,10 @@ ListView {
 
         property bool checkingForChildren: false
 
+        //Only used if isForumOverview:
+        property string fetchedXml
+        property int lastFetchedPos
+
         onStatusChanged: {
             if (status === 1) {
 //                console.log(xml) //Do not run on XDA home!!! (Too big, will freeze QtCreator)
@@ -204,15 +208,24 @@ ListView {
                 var element = get(i)
                 //We need to declare even unused properties here
                 //Needed when there are both topics and categories in a subforum
-                forumListModel.insert(i, {"topic": false, "id": element.id.trim(), "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": "-1", "has_new": "0"});
+                var pushObject = {"topic": false, "id": element.id.trim(), "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": "-1", "has_new": "0"}
+                if (!isForumOverview) {
+                    forumListModel.insert(i, pushObject)
+                } else {
+                    forumListModel.append(pushObject)
+                }
             }
 
             loadingFinished()
         }
 
-        function loadingFinished() {
+        function loadingFinished() { //TODO: Check reload behaviour
             hasLoadedCompletely = true
-            loadingSpinner.running = !(topicModel.hasLoadedCompletely || current_forum === 0)
+            loadingSpinner.running = !(topicModel.hasLoadedCompletely || current_forum === 0) //TODO: Add footer instead
+
+            if (isForumOverview) {
+                parseFetchedXml()
+            }
         }
 
         Component.onCompleted: {
@@ -240,6 +253,7 @@ ListView {
             console.log("loading categories")
 
             hasLoadedCompletely = false
+            lastFetchedPos = 0
 
             var xhr = new XMLHttpRequest;
             categoryModel.xml="";
@@ -252,7 +266,11 @@ ListView {
                                 backend.login() //Connection to loginDone will care about reloading afterwards
                             }
                         } else {
-                            categoryModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
+                            if (isForumOverview) {
+                                fetchedXml = StringUtils.xmlFromResponse(xhr.responseText)
+                            } else {
+                                categoryModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
+                            }
                         }
                     } else {
                         notification.show(i18n.tr("Connection error"))
@@ -266,9 +284,67 @@ ListView {
             } else {
                 xhr.send('<?xml version="1.0"?><methodCall><methodName>get_subscribed_forum</methodName></methodCall>')
             }
-
-
         }
+
+        onFetchedXmlChanged: parseFetchedXml()
+
+        function parseFetchedXml() { //TODO: Need to check which n ensures best possible performance
+            if (fetchedXml === "") {
+                return
+            }
+
+            var pos = getNthStructEnd(fetchedXml, 20, lastFetchedPos)
+
+            if (pos < 0 && lastFetchedPos === 0) { //Not found 20 times in the whole xml response
+                categoryModel.xml = fetchedXml
+            } else {
+                var beginningText = ""
+                if (lastFetchedPos !== 0) { //add end + start
+                    var beginningEndPos = fetchedXml.indexOf("<struct>")
+                    beginningText = fetchedXml.substring(0, beginningEndPos)
+                }
+
+                if (pos > 0) {
+                    var closingTagsPos = fetchedXml.lastIndexOf("</struct>")
+                    var closingText = fetchedXml.substring(closingTagsPos + 6)
+
+                    var middleText = fetchedXml.substring(lastFetchedPos, pos)
+
+                    categoryModel.xml = beginningText + middleText + closingText //TODO: Remove already parsed parts for better search performance? (Would require a change in lastFetchedPos handling)
+                } else { //Not found 20 times anymore
+                    var contentText = fetchedXml.substring(lastFetchedPos)
+
+                    categoryModel.xml = beginningText + contentText
+
+                    fetchedXml = "" //Stops loading loop
+                }
+
+                lastFetchedPos = pos
+            }
+        }
+
+        function getNthStructEnd(string, n, startPos) { //Returns -1 if not found n times
+            if (startPos === undefined) {
+                startPos = 0
+            }
+            var endPos = startPos
+
+            for (var i = 0; i < n; i++) {
+                startPos = string.indexOf("struct", endPos)
+                var nextPos = string.indexOf("struct", startPos + 6)
+                while (string.charAt(nextPos - 1) !== "/") {
+                    nextPos = string.indexOf("struct", getNthStructEnd(string, 1, nextPos)) //TODO: Remove children from document? Would interfere with child-only subforums though
+
+                    if (nextPos < 0) {
+                        return -1
+                    }
+                }
+
+                endPos = nextPos + 6
+            }
+            return endPos + 1 // + 1 for ">"
+        }
+
     }
 
     XmlListModel {
