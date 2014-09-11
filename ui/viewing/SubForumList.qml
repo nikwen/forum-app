@@ -288,12 +288,12 @@ ListView {
 
         onFetchedXmlChanged: parseFetchedXml()
 
-        function parseFetchedXml() { //TODO: Need to check which n ensures best possible performance
+        function parseFetchedXml() {
             if (fetchedXml === "") {
                 return
             }
 
-            var pos = getNthStructEnd(fetchedXml, 20, lastFetchedPos)
+            var pos = getNthStructEnd(fetchedXml, (forumListModel.count < 40) ? 20 : 50, lastFetchedPos)
 
             if (pos < 0 && lastFetchedPos === 0) { //Not found 20 times in the whole xml response
                 categoryModel.xml = fetchedXml
