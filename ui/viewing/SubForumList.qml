@@ -81,7 +81,7 @@ ListView {
     }
 
     footer: Standard { //ListItem.Standard
-        visible: moreLoading
+        visible: moreLoading && forumListModel.count > 0 //forumListModel.count > 0 for forum overview
         width: parent.width
         height: visible ? units.gu(6) : 0
         divider.visible: false
@@ -221,7 +221,7 @@ ListView {
 
         function loadingFinished() { //TODO: Check reload behaviour
             hasLoadedCompletely = true
-            loadingSpinner.running = !(topicModel.hasLoadedCompletely || current_forum === 0) //TODO: Add footer instead
+            loadingSpinner.running = !(topicModel.hasLoadedCompletely || current_forum === 0)
 
             if (isForumOverview) {
                 parseFetchedXml()
@@ -311,12 +311,15 @@ ListView {
                     var middleText = fetchedXml.substring(lastFetchedPos, pos)
 
                     categoryModel.xml = beginningText + middleText + closingText //TODO: Remove already parsed parts for better search performance? (Would require a change in lastFetchedPos handling)
+
+                    moreLoading = true
                 } else { //Not found 20 times anymore
-                    var contentText = fetchedXml.substring(lastFetchedPos)
+                    var contentText = fetchedXml.substring(lastFetchedPos) //TODO: What if found 0 times anymore?
 
                     categoryModel.xml = beginningText + contentText
 
                     fetchedXml = "" //Stops loading loop
+                    moreLoading = false
                 }
 
                 lastFetchedPos = pos
