@@ -95,10 +95,19 @@ PageWithBottomEdge {
         width: parent.width
         anchors.verticalCenter: parent.verticalCenter
         text: threadPage.title
-        fontSize: "medium"
-        maximumLineCount: 2
+        fontSize: "x-large"
+        maximumLineCount: fontSize === "medium" ? 2 : 1
         wrapMode: Text.WordWrap
         elide: Text.ElideRight
+
+        onTruncatedChanged: {
+            if (truncated) {
+                fontSize = "large"
+                if (truncated) {
+                    fontSize = "medium"
+                }
+            }
+        }
     }
 
     head.backAction: Action {
