@@ -46,7 +46,6 @@ ListView {
 
     property bool viewSubscriptions: false
 
-    readonly property bool modelLoading: (categoryModel.status === XmlListModel.Loading) || (topicModel.status === XmlListModel.Loading)
     readonly property bool modelsHaveLoadedCompletely: categoryModel.hasLoadedCompletely && topicModel.hasLoadedCompletely
 
     clip: true
@@ -219,7 +218,7 @@ ListView {
             loadingFinished()
         }
 
-        function loadingFinished() { //TODO: Check reload behaviour
+        function loadingFinished() {
             hasLoadedCompletely = true
             loadingSpinner.running = !(topicModel.hasLoadedCompletely || current_forum === 0)
 
@@ -255,9 +254,10 @@ ListView {
             hasLoadedCompletely = false
             lastFetchedPos = 0
 
-            var xhr = new XMLHttpRequest;
-            categoryModel.xml="";
-            xhr.open("POST", backend.currentSession.apiSource);
+            var xhr = new XMLHttpRequest
+            categoryModel.xml = ""
+            fetchedXml = ""
+            xhr.open("POST", backend.currentSession.apiSource)
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
@@ -314,7 +314,7 @@ ListView {
 
                     moreLoading = true
                 } else { //Not found 20 times anymore
-                    var contentText = fetchedXml.substring(lastFetchedPos) //TODO: What if found 0 times anymore?
+                    var contentText = fetchedXml.substring(lastFetchedPos) //TODO-r: What if found 0 times anymore?
 
                     categoryModel.xml = beginningText + contentText
 
