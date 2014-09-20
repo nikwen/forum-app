@@ -314,7 +314,7 @@ ListView {
 
                     moreLoading = true
                 } else { //Not found 20 times anymore
-                    var contentText = fetchedXml.substring(lastFetchedPos) //TODO-r: What if found 0 times anymore?
+                    var contentText = fetchedXml.substring(lastFetchedPos)
 
                     categoryModel.xml = beginningText + contentText
 
