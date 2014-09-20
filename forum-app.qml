@@ -66,7 +66,6 @@ MainView {
 
     Notification {
         id: notification
-        textColor: mainView.backgroundColor
     }
 
     ForumsListPage {
