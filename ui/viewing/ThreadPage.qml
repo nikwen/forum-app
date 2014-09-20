@@ -91,6 +91,16 @@ PageWithBottomEdge {
         }
     ]
 
+    head.contents: Label {
+        width: parent.width
+        anchors.verticalCenter: parent.verticalCenter
+        text: threadPage.title
+        fontSize: "medium"
+        maximumLineCount: 2
+        wrapMode: Text.WordWrap
+        elide: Text.ElideRight
+    }
+
     head.backAction: Action {
         text: i18n.tr("Back")
         iconName: "back"
