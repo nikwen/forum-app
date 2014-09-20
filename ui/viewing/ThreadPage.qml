@@ -102,7 +102,10 @@ PageWithBottomEdge {
 
         onTruncatedChanged: {
             if (truncated) {
-                fontSize = "medium"
+                fontSize = "large"
+                if (truncated) {
+                    fontSize = "medium"
+                }
             }
         }
     }
