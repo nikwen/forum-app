@@ -28,7 +28,7 @@ import QtQuick 2.2
 
 Item {
     property string query
-    property string checkSuccess: false
+    property bool checkSuccess: false
 
     signal queryResult(var session, bool withoutErrors, string responseXml)
     signal querySuccessResult(var session, bool success, string responseXml)
@@ -36,31 +36,31 @@ Item {
     function start() {
         if (checkSuccess) {
             backend.currentSession.apiSuccessQuery(query)
-            backend.currentSession.querySuccessResult.connect(executedSuccessQuery)
+            backend.currentSession.querySuccessResult.connect(executedSuccessQuery) //TODO: Pass a function to the method instead which calls executedQuery()? Or make it call executedQuery() on the ApiRequest item directly? -> Depends on the queue implementation
         } else {
             backend.currentSession.apiQuery(query)
             backend.currentSession.queryResult.connect(executedQuery)
         }
     }
 
-    function executedSuccessQuery(session, success, xml) {
+    function executedSuccessQuery(session, success, responseXml) {
         if (session !== backend.currentSession) {
             return
         }
 
-        backend.currentSession.querySuccessResult.disconnect(executed)
+        backend.currentSession.querySuccessResult.disconnect(executedSuccessQuery)
 
-        querySuccessResult(session, success, xml)
+        querySuccessResult(session, success, responseXml)
     }
 
-    function executedQuery(session, withErrors, xml) {
+    function executedQuery(session, withoutErrors, responseXml) {
         if (session !== backend.currentSession) {
             return
         }
 
-        backend.currentSession.querySuccessResult.disconnect(executed)
+        backend.currentSession.queryResult.disconnect(executedQuery)
 
-        queryResult(session, success, xml)
+        queryResult(session, withoutErrors, responseXml)
     }
 
 }

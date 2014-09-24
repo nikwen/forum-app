@@ -28,6 +28,7 @@ import QtQuick 2.2
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import "../../stringutils.js" as StringUtils
+import "../../backend"
 
 Page {
     id: postCreationPage
@@ -111,6 +112,18 @@ Page {
 
                 onClicked: submit()
 
+                ApiRequest {
+                    id: submitRequest
+                    checkSuccess: true
+
+                    onQuerySuccessResult: {
+                        if (success) {
+                            pageStack.pop()
+                            posted()
+                        }
+                    }
+                }
+
                 function submit() {
                     var message = messageTextField.text
 
@@ -118,22 +131,9 @@ Page {
                         message += "\n\n" + signature
                     }
 
-                    backend.currentSession.apiSuccessQuery('<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>')
+                    submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
 
-                    backend.currentSession.querySuccessResult.connect(successful)
-                }
-
-                function successful(session, success, xml) {
-                    if (session !== backend.currentSession) {
-                        return
-                    }
-
-                    backend.currentSession.querySuccessResult.disconnect(successful)
-
-                    if (success) {
-                        pageStack.pop()
-                        posted()
-                    }
+                    submitRequest.start()
                 }
             }
 
