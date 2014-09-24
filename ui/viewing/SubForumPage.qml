@@ -132,7 +132,7 @@ PageWithBottomEdge {
         id: subscribeAction
         text: forumsList.isSubscribed ? i18n.tr("Unsubscribe") : i18n.tr("Subscribe")
         iconName: forumsList.isSubscribed ? "starred" : "non-starred"
-        visible: backend.currentSession.loggedIn && forumsList.canSubscribe
+        visible: backend.currentSession.loggedIn && !viewSubscriptions && forumsList.canSubscribe
 
         onTriggered: subscriptionChange()
 
