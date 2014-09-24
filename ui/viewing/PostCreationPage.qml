@@ -111,66 +111,25 @@ Page {
 
                 onClicked: submit()
 
-                function submit(session) { //parameter only for connection with loginDone
-                    if (session !== undefined) {
-                        if (session === backend.currentSession) {
-                            backend.loginDone.disconnect(submit)
-                        } else {
-                            return
-                        }
-                    }
-
+                function submit() {
                     var message = messageTextField.text
 
                     if (appendSignatureCheckBox.checked) {
                         message += "\n\n" + signature
                     }
 
-                    var xhr = new XMLHttpRequest;
-                    xhr.open("POST", backend.currentSession.apiSource);
-                    var onReadyStateChangeFunction = function() {
-                        if (xhr.readyState === XMLHttpRequest.DONE) {
-//                            console.log(xhr.responseText)
-                            if (xhr.status === 200) {
-                                var resultIndex = xhr.responseText.indexOf("result");
-                                var booleanTag = xhr.responseText.indexOf("<boolean>", resultIndex)
-                                var booleanEndTag = xhr.responseText.indexOf("</boolean>", resultIndex)
-                                var result = xhr.responseText.substring(booleanTag + 9, booleanEndTag)
+                    backend.currentSession.apiQuery('<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>')
 
-                                var success = result === "1";
+                    backend.currentSession.queryResult.connect(successful)
+                }
 
-                                if (success) {
-                                    pageStack.pop()
-                                    posted()
-                                } else {
-                                    if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
-                                        if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
-                                            backend.login() //Connection to loginDone will care about reloading afterwards
-                                            backend.loginDone.connect(submit)
-                                        }
-                                    } else {
-                                        var resultTextIndex = xhr.responseText.indexOf("result_text")
-                                        var resultText
-                                        if (resultTextIndex > 0) {
-                                            var base64Tag = xhr.responseText.indexOf("<base64>", resultTextIndex)
-                                            var base64EndTag = xhr.responseText.indexOf("</base64>", resultTextIndex)
-                                            resultText = StringUtils.base64_decode(xhr.responseText.substring(base64Tag + 8, base64EndTag))
-                                            console.log(resultText)
-                                        }
-                                        var dialog = PopupUtils.open(errorDialog)
-                                        dialog.title = i18n.tr("Action failed")
-                                        if (resultText !== undefined) {
-                                            dialog.text = i18n.tr("Text returned by the server:\n") + resultText
-                                        }
-                                    }
-                                }
-                            } else {
-                                notification.show(i18n.tr("Connection error"))
-                            }
-                        }
+                function successful(session, success, responseXml) {
+                    backend.currentSession.queryResult.disconnect(successful)
+
+                    if (success) {
+                        pageStack.pop()
+                        posted()
                     }
-                    xhr.onreadystatechange = onReadyStateChangeFunction
-                    xhr.send('<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>');
                 }
             }
 

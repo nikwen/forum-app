@@ -91,6 +91,65 @@ Object {
                     loadConfig()
                 }
             }
+
+            signal queryResult(var session, bool success, string responseXml)
+
+            function apiQuery(queryString) { //parameter only for connection with loginDone
+                if (session !== undefined) {
+                    if (session === backend.currentSession) {
+                        backend.loginDone.disconnect(apiQuery)
+                    } else {
+                        return
+                    }
+                }
+
+                var xhr = new XMLHttpRequest;
+                xhr.open("POST", backend.currentSession.apiSource);
+                var onReadyStateChangeFunction = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+//                            console.log(xhr.responseText)
+                        if (xhr.status === 200) {
+                            var xml = StringUtils.xmlFromResponse(xhr.responseText)
+                            var resultIndex = xml.indexOf("result");
+                            var booleanTag = xml.indexOf("<boolean>", resultIndex)
+                            var booleanEndTag = xml.indexOf("</boolean>", resultIndex)
+                            var result = xml.substring(booleanTag + 9, booleanEndTag)
+
+                            var success = result === "1";
+
+                            if (success) {
+                                queryResult(session, success, xml)
+                            } else {
+                                if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
+                                    if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
+                                        backend.login() //Connection to loginDone will care about reloading afterwards
+                                        backend.loginDone.connect(apiQuery)
+                                    }
+                                } else {
+                                    var resultTextIndex = xml.indexOf("result_text")
+                                    var resultText
+                                    if (resultTextIndex > 0) {
+                                        var base64Tag = xml.indexOf("<base64>", resultTextIndex)
+                                        var base64EndTag = xml.indexOf("</base64>", resultTextIndex)
+                                        resultText = StringUtils.base64_decode(xml.substring(base64Tag + 8, base64EndTag))
+                                        console.log(resultText)
+                                    }
+                                    var dialog = PopupUtils.open(errorDialog)
+                                    dialog.title = i18n.tr("Action failed")
+                                    if (resultText !== undefined) {
+                                        dialog.text = i18n.tr("Text returned by the server:\n") + resultText
+                                    }
+                                    queryResult(session, success, xml)
+                                }
+                            }
+                        } else {
+                            notification.show(i18n.tr("Connection error"))
+                        }
+                    }
+                }
+                xhr.onreadystatechange = onReadyStateChangeFunction
+                xhr.send(queryString);
+            }
         }
     }
 
