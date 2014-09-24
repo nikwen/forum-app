@@ -93,7 +93,7 @@ Object {
             }
 
             signal queryResult(var session, bool withoutErrors, string responseXml)
-            signal querySuccessResult(var session, bool success)
+            signal querySuccessResult(var session, bool success, string responseXml)
 
             function apiSuccessQuery(queryString) {
                 apiQuery(queryString)
@@ -103,6 +103,11 @@ Object {
             function checkApiQuerySuccess(session, withoutErrors, xml) {
                 queryResult.disconnect(checkApiQuerySuccess)
 
+                if (!withoutErrors) {
+                    querySuccessResult(session, false, xml)
+                    return
+                }
+
                 var resultIndex = xml.indexOf("result");
                 var booleanTag = xml.indexOf("<boolean>", resultIndex)
                 var booleanEndTag = xml.indexOf("</boolean>", resultIndex)
@@ -111,7 +116,7 @@ Object {
                 var success = result === "1";
 
                 if (success) {
-                    querySuccessResult(session, success)
+                    querySuccessResult(session, success, xml)
                 } else {
                     var resultTextIndex = xml.indexOf("result_text")
                     var resultText
@@ -126,7 +131,7 @@ Object {
                     if (resultText !== undefined) {
                         dialog.text = i18n.tr("Text returned by the server:\n") + resultText
                     }
-                    querySuccessResult(session, success)
+                    querySuccessResult(session, success, xml)
                 }
             }
 

@@ -123,7 +123,7 @@ Page {
                     backend.currentSession.querySuccessResult.connect(successful)
                 }
 
-                function successful(session, success) {
+                function successful(session, success, xml) {
                     if (session !== backend.currentSession) {
                         return
                     }

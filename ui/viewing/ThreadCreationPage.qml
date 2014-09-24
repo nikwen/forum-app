@@ -123,7 +123,7 @@ Page {
                     backend.currentSession.querySuccessResult.connect(successful)
                 }
 
-                function successful(session, success) {
+                function successful(session, success, xml) {
                     if (session !== backend.currentSession) {
                         return
                     }
@@ -131,8 +131,14 @@ Page {
                     backend.currentSession.querySuccessResult.disconnect(successful)
 
                     if (success) {
+                        //Get the id of the topic
+                        var idIndex = xml.indexOf("topic_id");
+                        var stringTag = xml.indexOf("<string>", idIndex)
+                        var stringEndTag = xml.indexOf("</string>", idIndex)
+                        var id = parseInt(xml.substring(stringTag + 8, stringEndTag))
+
                         pageStack.pop()
-                        posted() //FIXME: Params
+                        posted(subjectTextField.text, id)
                     }
                 }
             }
