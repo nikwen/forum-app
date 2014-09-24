@@ -28,7 +28,8 @@
 import QtQuick 2.2
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
-import '../components'
+import "../components"
+import "../../backend"
 
 PageWithBottomEdge {
     id: forumsPage
@@ -127,6 +128,40 @@ PageWithBottomEdge {
         }
     }
 
+    Action {
+        id: subscribeAction
+        text: forumsList.isSubscribed ? i18n.tr("Unsubscribe") : i18n.tr("Subscribe")
+        iconName: forumsList.isSubscribed ? "starred" : "non-starred"
+        visible: backend.currentSession.loggedIn && forumsList.canSubscribe
+
+        onTriggered: subscriptionChange()
+
+        function subscriptionChange() {
+            if (forumsList.isSubscribed) {
+                subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>unsubscribe_forum</methodName><params><param><value>' + current_forum + '</value></param></params></methodCall>'
+            } else {
+                subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>subscribe_forum</methodName><params><param><value>' + current_forum + '</value></param></params></methodCall>'
+            }
+
+            forumsList.isSubscribed = !forumsList.isSubscribed //If the api request fails, it will be changed back later
+
+            subscribeRequest.start()
+        }
+    }
+
+    ApiRequest {
+        id: subscribeRequest
+        checkSuccess: true
+
+        onQuerySuccessResult: {
+            if (success) {
+                notification.show(forumsList.isSubscribed ? i18n.tr("Subscribed to this subforum") : i18n.tr("Unsubscribed from this subforum"))
+            } else {
+                forumsList.isSubscribed = !forumsList.isSubscribed
+            }
+        }
+    }
+
     function onNewTopicCreated(subject, topicId) {
         selectedTitle = subject
         forumsList.current_topic = -1
@@ -138,6 +173,7 @@ PageWithBottomEdge {
     readonly property var headerActions: [
         reloadAction,
         newTopicAction,
+        subscribeAction,
         loginAction
     ]
 

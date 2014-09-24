@@ -95,7 +95,7 @@ PageWithBottomEdge {
         },
         Action {
             id: subscribeAction
-            text: threadList.isSubscribed ? i18n.tr("Subscribe") : i18n.tr("Unsubscribe")
+            text: threadList.isSubscribed ? i18n.tr("Unsubscribe") : i18n.tr("Subscribe")
             iconName: threadList.isSubscribed ? "starred" : "non-starred"
             visible: backend.currentSession.loggedIn && threadList.canSubscribe
 

@@ -40,10 +40,12 @@ ListView {
     property int current_topic: -1
     property int selected_forum: -1
     property string selected_title: ""
-    property bool canPost: false
-    property bool hasTopics: false
     property string mode: ""
     property bool moreLoading: false
+    property bool hasTopics: false
+    property bool canPost: false
+    property bool canSubscribe: false
+    property bool isSubscribed: false
 
     property bool viewSubscriptions: false
 
@@ -403,6 +405,32 @@ ListView {
                     var canPostSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
 
                     canPost = canPostSubstring.trim() === "1"
+                }
+
+                //Check if can subscribe
+
+                var canSubscribeStringPosition = xml.indexOf("<name>can_subscribe</name>");
+                if (canSubscribeStringPosition < 0) {
+                    canSubscribe = true
+                } else {
+                    var openBoolTagPosition = xml.indexOf("<boolean>", canSubscribeStringPosition);
+                    var closeBoolTagPosition = xml.indexOf("</boolean>", openBoolTagPosition);
+                    var canSubscribeSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
+
+                    canSubscribe = canSubscribeSubstring.trim() === "1"
+                }
+
+                //Check if is subscribed
+
+                var isSubscribedStringPosition = xml.indexOf("<name>is_subscribed</name>");
+                if (isSubscribedStringPosition < 0) {
+                    isSubscribed = false
+                } else {
+                    var openBoolTagPosition = xml.indexOf("<boolean>", isSubscribedStringPosition);
+                    var closeBoolTagPosition = xml.indexOf("</boolean>", openBoolTagPosition);
+                    var isSubscribedSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
+
+                    isSubscribed = isSubscribedSubstring.trim() === "1"
                 }
 
                 loadingFinished()
