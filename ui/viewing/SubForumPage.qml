@@ -30,7 +30,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import '../components'
 
-PageWithBottomEdge {
+PageWithBottomEdge { //TODO: If viewSubscriptions: reload when going back to this page (user may have new messages and/or new subscriptions)
     id: forumsPage
     objectName: "forumsPage"
     title: i18n.tr("Forums")

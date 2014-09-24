@@ -74,7 +74,37 @@ PageWithBottomEdge {
         }
     }
 
-    head.actions: [
+    head.actions: [ //TODO: Action order
+        Action {
+            id: subscribeAction
+            text: threadList.isSubscribed ? i18n.tr("Subscribe") : i18n.tr("Unsubscribe")
+            iconName: threadList.isSubscribed ? "starred" : "non-starred"
+            visible: backend.currentSession.loggedIn && threadList.canSubscribe
+            onTriggered: {
+                if (threadList.isSubscribed) {
+                    var query = '<?xml version="1.0"?><methodCall><methodName>unsubscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
+                } else {
+                    var query = '<?xml version="1.0"?><methodCall><methodName>subscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
+                }
+
+                backend.currentSession.apiSuccessQuery(query)
+
+                backend.currentSession.querySuccessResult.connect(successful)
+            }
+
+            function successful(session, success, xml) {
+                if (session !== backend.currentSession) {
+                    return
+                }
+
+                backend.currentSession.querySuccessResult.disconnect(successful)
+
+                if (success) {
+                    threadList.isSubscribed = !threadList.isSubscribed
+                    notification.show(threadList.isSubscribed ? i18n.tr("Subscribed to this topic") : i18n.tr("Unsubscribed from this topic"))
+                }
+            }
+        },
         Action {
             id: loginAction
             text: i18n.tr("Login")
