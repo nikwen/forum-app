@@ -118,17 +118,21 @@ Page {
                         message += "\n\n" + signature
                     }
 
-                    backend.currentSession.apiQuery('<?xml version="1.0"?><methodCall><methodName>new_topic</methodName><params><param><value>' + forum_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>')
+                    backend.currentSession.apiSuccessQuery('<?xml version="1.0"?><methodCall><methodName>new_topic</methodName><params><param><value>' + forum_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>')
 
-                    backend.currentSession.queryResult.connect(successful)
+                    backend.currentSession.querySuccessResult.connect(successful)
                 }
 
-                function successful(session, success, responseXml) {
-                    backend.currentSession.queryResult.disconnect(successful)
+                function successful(session, success) {
+                    if (session !== backend.currentSession) {
+                        return
+                    }
+
+                    backend.currentSession.querySuccessResult.disconnect(successful)
 
                     if (success) {
                         pageStack.pop()
-                        posted()
+                        posted() //FIXME: Params
                     }
                 }
             }
