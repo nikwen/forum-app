@@ -30,6 +30,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
 import Ubuntu.Components.Popups 1.0
 import "../components"
+import "../../backend"
 
 PageWithBottomEdge {
     id: threadPage
@@ -80,29 +81,19 @@ PageWithBottomEdge {
             text: threadList.isSubscribed ? i18n.tr("Subscribe") : i18n.tr("Unsubscribe")
             iconName: threadList.isSubscribed ? "starred" : "non-starred"
             visible: backend.currentSession.loggedIn && threadList.canSubscribe
-            onTriggered: {
+
+            onTriggered: subscriptionChange()
+
+            function subscriptionChange() {
                 if (threadList.isSubscribed) {
-                    var query = '<?xml version="1.0"?><methodCall><methodName>unsubscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
+                    subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>unsubscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
                 } else {
-                    var query = '<?xml version="1.0"?><methodCall><methodName>subscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
+                    subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>subscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
                 }
 
-                backend.currentSession.apiSuccessQuery(query)
+                threadList.isSubscribed = !threadList.isSubscribed //If the api request fails, it will be changed back later
 
-                backend.currentSession.querySuccessResult.connect(successful)
-            }
-
-            function successful(session, success, xml) {
-                if (session !== backend.currentSession) {
-                    return
-                }
-
-                backend.currentSession.querySuccessResult.disconnect(successful)
-
-                if (success) {
-                    threadList.isSubscribed = !threadList.isSubscribed
-                    notification.show(threadList.isSubscribed ? i18n.tr("Subscribed to this topic") : i18n.tr("Unsubscribed from this topic"))
-                }
+                subscribeRequest.start()
             }
         },
         Action {
@@ -135,6 +126,19 @@ PageWithBottomEdge {
             }
         }
     ]
+
+    ApiRequest {
+        id: subscribeRequest
+        checkSuccess: true
+
+        onQuerySuccessResult: {
+            if (success) {
+                notification.show(threadList.isSubscribed ? i18n.tr("Subscribed to this topic") : i18n.tr("Unsubscribed from this topic"))
+            } else {
+                threadList.isSubscribed = !threadList.isSubscribed
+            }
+        }
+    }
 
     head.contents: Label {
         width: parent.width
