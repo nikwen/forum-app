@@ -75,7 +75,24 @@ PageWithBottomEdge {
         }
     }
 
-    head.actions: [ //TODO: Action order
+    head.actions: [
+        Action {
+            id: reloadAction
+            text: i18n.tr("Reload")
+            iconName: "reload"
+            onTriggered: {
+                threadList.reload()
+            }
+        },
+        Action {
+            id: loginAction
+            text: i18n.tr("Login")
+            iconName: "contact"
+            visible: !backend.currentSession.loggedIn
+            onTriggered: {
+                pageStack.push(loginPage)
+            }
+        },
         Action {
             id: subscribeAction
             text: threadList.isSubscribed ? i18n.tr("Subscribe") : i18n.tr("Unsubscribe")
@@ -97,15 +114,6 @@ PageWithBottomEdge {
             }
         },
         Action {
-            id: loginAction
-            text: i18n.tr("Login")
-            iconName: "contact"
-            visible: !backend.currentSession.loggedIn
-            onTriggered: {
-                pageStack.push(loginPage)
-            }
-        },
-        Action {
             id: gotoAction
             text: i18n.tr("Go To Page")
             iconName: "view-list-symbolic"
@@ -115,14 +123,6 @@ PageWithBottomEdge {
                 var selected = threadList.firstDisplayedPost / backend.postsPerPage
                 popup.itemSelector.selectedIndex = selected
 //                popup.itemSelector.positionViewAtIndex(selected, ListView.Center) //TODO: Add to UI Toolkit?
-            }
-        },
-        Action {
-            id: reloadAction
-            text: i18n.tr("Reload")
-            iconName: "reload"
-            onTriggered: {
-                threadList.reload()
             }
         }
     ]
