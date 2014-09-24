@@ -96,7 +96,7 @@ Page {
 
                 Label {
                     id: signatureLabel
-                    text: signature
+                    text: backend.signature
                     wrapMode: Text.Wrap
 
                     anchors.verticalCenter: parent.verticalCenter
@@ -123,7 +123,7 @@ Page {
                     var message = messageTextField.text
 
                     if (appendSignatureCheckBox.checked) {
-                        message += "\n\n" + signature
+                        message += "\n\n" + backend.signature
                     }
 
                     var xhr = new XMLHttpRequest;
