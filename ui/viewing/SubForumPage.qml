@@ -30,7 +30,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import '../components'
 
-PageWithBottomEdge { //TODO: If viewSubscriptions: reload when going back to this page (user may have new messages and/or new subscriptions)
+PageWithBottomEdge {
     id: forumsPage
     objectName: "forumsPage"
     title: i18n.tr("Forums")
@@ -70,6 +70,16 @@ PageWithBottomEdge { //TODO: If viewSubscriptions: reload when going back to thi
                 previousPage.destroy()
             }
             previousPage = pageStack.currentPage
+        }
+    }
+
+    Connections {
+        target: pageStack
+
+        onCurrentPageChanged: { //Reload when going back to the subscriptions page
+            if (viewSubscriptions && pageStack.currentPage === forumsPage && forumsList.modelsHaveLoadedCompletely) {
+                forumsList.reload()
+            }
         }
     }
 
