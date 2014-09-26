@@ -70,8 +70,17 @@ Page {
 
         onResultsChanged: {
             if (results[0] !== undefined) {
-                if (results[0].user !== undefined) nameTextField.text = results[0].user
-                if (results[0].password !== undefined) passwordTextField.text = results[0].password
+                if (results[0].user !== undefined) {
+                    nameTextField.text = results[0].user
+                } else {
+                    nameTextField.text = ""
+                }
+
+                if (results[0].password !== undefined) {
+                    passwordTextField.text = results[0].password
+                } else {
+                    passwordTextField.text = ""
+                }
             }
         }
     }
