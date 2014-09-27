@@ -37,15 +37,10 @@ ListView {
     id: forumsList
 
     property alias current_forum: categoryModel.parentForumId
-    property int current_topic: -1
-    property int selected_forum: -1
-    property string selected_title: ""
     property string mode: ""
     property bool moreLoading: false
     property bool hasTopics: false
     property bool canPost: false
-    property bool canSubscribe: false
-    property bool isSubscribed: false
 
     property bool viewSubscriptions: false
 
@@ -64,13 +59,10 @@ ListView {
         progression: true
 
         onTriggered: {
-            selected_title = text
             if (model.topic) {
-                current_topic = -1
-                current_topic = model.id
+                forumsPage.pushThreadPage(model.id, text)
             } else {
-                selected_forum = -1
-                selected_forum = model.id
+                forumsPage.pushSubForumPage(model.id, text, model.can_subscribe, model.is_subscribed)
             }
         }
 
@@ -167,8 +159,8 @@ ListView {
         XmlRole { name: "name"; query: "member[name='forum_name']/value/base64/string()" }
         XmlRole { name: "description"; query: "member[name='description']/value/base64/string()" }
         XmlRole { name: "logo"; query: "member[name='logo_url']/value/string()" }
-        XmlRole { name: "can_subscribe"; query: "member[name='can_subscribe']/value/string()" } //TODO: Pass to pushed SubForumPage, remove code from topicModel as its values probably refer to the first topic in the list
-        XmlRole { name: "is_subscribed"; query: "member[name='is_subscribed']/value/string()" } //TODO: How to handle the following? User subscribes to a forum, goes back, enters the forum again => state needs to be changed. Change it in the parent's forumListModel using a signal?
+        XmlRole { name: "can_subscribe"; query: "member[name='can_subscribe']/value/number()" } //TODO: Pass to pushed SubForumPage, remove code from topicModel as its values probably refer to the first topic in the list
+        XmlRole { name: "is_subscribed"; query: "member[name='is_subscribed']/value/number()" } //TODO: How to handle the following? User subscribes to a forum, goes back, enters the forum again => state needs to be changed. Change it in the parent's forumListModel using a signal?
 
         property bool checkingForChildren: false
 
@@ -222,7 +214,7 @@ ListView {
                 var element = get(i)
                 //We need to declare even unused properties here
                 //Needed when there are both topics and categories in a subforum
-                var pushObject = {"topic": false, "id": element.id.trim(), "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": "-1", "has_new": "0"}
+                var pushObject = {"topic": false, "id": element.id.trim(), "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": "-1", "has_new": "0", "can_subscribe": element.can_subscribe, "is_subscribed": element.is_subscribed}
                 if (!isForumOverview) {
                     forumListModel.insert(i, pushObject)
                 } else {
@@ -389,7 +381,7 @@ ListView {
                             var element = get(i);
                             //We need to declare even unused properties here
                             //Needed when there are both topics and categories in a subforum
-                            forumListModel.append({"topic": true, "id": element.id.trim(), "name": element.title.trim(), "description": "" /*element.description.trim()*/, "logo": "", "author": element.author.trim(), "posts": element.posts.trim(), "has_new": element.has_new.trim()});
+                            forumListModel.append({"topic": true, "id": element.id.trim(), "name": element.title.trim(), "description": "" /*element.description.trim()*/, "logo": "", "author": element.author.trim(), "posts": element.posts.trim(), "has_new": element.has_new.trim(), "can_subscribe": false, "is_subscribed": false});
                         }
                     }
                 }
@@ -407,32 +399,6 @@ ListView {
                     var canPostSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
 
                     canPost = canPostSubstring.trim() === "1"
-                }
-
-                //Check if can subscribe
-
-                var canSubscribeStringPosition = xml.indexOf("<name>can_subscribe</name>");
-                if (canSubscribeStringPosition < 0) {
-                    canSubscribe = true
-                } else {
-                    var openBoolTagPosition = xml.indexOf("<boolean>", canSubscribeStringPosition);
-                    var closeBoolTagPosition = xml.indexOf("</boolean>", openBoolTagPosition);
-                    var canSubscribeSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
-
-                    canSubscribe = canSubscribeSubstring.trim() === "1"
-                }
-
-                //Check if is subscribed
-
-                var isSubscribedStringPosition = xml.indexOf("<name>is_subscribed</name>");
-                if (isSubscribedStringPosition < 0) {
-                    isSubscribed = false
-                } else {
-                    var openBoolTagPosition = xml.indexOf("<boolean>", isSubscribedStringPosition);
-                    var closeBoolTagPosition = xml.indexOf("</boolean>", openBoolTagPosition);
-                    var isSubscribedSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
-
-                    isSubscribed = isSubscribedSubstring.trim() === "1"
                 }
 
                 loadingFinished()

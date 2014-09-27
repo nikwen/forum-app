@@ -42,10 +42,16 @@ PageWithBottomEdge {
     property alias current_forum: forumsList.current_forum
     property bool isForumOverview: current_forum === 0
 
-    property alias selectedTitle: forumsList.selected_title
+    property int selectedId: -1
+    property string selectedTitle: ""
+    property bool selectedCanSubscribe: false
+    property bool selectedIsSubscribed: false
 
     property alias loadingSpinnerRunning: loadingSpinner.running
     property bool showSections: false
+
+    property bool isSubscribed: false
+    property bool canSubscribe: false
 
     bottomEdgeTitle: i18n.tr("Subscriptions")
     bottomEdgeEnabled: !disableBottomEdge && current_forum >= 0 && backend.currentSession.loggedIn
@@ -130,20 +136,20 @@ PageWithBottomEdge {
 
     Action {
         id: subscribeAction
-        text: forumsList.isSubscribed ? i18n.tr("Unsubscribe") : i18n.tr("Subscribe")
-        iconName: forumsList.isSubscribed ? "starred" : "non-starred"
-        visible: backend.currentSession.loggedIn && !viewSubscriptions && backend.currentSession.configModel.subscribeForum && forumsList.canSubscribe
+        text: isSubscribed ? i18n.tr("Unsubscribe") : i18n.tr("Subscribe")
+        iconName: isSubscribed ? "starred" : "non-starred"
+        visible: backend.currentSession.loggedIn && !viewSubscriptions && backend.currentSession.configModel.subscribeForum && canSubscribe
 
         onTriggered: subscriptionChange()
 
         function subscriptionChange() {
-            if (forumsList.isSubscribed) {
+            if (isSubscribed) {
                 subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>unsubscribe_forum</methodName><params><param><value>' + current_forum + '</value></param></params></methodCall>'
             } else {
                 subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>subscribe_forum</methodName><params><param><value>' + current_forum + '</value></param></params></methodCall>'
             }
 
-            forumsList.isSubscribed = !forumsList.isSubscribed //If the api request fails, it will be changed back later
+            isSubscribed = !isSubscribed //If the api request fails, it will be changed back later
 
             subscribeRequest.start()
         }
@@ -155,17 +161,16 @@ PageWithBottomEdge {
 
         onQuerySuccessResult: {
             if (success) {
-                notification.show(forumsList.isSubscribed ? i18n.tr("Subscribed to this subforum") : i18n.tr("Unsubscribed from this subforum"))
+                notification.show(isSubscribed ? i18n.tr("Subscribed to this subforum") : i18n.tr("Unsubscribed from this subforum"))
             } else {
-                forumsList.isSubscribed = !forumsList.isSubscribed
+                isSubscribed = !isSubscribed
             }
         }
     }
 
     function onNewTopicCreated(subject, topicId) {
         selectedTitle = subject
-        forumsList.current_topic = -1
-        forumsList.current_topic = topicId //Show topic
+        pushThreadPage(topicId) //Show thread
 
         forumsList.reload()
     }
@@ -223,41 +228,44 @@ PageWithBottomEdge {
 
         mode: (forumsPage.head.sections.selectedIndex === 1) ? "TOP" : ((forumsPage.head.sections.selectedIndex === 2) ? "ANN" : "")
 
-        onSelected_forumChanged: {
-            if (selected_forum > 0) {
-                component = Qt.createComponent("SubForumPage.qml");
+    }
 
-                if (component.status === Component.Ready) {
-                    finishSubForumPageCreation();
-                } else {
-                    component.statusChanged.connect(finishSubForumPageCreation);
-                }
-            }
+    function pushSubForumPage(forumId, title, canSubscribe, isSubscribed) {
+        selectedId = forumId
+        selectedTitle = title
+        selectedCanSubscribe = (typeof(canSubscribe) === "bool" || typeof(canSubscribe) === "number") ? canSubscribe : true
+        selectedIsSubscribed = (typeof(isSubscribed) === "bool" || typeof(isSubscribed) === "number") ? isSubscribed : false
+        component = Qt.createComponent("SubForumPage.qml")
+
+        if (component.status === Component.Ready) {
+            finishSubForumPageCreation()
+        } else {
+            component.statusChanged.connect(finishSubForumPageCreation)
         }
+    }
 
-        function finishSubForumPageCreation() {
-            var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selected_forum, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge})
-            pageStack.push(page)
+    function finishSubForumPageCreation() {
+        var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedId, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
+        pageStack.push(page)
+    }
+
+    function pushThreadPage(topicId, title) {
+        selectedId = topicId
+        selectedTitle = title
+        component = Qt.createComponent("ThreadPage.qml")
+
+        if (component.status === Component.Ready) {
+            finishThreadPageCreation()
+        } else {
+            component.statusChanged.connect(finishThreadPageCreation)
         }
+    }
 
-        onCurrent_topicChanged: {
-            if (current_topic > 0) {
-                component = Qt.createComponent("ThreadPage.qml")
-
-                if (component.status === Component.Ready) {
-                    finishThreadPageCreation();
-                } else {
-                    component.statusChanged.connect(finishThreadPageCreation);
-                }
-            }
-        }
-
-        function finishThreadPageCreation() {
-            var vBulletinAnnouncement = backend.currentSession.configModel.isVBulletin && forumsList.mode === "ANN"
-            var page = component.createObject(mainView, {"title": selectedTitle, "loadingSpinnerRunning": true, "forum_id": current_forum, "vBulletinAnnouncement": vBulletinAnnouncement})
-            page.current_topic = current_topic //Need to set vBulletinAnnouncement before current_topic!!! Therefore, this is executed after the creation of the Page.
-            pageStack.push(page)
-        }
+    function finishThreadPageCreation() {
+        var vBulletinAnnouncement = backend.currentSession.configModel.isVBulletin && forumsList.mode === "ANN"
+        var page = component.createObject(mainView, {"title": selectedTitle, "loadingSpinnerRunning": true, "forum_id": current_forum, "vBulletinAnnouncement": vBulletinAnnouncement})
+        page.current_topic = selectedId //Need to set vBulletinAnnouncement before current_topic!!! Therefore, this is executed after the creation of the Page.
+        pageStack.push(page)
     }
 
     Label {
