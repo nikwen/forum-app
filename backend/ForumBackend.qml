@@ -150,10 +150,10 @@ Object {
 
                 loginFinished = false //do not set loggedIn to false => ability to change login data
 
-                if (configModel.get(0).support_md5) {
+                if (configModel.supportMd5) {
                     console.log("md5")
                     password = Md5Utils.md5(password)
-                } else if (configModel.get(0).support_sha1) { //Untested yet
+                } else if (configModel.supportSHA1) { //Untested yet
                     console.log("sha1")
                     password = Sha1Utils.sha1(password)
                 } else {
