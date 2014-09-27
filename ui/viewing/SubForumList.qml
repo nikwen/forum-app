@@ -167,6 +167,8 @@ ListView {
         XmlRole { name: "name"; query: "member[name='forum_name']/value/base64/string()" }
         XmlRole { name: "description"; query: "member[name='description']/value/base64/string()" }
         XmlRole { name: "logo"; query: "member[name='logo_url']/value/string()" }
+        XmlRole { name: "can_subscribe"; query: "member[name='can_subscribe']/value/string()" } //TODO: Pass to pushed SubForumPage, remove code from topicModel as its values probably refer to the first topic in the list
+        XmlRole { name: "is_subscribed"; query: "member[name='is_subscribed']/value/string()" } //TODO: How to handle the following? User subscribes to a forum, goes back, enters the forum again => state needs to be changed. Change it in the parent's forumListModel using a signal?
 
         property bool checkingForChildren: false
 
