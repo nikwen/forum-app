@@ -106,7 +106,7 @@ UbuntuShape {
             }
 
             function formatTime(time) {
-                if (time.charAt(4) !== "-") { //Fix ISO 8601 format if necessary
+                if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
                     time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
                 }
 
@@ -117,9 +117,9 @@ UbuntuShape {
                 if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
                     return Qt.formatTime(postDate, i18n.tr("hh:mm"))
                 } else if (postDate.getFullYear() === todaysDate.getFullYear()) {
-                    return Qt.formatDate(postDate, i18n.tr("dd. MMM"))
+                    return Qt.formatDate(postDate, i18n.tr("dd MMM"))
                 } else {
-                    return Qt.formatDate(postDate, i18n.tr("dd.MM.yyyy")) //TODO: Localize!!!
+                    return Qt.formatDate(postDate, i18n.tr("dd/MM/yyyy")) //TODO: Localize!!!
                 }
             }
         }
