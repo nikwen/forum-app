@@ -80,16 +80,6 @@ PageWithBottomEdge {
         }
     }
 
-    Connections {
-        target: pageStack
-
-        onCurrentPageChanged: { //Reload when going back to the subscriptions page
-            if (viewSubscriptions && pageStack.currentPage === forumsPage && forumsList.modelsHaveLoadedCompletely) {
-                forumsList.reload()
-            }
-        }
-    }
-
     Action {
         id: reloadAction
         text: i18n.tr("Reload")
