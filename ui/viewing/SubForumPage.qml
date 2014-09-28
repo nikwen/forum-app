@@ -246,6 +246,14 @@ PageWithBottomEdge {
 
     function finishSubForumPageCreation() {
         var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedId, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
+        page.onIsSubscribedChanged.connect(function() { //Change is_subscribed attribute when the subscription state is changed
+            for (var i = 0; i < forumsList.model.count; i++) {
+                if (forumsList.model.get(i).id === selectedId) {
+                    forumsList.model.setProperty(i, "is_subscribed", page.isSubscribed ? 1 : 0) //is_subscribed requires a number
+                    break
+                }
+            }
+        })
         pageStack.push(page)
     }
 

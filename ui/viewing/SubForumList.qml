@@ -53,9 +53,9 @@ ListView {
     delegate: SubForumListItem {
         text: StringUtils.base64_decode(model.name)
         subText: StringUtils.base64_decode(model.description)
-        replies: model.topic ? (parseInt(model.posts) + 1) : 0 //+1 to include OP
+        replies: model.topic ? (model.posts + 1) : 0 //+1 to include OP
         author: model.topic ? StringUtils.base64_decode(model.author) : ""
-        has_new: model.has_new === '1' ? true : false
+        has_new: model.has_new
         progression: true
 
         onTriggered: {
@@ -155,12 +155,12 @@ ListView {
         property bool viewSubscriptions: forumsList.viewSubscriptions
         query: viewSubscriptions ? "/methodResponse/params/param/value/struct/member[name='forums']/value/array/data/value/struct" : "/methodResponse/params/param/value/array/data/value/struct"
 
-        XmlRole { name: "id"; query: "member[name='forum_id']/value/string()" }
+        XmlRole { name: "id"; query: "member[name='forum_id']/value/number()" }
         XmlRole { name: "name"; query: "member[name='forum_name']/value/base64/string()" }
         XmlRole { name: "description"; query: "member[name='description']/value/base64/string()" }
         XmlRole { name: "logo"; query: "member[name='logo_url']/value/string()" }
-        XmlRole { name: "can_subscribe"; query: "member[name='can_subscribe']/value/number()" } //TODO: Pass to pushed SubForumPage, remove code from topicModel as its values probably refer to the first topic in the list
-        XmlRole { name: "is_subscribed"; query: "member[name='is_subscribed']/value/number()" } //TODO: How to handle the following? User subscribes to a forum, goes back, enters the forum again => state needs to be changed. Change it in the parent's forumListModel using a signal?
+        XmlRole { name: "can_subscribe"; query: "member[name='can_subscribe']/value/number()" }
+        XmlRole { name: "is_subscribed"; query: "member[name='is_subscribed']/value/number()" }
 
         property bool checkingForChildren: false
 
@@ -174,7 +174,7 @@ ListView {
                 if (!checkingForChildren) {
                     console.debug("categoryModel has: " + count + " items");
 
-                    if (count !== 1 || parentForumId !== parseInt(get(0).id)) {
+                    if (count !== 1 || parentForumId !== get(0).id) {
                         insertResults()
                     } else { //Header with a child attribute
                         if (!topicModel.hasLoadedCompletely) {
@@ -214,7 +214,7 @@ ListView {
                 var element = get(i)
                 //We need to declare even unused properties here
                 //Needed when there are both topics and categories in a subforum
-                var pushObject = {"topic": false, "id": element.id.trim(), "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": "-1", "has_new": "0", "can_subscribe": element.can_subscribe, "is_subscribed": element.is_subscribed}
+                var pushObject = {"topic": false, "id": element.id, "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": -1, "has_new": 0, "can_subscribe": viewSubscriptions ? 1 : element.can_subscribe, "is_subscribed": viewSubscriptions ? 1 : element.is_subscribed}
                 if (!isForumOverview) {
                     forumListModel.insert(i, pushObject)
                 } else {
@@ -352,12 +352,12 @@ ListView {
         property bool viewSubscriptions: forumsList.viewSubscriptions
         query: "/methodResponse/params/param/value/struct/member/value/array/data/value/struct"
 
-        XmlRole { name: "id"; query: "member[name='topic_id']/value/string()" }
+        XmlRole { name: "id"; query: "member[name='topic_id']/value/number()" }
         XmlRole { name: "title"; query: "member[name='topic_title']/value/base64/string()" }
 //        XmlRole { name: "description"; query: "member[name='short_content']/value/base64/string()" }
         XmlRole { name: "author"; query: "member[name='topic_author_name']/value/base64/string()" }
-        XmlRole { name: "posts"; query: "member[name='reply_number']/value/int/string()" }
-        XmlRole { name: "has_new"; query: "member[name='new_post']/value/boolean/string()" }
+        XmlRole { name: "posts"; query: "member[name='reply_number']/value/int/number()" }
+        XmlRole { name: "has_new"; query: "member[name='new_post']/value/boolean/number()" }
 
         onStatusChanged: {
             if (status === 1) {
@@ -365,7 +365,7 @@ ListView {
                     hasTopics = true //no else needed (and it may interfere with moreLoading)
 
                     //TODO: Check if if is needed or if it won't be added twice even without the if
-                    if (count === 1 && forumListModel.count > 0 && get(0).id.trim() === forumListModel.get(forumListModel.count - 1).id && forumListModel.get(forumListModel.count - 1).topic === true) {
+                    if (count === 1 && forumListModel.count > 0 && get(0).id === forumListModel.get(forumListModel.count - 1).id && forumListModel.get(forumListModel.count - 1).topic === true) {
                         //Do not add the element as it is a duplicate of the last one which was added
                         //Happens if a forum contains n * backend.topicsLoadCount topics (with n = 2, 3, 4, ...) and loadMore() is called (sadly, that's how the API handles the request)
 
@@ -381,7 +381,7 @@ ListView {
                             var element = get(i);
                             //We need to declare even unused properties here
                             //Needed when there are both topics and categories in a subforum
-                            forumListModel.append({"topic": true, "id": element.id.trim(), "name": element.title.trim(), "description": "" /*element.description.trim()*/, "logo": "", "author": element.author.trim(), "posts": element.posts.trim(), "has_new": element.has_new.trim(), "can_subscribe": false, "is_subscribed": false});
+                            forumListModel.append({"topic": true, "id": element.id, "name": element.title.trim(), "description": "", "logo": "", "author": element.author.trim(), "posts": element.posts, "has_new": element.has_new, "can_subscribe": 1, "is_subscribed": 0});
                         }
                     }
                 }
