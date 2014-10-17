@@ -130,6 +130,7 @@ PageWithBottomEdge {
     ApiRequest {
         id: subscribeRequest
         checkSuccess: true
+        allowMultipleRequests: true
 
         onQuerySuccessResult: {
             if (success) {
