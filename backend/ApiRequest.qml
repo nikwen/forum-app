@@ -28,41 +28,51 @@ import QtQuick 2.2
 
 Item {
     property string query
-    property int backendQueryId: -1
     property bool checkSuccess: false
+
+    property var runningQueries: [] //Multiple queries by one ApiRequest object are currently only planned for features like subscribing or thanking for a post, so the queryId does not need to be passed by the signals
+                                    //DO NOT use variant here as it will for some reason not allow to push objects to the array
 
     signal queryResult(var session, bool withoutErrors, string responseXml)
     signal querySuccessResult(var session, bool success, string responseXml)
 
     function start() {
+        var currentQueryId = -1
         if (checkSuccess) {
-            backendQueryId = backend.currentSession.apiSuccessQuery(query)
-            backend.currentSession.querySuccessResult.connect(executedSuccessQuery) //TODO: Pass a function to the method instead which calls executedQuery()? Or make it call executedQuery() on the ApiRequest item directly? -> Depends on the queue implementation
+            currentQueryId = backend.currentSession.apiSuccessQuery(query)
+            backend.currentSession.querySuccessResult.connect(executedSuccessQuery)
         } else {
-            backendQueryId = backend.currentSession.apiQuery(query)
+            currentQueryId = backend.currentSession.apiQuery(query)
             backend.currentSession.queryResult.connect(executedQuery)
         }
+        runningQueries.push(currentQueryId)
     }
 
     function executedSuccessQuery(queryId, session, success, responseXml) {
-        if (session !== backend.currentSession || queryId !== backendQueryId) {
+        var index = runningQueries.indexOf(queryId)
+        if (session !== backend.currentSession || index === -1) {
             return
         }
 
-        backend.currentSession.querySuccessResult.disconnect(executedSuccessQuery)
+        runningQueries.slice(index, 1)
+        if (runningQueries.length === 0) {
+            backend.currentSession.querySuccessResult.disconnect(executedSuccessQuery)
+        }
 
-        backendQueryId = -1
         querySuccessResult(session, success, responseXml)
     }
 
     function executedQuery(queryId, session, withoutErrors, responseXml) {
-        if (session !== backend.currentSession || queryId !== backendQueryId) {
+        var index = runningQueries.indexOf(queryId)
+        if (session !== backend.currentSession || index === -1) {
             return
         }
 
-        backend.currentSession.queryResult.disconnect(executedQuery)
+        runningQueries.slice(index, 1)
+        if (runningQueries.length === 0) {
+            backend.currentSession.queryResult.disconnect(executedQuery)
+        }
 
-        backendQueryId = -1
         queryResult(session, withoutErrors, responseXml)
     }
 
