@@ -62,7 +62,7 @@ Item {
             return
         }
 
-        runningQueries.slice(index, 1)
+        runningQueries = runningQueries.slice(index, 1)
         if (runningQueries.length === 0) {
             backend.currentSession.querySuccessResult.disconnect(executedSuccessQuery)
         }
@@ -76,7 +76,7 @@ Item {
             return
         }
 
-        runningQueries.slice(index, 1)
+        runningQueries = runningQueries.slice(index, 1)
         if (runningQueries.length === 0) {
             backend.currentSession.queryResult.disconnect(executedQuery)
         }
