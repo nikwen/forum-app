@@ -92,19 +92,55 @@ Object {
                 }
             }
 
-            signal queryResult(var session, bool withoutErrors, string responseXml)
-            signal querySuccessResult(var session, bool success, string responseXml)
+            property var queryQueue: [] //Array of arrays following this structure: [ queryId, queryString, isSuccessQuery ]; DO NOT use variant as it cannot handle objects properly
+            property bool processingQuery: false
+            property int currentQueryId: -1
+            property int nextQueryId: 0
 
-            function apiSuccessQuery(queryString) {
-                apiQuery(queryString)
-                queryResult.connect(checkApiQuerySuccess)
+            signal queryResult(int queryId, var session, bool withoutErrors, string responseXml)
+            signal querySuccessResult(int queryId, var session, bool success, string responseXml)
+
+            function checkRunNextQuery() {
+                console.log("Pending queries: " + queryQueue.length)
+                if (!processingQuery && queryQueue.length > 0) {
+                    runNextQuery()
+                }
             }
 
-            function checkApiQuerySuccess(session, withoutErrors, xml) {
+            onQueryResult: {
+                if (!queryQueue[0].isSuccessQuery) {
+                    processingQueryDone()
+                }
+            }
+
+            onQuerySuccessResult: processingQueryDone()
+
+            function processingQueryDone() {
+                currentQueryId = -1
+                processingQuery = false
+                queryQueue.shift() //removes first element
+                checkRunNextQuery()
+            }
+
+            function apiSuccessQuery(queryString) {
+                nextQueryId++
+                queryQueue.push({ "queryId": nextQueryId, "queryString": queryString, "isSuccessQuery": true })
+                checkRunNextQuery()
+                return nextQueryId
+            }
+
+            function apiQuery(queryString) {
+                nextQueryId++
+                queryQueue.push({ "queryId": nextQueryId, "queryString": queryString, "isSuccessQuery": false })
+                checkRunNextQuery()
+                return nextQueryId
+            }
+
+            function checkApiQuerySuccess(currentQueryId, session, withoutErrors, xml) {
                 queryResult.disconnect(checkApiQuerySuccess)
 
                 if (!withoutErrors) {
-                    querySuccessResult(session, false, xml)
+                    querySuccessResult(currentQueryId, session, false, xml)
                     return
                 }
 
@@ -116,7 +152,7 @@ Object {
                 var success = result === "1";
 
                 if (success) {
-                    querySuccessResult(session, success, xml)
+                    querySuccessResult(currentQueryId, session, success, xml)
                 } else {
                     var resultTextIndex = xml.indexOf("result_text")
                     var resultText
@@ -131,17 +167,24 @@ Object {
                     if (resultText !== undefined) {
                         dialog.text = i18n.tr("Text returned by the server:\n") + resultText
                     }
-                    querySuccessResult(session, success, xml)
+                    querySuccessResult(currentQueryId, session, success, xml)
                 }
             }
 
-            function apiQuery(queryString) { //parameter only for connection with loginDone
-                if (session !== undefined) {
+            function runNextQuery() { //parameter only for connection with loginDone - TODO: Does this comment still make sense?
+                processingQuery = true
+
+                if (session !== undefined) { //TODO: First if needed???
                     if (session === backend.currentSession) {
-                        backend.loginDone.disconnect(apiQuery)
+                        backend.loginDone.disconnect(runNextQuery)
                     } else {
                         return
                     }
+                }
+
+                currentQueryId = queryQueue[0].queryId
+                if (queryQueue[0].isSuccessQuery) {
+                    queryResult.connect(checkApiQuerySuccess)
                 }
 
                 var xhr = new XMLHttpRequest;
@@ -152,22 +195,22 @@ Object {
                         if (xhr.status === 200) {
                             if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
                                 if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
-                                    backend.login() //Connection to loginDone will care about reloading afterwards
-                                    backend.loginDone.connect(apiQuery)
+                                    backend.login() //Connection to loginDone will take care of retrying afterwards
+                                    backend.loginDone.connect(runNextQuery)
                                 }
                             } else {
                                 var xml = StringUtils.xmlFromResponse(xhr.responseText)
-                                queryResult(session, true, xml)
+                                queryResult(currentQueryId, session, true, xml)
                             }
 
                         } else {
                             notification.show(i18n.tr("Connection error"))
-                            queryResult(session, false, "")
+                            queryResult(currentQueryId, session, false, "")
                         }
                     }
                 }
                 xhr.onreadystatechange = onReadyStateChangeFunction
-                xhr.send(queryString);
+                xhr.send(queryQueue[0].queryString);
             }
         }
     }
