@@ -29,6 +29,7 @@ import QtQuick 2.2
 Item {
     property string query
     property bool checkSuccess: false
+    property bool allowMultipleRequests: false
 
     property var runningQueries: [] //Multiple queries by one ApiRequest object are currently only planned for features like subscribing or thanking for a post, so the queryId does not need to be passed by the signals
                                     //DO NOT use variant here as it will for some reason not allow to push objects to the array
@@ -36,7 +37,12 @@ Item {
     signal queryResult(var session, bool withoutErrors, string responseXml)
     signal querySuccessResult(var session, bool success, string responseXml)
 
-    function start() {
+    function start() { //Returns whether the request will be executed
+        if (!allowMultipleRequests && runningQueries.length > 0) {
+            console.log("Will not run second api query (allowMultipleRequests === false)")
+            return false
+        }
+
         var currentQueryId = -1
         if (checkSuccess) {
             currentQueryId = backend.currentSession.apiSuccessQuery(query)
@@ -46,6 +52,8 @@ Item {
             backend.currentSession.queryResult.connect(executedQuery)
         }
         runningQueries.push(currentQueryId)
+
+        return true
     }
 
     function executedSuccessQuery(queryId, session, success, responseXml) {
