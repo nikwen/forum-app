@@ -62,7 +62,7 @@ Item {
             return
         }
 
-        runningQueries = runningQueries.slice(index, 1)
+        runningQueries.shift() //Removes first query (The splice() function does not work properly with properties in QML. As the backend processes queries serially, shift() can be used as a workaround.)
         if (runningQueries.length === 0) {
             backend.currentSession.querySuccessResult.disconnect(executedSuccessQuery)
         }
@@ -76,7 +76,7 @@ Item {
             return
         }
 
-        runningQueries = runningQueries.slice(index, 1)
+        runningQueries.shift() //See comment above
         if (runningQueries.length === 0) {
             backend.currentSession.queryResult.disconnect(executedQuery)
         }
