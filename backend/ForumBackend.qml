@@ -198,7 +198,7 @@ Object {
                     queryResult.connect(checkApiQuerySuccess)
                 }
 
-                var xhr = new XMLHttpRequest;
+                var xhr = new XMLHttpRequest
                 xhr.open("POST", backend.currentSession.apiSource)
                 var onReadyStateChangeFunction = function() {
                     if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -210,11 +210,18 @@ Object {
                                 }
                             } else {
                                 var xml = StringUtils.xmlFromResponse(xhr.responseText)
-                                queryResult(currentQueryId, session, true, xml)
+                                if (xml.trim() !== "") {
+                                    queryResult(currentQueryId, session, true, xml)
+                                } else {
+                                    notification.show(i18n.tr("Error: Could not get Tapatalk API response using the given URL"))
+                                    console.log("Error: Could not get Tapatalk API response using the given URL")
+                                    queryResult(currentQueryId, session, false, "")
+                                }
                             }
 
                         } else {
                             notification.show((xhr.status === 404) ? i18n.tr("Error 404: Could not find Tapatalk API for given URL") : i18n.tr("Connection error"))
+                            console.log((xhr.status === 404) ? "Error 404: Could not find Tapatalk API for given URL" : "Connection error")
                             queryResult(currentQueryId, session, false, "")
                         }
                     }
