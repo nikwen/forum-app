@@ -86,9 +86,20 @@ Object {
                         login()
                     }
                 }
+            }
 
-                Component.onCompleted: {
-                    loadConfig()
+            onApiSourceChanged: {
+                if (apiSource !== "") {
+                    configModel.loadConfig()
+                }
+            }
+
+            ApiRequest {
+                id: loadConfigRequest
+                query: '<?xml version="1.0"?><methodCall><methodName>get_config</methodName></methodCall>'
+
+                onQueryResult: {
+                    configModel.xml = StringUtils.xmlFromResponse(responseXml)
                 }
             }
 
@@ -144,12 +155,12 @@ Object {
                     return
                 }
 
-                var resultIndex = xml.indexOf("result");
+                var resultIndex = xml.indexOf("result")
                 var booleanTag = xml.indexOf("<boolean>", resultIndex)
                 var booleanEndTag = xml.indexOf("</boolean>", resultIndex)
                 var result = xml.substring(booleanTag + 9, booleanEndTag)
 
-                var success = result === "1";
+                var success = result === "1"
 
                 if (success) {
                     querySuccessResult(currentQueryId, session, success, xml)
@@ -188,10 +199,9 @@ Object {
                 }
 
                 var xhr = new XMLHttpRequest;
-                xhr.open("POST", backend.currentSession.apiSource);
+                xhr.open("POST", backend.currentSession.apiSource)
                 var onReadyStateChangeFunction = function() {
                     if (xhr.readyState === XMLHttpRequest.DONE) {
-//                            console.log(xhr.responseText)
                         if (xhr.status === 200) {
                             if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
                                 if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
@@ -204,21 +214,22 @@ Object {
                             }
 
                         } else {
-                            notification.show(i18n.tr("Connection error"))
+                            notification.show((xhr.status === 404) ? i18n.tr("Error 404: Could not find Tapatalk API for given URL") : i18n.tr("Connection error"))
                             queryResult(currentQueryId, session, false, "")
                         }
                     }
                 }
                 xhr.onreadystatechange = onReadyStateChangeFunction
-                xhr.send(queryQueue[0].queryString);
+                xhr.send(queryQueue[0].queryString)
             }
         }
     }
 
     function newSession(forumUrl, apiSource) {
-        var session = sessionComponent.createObject(mainView, {"forumUrl": forumUrl, "apiSource": apiSource})
+        var session = sessionComponent.createObject(mainView, { "forumUrl": forumUrl })
         sessions.push(session)
         currentSessionIndex = sessions.indexOf(session)
+        session.apiSource = apiSource //Needs to be set after object creation to provide ApiRequest with a valid currentSession
     }
 
     function endSession(session) {
