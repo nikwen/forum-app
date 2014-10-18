@@ -9,12 +9,16 @@ Rectangle {
     anchors {
         horizontalCenter: parent.horizontalCenter
         bottom: parent.bottom
-        margins: (mainView.useDeprecatedToolbar && toolbar.opened && !toolbar.locked ? toolbar.height : 0) + units.gu(2) + ((!mainView.anchorToKeyboard && Qt.inputMethod.visible) ? Qt.inputMethod.keyboardRectangle.height : 0)
+        bottomMargin: (mainView.useDeprecatedToolbar && toolbar.opened && !toolbar.locked ? toolbar.height : 0) + units.gu(2) + ((!mainView.anchorToKeyboard && Qt.inputMethod.visible) ? Qt.inputMethod.keyboardRectangle.height : 0)
+        leftMargin: units.gu(2)
+        rightMargin: units.gu(2)
     }
 
+    readonly property real labelPadding: units.gu(4.5)
+
     height: label.height + units.gu(3)
-    width: label.width + units.gu(4.5)
-    radius: height/2
+    width: label.width + labelPadding
+    radius: label.height / (2 * label.lineCount) + units.gu(1.5)
     color: Qt.rgba(0,0,0,0.7)
 
     opacity: showing ? 1 : 0
@@ -24,7 +28,7 @@ Rectangle {
     }
 
     property bool showing: false
-    property string text
+    property alias text: label.text
     property MainView mainView
     property var queue: []
     property color textColor: "white"
@@ -39,6 +43,7 @@ Rectangle {
     }
 
     function update() {
+        notification.text = ""
         notification.text = queue.pop()
         notification.showing = true
     }
@@ -57,9 +62,35 @@ Rectangle {
     Label {
         id: label
         anchors.centerIn: parent
-        text: notification.text
         fontSize: "medium"
         color: textColor
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.WordWrap
+
+        property real wantedWidth: 0 //Needed for multi-line notifications
+
+        onTextChanged: {
+            if (text !== "") {
+                wantedWidth = Math.min(contentWidth, mainView.width - notification.anchors.rightMargin - notification.anchors.leftMargin - notification.labelPadding)
+            } else {
+                wantedWidth = 0
+            }
+        }
+
+        state: (wantedWidth === 0) ? "" : "wanted"
+        states: [
+            State {
+                name: ""
+            },
+            State {
+                name: "wanted"
+
+                PropertyChanges {
+                    target: label
+                    width: wantedWidth
+                }
+            }
+        ]
     }
 
     Timer {
