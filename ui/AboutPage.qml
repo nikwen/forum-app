@@ -125,7 +125,7 @@ Page {
             }
 
             ListItem.Header {
-                text: i18n.tr("Contact")
+                text: i18n.tr("Contact:")
             }
 
             ListItem.Standard {
