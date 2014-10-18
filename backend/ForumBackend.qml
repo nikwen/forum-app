@@ -99,7 +99,7 @@ Object {
                 query: '<?xml version="1.0"?><methodCall><methodName>get_config</methodName></methodCall>'
 
                 onQueryResult: {
-                    configModel.xml = StringUtils.xmlFromResponse(responseXml)
+                    configModel.xml = responseXml
                 }
             }
 

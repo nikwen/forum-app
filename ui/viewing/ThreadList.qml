@@ -30,6 +30,7 @@ import QtQuick.XmlListModel 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
 import "../../stringutils.js" as StringUtils
+import "../../backend"
 
 
 ListView {
@@ -64,7 +65,7 @@ ListView {
     function loadPosts(startNum, count) {
         totalPostCount = -1
         loadingSpinner.running = true;
-        threadModel.__loadPosts(startNum, count);
+        threadModel.loadPosts(startNum, count);
     }
 
     function reload() {
@@ -132,39 +133,34 @@ ListView {
             }
         }
 
-        onTopic_idChanged: __loadPosts(0, backend.postsPerPage)
-        function __loadPosts(startNum, count) {
-            firstDisplayedPost = startNum;
-            lastDisplayedPost = startNum + count - 1;
+        onTopic_idChanged: loadPosts(0, backend.postsPerPage)
 
-            var xhr = new XMLHttpRequest;
-            threadModel.xml="";
-            xhr.open("POST", backend.currentSession.apiSource);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    loadingSpinner.running=false;
-                    if (xhr.status === 200) {
-                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
-                            if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
-                                backend.login() //Connection to loginDone will care about reloading afterwards
-                            }
-                        } else {
-                            threadModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
-                        }
-                    } else {
-                        notification.show(i18n.tr("Connection error"))
-                    }
-                }
-            }
+        function loadPosts(startNum, count) {
+            firstDisplayedPost = startNum
+            lastDisplayedPost = startNum + count - 1
+
+            threadModel.xml = ""
+
             if (!vBulletinAnnouncement) {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_thread</methodName><params><param><value>'+topic_id+'</value></param><param><value><int>' + firstDisplayedPost + '</int></value></param><param><value><int>' + lastDisplayedPost + '</int></value></param><param><value><boolean>true</boolean></value></param></params></methodCall>');
-            } else { //TODO: BBCode parsing for announcements
+                loadThreadListRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_thread</methodName><params><param><value>' + topic_id + '</value></param><param><value><int>' + firstDisplayedPost + '</int></value></param><param><value><int>' + lastDisplayedPost + '</int></value></param><param><value><boolean>true</boolean></value></param></params></methodCall>'
+            } else {
                 console.log("vb announcement")
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_announcement</methodName><params><param><value>'+topic_id+'</value></param></params></methodCall>');
+                loadThreadListRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_announcement</methodName><params><param><value>' + topic_id + '</value></param></params></methodCall>'
             }
+
+            loadThreadListRequest.start()
         }
 
 
+    }
+
+    ApiRequest {
+        id: loadThreadListRequest
+
+        onQueryResult: {
+            loadingSpinner.running = false
+            threadModel.xml = responseXml
+        }
     }
 
 
