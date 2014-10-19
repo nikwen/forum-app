@@ -129,7 +129,7 @@ ListView {
     function loadMore(count) {
         moreLoading = true
         var tCount = topicCount();
-        topicModel.__loadTopics(tCount, tCount + count - 1);
+        topicModel.loadTopics(tCount, tCount + count - 1);
     }
 
     function reload() {
@@ -138,7 +138,7 @@ ListView {
         if (mode === "") {
             categoryModel.loadForums()
         }
-        topicModel.__loadTopics()
+        topicModel.loadTopics()
     }
 
     ApiRequest {
@@ -263,7 +263,7 @@ ListView {
 
         function loadForums() {
             if (parentForumId < 0 && !viewSubscriptions) {
-                return;
+                return
             }
 
             console.log("loading categories")
@@ -344,6 +344,18 @@ ListView {
             return endPos + 1 // + 1 for ">"
         }
 
+    }
+
+    ApiRequest {
+        id: topicRequest
+
+        onQueryResult: {
+            if (withoutErrors) {
+                topicModel.xml = responseXml
+            } else {
+                topicModel.loadingFinished()
+            }
+        }
     }
 
     XmlListModel {
@@ -433,43 +445,25 @@ ListView {
 
         function loadOnLoginDone(session) {
             if (session === backend.currentSession) {
-                __loadTopics()
+                loadTopics()
             }
         }
 
-        onForumIdChanged: if (backend.currentSession.loginFinished) __loadTopics()
-        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) __loadTopics()
+        onForumIdChanged: if (backend.currentSession.loginFinished) loadTopics()
+        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) loadTopics()
 
-        function __loadTopics(startNum, endNum) {
+        function loadTopics(startNum, endNum) {
             if (forumId <= 0 && !viewSubscriptions) {
-                return;
+                return
             }
 
             console.log("loading topics")
 
             hasLoadedCompletely = false
 
-            var xhr = new XMLHttpRequest;
-            topicModel.xml="";
-            xhr.open("POST", backend.currentSession.apiSource);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
-                            if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
-                                backend.login() //Connection to loginDone will care about reloading afterwards
-                            }
-                        } else {
-                            topicModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
-                        }
-                    } else {
-                        notification.show(i18n.tr("Connection error"))
+            topicModel.xml = ""
 
-                        loadingFinished()
-                    }
-                }
-            }
-            var startEndParams = "";
+            var startEndParams = ""
             if (startNum !== undefined && endNum !== undefined) {
                 console.log("load topics: " + startNum + " - " + endNum)
                 startEndParams += '<param><value><int>'+startNum+'</int></value></param>'
@@ -480,10 +474,11 @@ ListView {
             }
 
             if (!viewSubscriptions) {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_topic</methodName><params><param><value>'+forumId+'</value></param>'+startEndParams+'<param><value>'+mode+'</value></param></params></methodCall>');
+                topicRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_topic</methodName><params><param><value>' + forumId + '</value></param>' + startEndParams + '<param><value>' + mode + '</value></param></params></methodCall>'
             } else {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_subscribed_topic</methodName><params>'+startEndParams+'</params></methodCall>');
+                topicRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_subscribed_topic</methodName><params>' + startEndParams + '</params></methodCall>'
             }
+            topicRequest.start()
         }
     }
 
