@@ -334,10 +334,11 @@ Object {
 
         console.log("logout")
         if (session.loggedIn) {
-            session.loginFinished = false;
-            var api = session.apiSource
-            var xhr = new XMLHttpRequest;
-            xhr.open("POST", session.apiSource);
+            session.loginFinished = false
+
+            //Do not use ApiRequest here as it will do many unnecessary and unwanted things, especially it will login again if the server has automatically logged the user out before
+            var xhr = new XMLHttpRequest
+            xhr.open("POST", session.apiSource)
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (session.loggedIn) { //Set to false if another attempt to login has already started
