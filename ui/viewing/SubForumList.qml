@@ -30,6 +30,7 @@ import QtQuick.XmlListModel 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
 import "../../stringutils.js" as StringUtils
+import "../../backend"
 
 
 ListView {
@@ -135,9 +136,25 @@ ListView {
         forumListModel.clear()
         loadingSpinner.running = true
         if (mode === "") {
-            categoryModel.__loadForums()
+            categoryModel.loadForums()
         }
         topicModel.__loadTopics()
+    }
+
+    ApiRequest {
+        id: categoryRequest
+
+        onQueryResult: {
+            if (withoutErrors) {
+                if (isForumOverview) {
+                    categoryModel.fetchedXml = responseXml
+                } else {
+                    categoryModel.xml = responseXml
+                }
+            } else {
+                categoryModel.loadingFinished()
+            }
+        }
     }
 
     XmlListModel {
@@ -199,7 +216,7 @@ ListView {
             checkingForChildren = true
 
             query = "/methodResponse/params/param/value/array/data/value/struct/member[name='child']/value/array/data/value/struct"
-            __loadForums()
+            loadForums()
         }
 
         function insertResults() { //If changed, adjust above as well
@@ -235,16 +252,16 @@ ListView {
             backend.loginDone.disconnect(loadOnLoginDone)
         }
 
-        onParentForumIdChanged: if (backend.currentSession.loginFinished) __loadForums()
-        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) __loadForums()
+        onParentForumIdChanged: if (backend.currentSession.loginFinished) loadForums()
+        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) loadForums()
 
         function loadOnLoginDone(session) {
             if (session === backend.currentSession) {
-                __loadForums()
+                loadForums()
             }
         }
 
-        function __loadForums() {
+        function loadForums() {
             if (parentForumId < 0 && !viewSubscriptions) {
                 return;
             }
@@ -254,36 +271,15 @@ ListView {
             hasLoadedCompletely = false
             lastFetchedPos = 0
 
-            var xhr = new XMLHttpRequest
             categoryModel.xml = ""
             fetchedXml = ""
-            xhr.open("POST", backend.currentSession.apiSource)
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
-                            if (backend.currentSession.loginFinished) { //login might already have been started in topicModel
-                                backend.login() //Connection to loginDone will care about reloading afterwards
-                            }
-                        } else {
-                            if (isForumOverview) {
-                                fetchedXml = StringUtils.xmlFromResponse(xhr.responseText)
-                            } else {
-                                categoryModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
-                            }
-                        }
-                    } else {
-                        notification.show(i18n.tr("Connection error"))
 
-                        loadingFinished()
-                    }
-                }
-            }
             if (!viewSubscriptions) {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_forum</methodName><params><param><value><boolean>true</boolean></value></param><param><value>'+parentForumId+'</value></param></params></methodCall>');
+                categoryRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_forum</methodName><params><param><value><boolean>true</boolean></value></param><param><value>' + parentForumId + '</value></param></params></methodCall>'
             } else {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_subscribed_forum</methodName></methodCall>')
+                categoryRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_subscribed_forum</methodName></methodCall>'
             }
+            categoryRequest.start()
         }
 
         onFetchedXmlChanged: parseFetchedXml()
