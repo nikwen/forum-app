@@ -255,62 +255,51 @@ Object {
         }
     }
 
+    ApiRequest {
+        id: loginRequest
+        checkSuccess: true
+
+        onQuerySuccessResult:  {
+            if (success) {
+                console.log("logged in")
+
+                session.loggedIn = true
+                session.loginFinished = true
+                loginDone(session)
+                if (session === currentSession) {
+                    notification.show(qsTr(i18n.tr("Logged in as %1")).arg(loginQuery.results[0].user))
+                }
+            } else {
+                var resultTextIndex = responseXml.indexOf("result_text")
+                var resultText
+                if (resultTextIndex > 0) {
+                    var base64Tag = responseXml.indexOf("<base64>", resultTextIndex)
+                    var base64EndTag = responseXml.indexOf("</base64>", resultTextIndex)
+                    resultText = StringUtils.base64_decode(responseXml.substring(base64Tag + 8, base64EndTag))
+                    console.log(resultText)
+                }
+                var willLogOut = logout(session)
+                if (!willLogOut) {
+                    session.loggedIn = false
+                    session.loginFinished = true
+                    loginDone(session)
+                }
+                var dialog = PopupUtils.open(errorDialog)
+                dialog.title = i18n.tr("Login failed")
+                if (resultText !== undefined) {
+                    dialog.text = i18n.tr("Text returned by the server:\n") + resultText
+                }
+            }
+        }
+    }
+
     function login() {
         var session = currentSession
         if (loginQuery.results[0] !== undefined && loginQuery.results[0].user !== undefined && loginQuery.results[0].password !== undefined && loginQuery.results[0].user !== "" && loginQuery.results[0].password !== "") {
             console.log("login")
             var api = session.apiSource
             session.loginFinished = false //do not set loggedIn to false => ability to change login data
-            var xhr = new XMLHttpRequest
-            xhr.open("POST", session.apiSource)
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-//                    console.log(xhr.responseText)
-                    console.log("logged in")
 
-                    if (xhr.status === 200) {
-                        var resultIndex = xhr.responseText.indexOf("result");
-                        var booleanTag = xhr.responseText.indexOf("<boolean>", resultIndex)
-                        var booleanEndTag = xhr.responseText.indexOf("</boolean>", resultIndex)
-                        var result = xhr.responseText.substring(booleanTag + 9, booleanEndTag)
-
-                        var success = result === "1"
-
-                        if (success) {
-                            session.loggedIn = true
-                            session.loginFinished = true
-                            loginDone(session)
-                            if (session === currentSession) {
-                                notification.show(qsTr(i18n.tr("Logged in as %1")).arg(loginQuery.results[0].user))
-                            }
-                        } else {
-                            var resultTextIndex = xhr.responseText.indexOf("result_text")
-                            var resultText
-                            if (resultTextIndex > 0) {
-                                var base64Tag = xhr.responseText.indexOf("<base64>", resultTextIndex)
-                                var base64EndTag = xhr.responseText.indexOf("</base64>", resultTextIndex)
-                                resultText = StringUtils.base64_decode(xhr.responseText.substring(base64Tag + 8, base64EndTag))
-                                console.log(resultText)
-                            }
-                            var willLogOut = logout(session)
-                            if (!willLogOut) {
-                                session.loggedIn = false
-                                session.loginFinished = true
-                                loginDone(session)
-                            }
-                            var dialog = PopupUtils.open(errorDialog)
-                            dialog.title = i18n.tr("Login failed")
-                            if (resultText !== undefined) {
-                                dialog.text = i18n.tr("Text returned by the server:\n") + resultText
-                            }
-                        }
-                    } else {
-                        if (session === currentSession) {
-                            notification.show(i18n.tr("Connection error"))
-                        }
-                    }
-                }
-            }
             var user = ""
             if (loginQuery.results[0].user !== undefined) {
                 user = loginQuery.results[0].user
@@ -328,19 +317,19 @@ Object {
                 password = loginQuery.results[0].password
             }
 
-            xhr.send('<?xml version="1.0"?><methodCall><methodName>login</methodName><params><param><value><base64>'+StringUtils.base64_encode(user)+'</base64></value></param><param><value><base64>'+StringUtils.base64_encode(password)+'</base64></value></param></params></methodCall>');
+            loginRequest.query = '<?xml version="1.0"?><methodCall><methodName>login</methodName><params><param><value><base64>' + StringUtils.base64_encode(user) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(password) + '</base64></value></param></params></methodCall>'
+            loginRequest.start()
         } else {
             console.log("no login")
             session.loginFinished = true
             loginDone(session)
         }
-
     }
 
-    //Return value: If it will try to log out
+    //Return value: Whether it will try to log out
     function logout(session) {
         if (session === undefined) {
-            return
+            return false
         }
 
         console.log("logout")
