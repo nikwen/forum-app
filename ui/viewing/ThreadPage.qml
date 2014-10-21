@@ -108,9 +108,10 @@ PageWithBottomEdge {
                     subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>subscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
                 }
 
-                threadList.isSubscribed = !threadList.isSubscribed //If the api request fails, it will be changed back later
-
-                subscribeRequest.start()
+                if (subscribeRequest.start()) {
+                    threadList.isSubscribed = !threadList.isSubscribed //If the api request fails, it will be changed back later
+                    subscribeRequest.notificationQueue.push(threadList.isSubscribed ? i18n.tr("Subscribed to this topic") : i18n.tr("Unsubscribed from this topic"))
+                }
             }
         },
         Action {
@@ -131,12 +132,14 @@ PageWithBottomEdge {
         id: subscribeRequest
         checkSuccess: true
         allowMultipleRequests: true
+        property var notificationQueue: [] //Needed when subscribeRequest.queryQueue.length > 1
 
         onQuerySuccessResult: {
             if (success) {
-                notification.show(threadList.isSubscribed ? i18n.tr("Subscribed to this topic") : i18n.tr("Unsubscribed from this topic"))
+                notification.show(notificationQueue.shift())
             } else {
                 threadList.isSubscribed = !threadList.isSubscribed
+                notificationQueue.shift()
             }
         }
     }

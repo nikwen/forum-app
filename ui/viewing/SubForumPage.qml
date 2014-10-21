@@ -139,9 +139,10 @@ PageWithBottomEdge {
                 subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>subscribe_forum</methodName><params><param><value>' + current_forum + '</value></param></params></methodCall>'
             }
 
-            isSubscribed = !isSubscribed //If the api request fails, it will be changed back later
-
-            subscribeRequest.start()
+            if (subscribeRequest.start()) {
+                isSubscribed = !isSubscribed //If the api request fails, it will be changed back later
+                subscribeRequest.notificationQueue.push(isSubscribed ? i18n.tr("Subscribed to this subforum") : i18n.tr("Unsubscribed from this subforum"))
+            }
         }
     }
 
@@ -149,12 +150,14 @@ PageWithBottomEdge {
         id: subscribeRequest
         checkSuccess: true
         allowMultipleRequests: true
+        property var notificationQueue: [] //Needed when subscribeRequest.queryQueue.length > 1
 
         onQuerySuccessResult: {
             if (success) {
-                notification.show(isSubscribed ? i18n.tr("Subscribed to this subforum") : i18n.tr("Unsubscribed from this subforum"))
+                notification.show(notificationQueue.shift())
             } else {
                 isSubscribed = !isSubscribed
+                notificationQueue.shift()
             }
         }
     }
