@@ -25,63 +25,134 @@
 *************************************************************************/
 
 import QtQuick 2.2
+import "../stringutils.js" as StringUtils
 
 Item {
     property string query
+    property string actionName: i18n.tr("Action") //Will be used for the error dialog title
     property bool checkSuccess: false
     property bool allowMultipleRequests: false
 
-    property var runningQueries: [] //Multiple queries by one ApiRequest object are currently only planned for features like subscribing or thanking for a post, so the queryId does not need to be passed by the signals
-                                    //DO NOT use variant here as it will for some reason not allow to push objects to the array
+    property bool busy: false
+    property var queryQueue: [] //Array of query strings; DO NOT use variant as it cannot handle objects properly
 
-    signal queryResult(var session, bool withoutErrors, string responseXml)
-    signal querySuccessResult(var session, bool success, string responseXml)
+    signal queryResult(bool withoutErrors, string responseXml)
+    signal querySuccessResult(bool success, string responseXml)
 
-    function start() { //Returns whether the request will be executed
-        if (!allowMultipleRequests && runningQueries.length > 0) {
+    function start() { //Returns whether the query will be executed
+        if (!allowMultipleRequests && queryQueue.length > 0) {
             console.log("Will not run second api query (allowMultipleRequests === false)")
             return false
         }
 
-        var currentQueryId = -1
-        if (checkSuccess) {
-            currentQueryId = backend.currentSession.apiSuccessQuery(query)
-            backend.currentSession.querySuccessResult.connect(executedSuccessQuery)
-        } else {
-            currentQueryId = backend.currentSession.apiQuery(query)
-            backend.currentSession.queryResult.connect(executedQuery)
-        }
-        runningQueries.push(currentQueryId)
+        queryQueue.push(query)
+        checkRunNextQuery()
 
         return true
     }
 
-    function executedSuccessQuery(queryId, session, success, responseXml) {
-        var index = runningQueries.indexOf(queryId)
-        if (session !== backend.currentSession || index === -1) {
-            return
-        }
+    // ===============================================================
+    // The following functions should NEVER be used in any other file!
+    // ===============================================================
 
-        runningQueries.shift() //Removes first query (The splice() function does not work properly with properties in QML. As the backend processes queries serially, shift() can be used as a workaround.)
-        if (runningQueries.length === 0) {
-            backend.currentSession.querySuccessResult.disconnect(executedSuccessQuery)
+    function checkRunNextQuery() {
+        console.log("Pending queries: " + queryQueue.length)
+        if (!busy && queryQueue.length > 0) {
+            runNextQuery()
         }
-
-        querySuccessResult(session, success, responseXml)
     }
 
-    function executedQuery(queryId, session, withoutErrors, responseXml) {
-        var index = runningQueries.indexOf(queryId)
-        if (session !== backend.currentSession || index === -1) {
+    function processingQueryDone() {
+        busy = false
+        queryQueue.shift() //removes first element
+        checkRunNextQuery()
+    }
+
+    function queryExecuted(withoutErrors, xml) {
+        if (checkSuccess) {
+            checkApiQuerySuccess(withoutErrors, xml)
+        } else {
+            queryResult(withoutErrors, xml)
+            processingQueryDone()
+        }
+    }
+
+    onQuerySuccessResult: processingQueryDone()
+
+    function checkApiQuerySuccess(withoutErrors, xml) {
+        if (!withoutErrors) {
+            querySuccessResult(false, xml)
             return
         }
 
-        runningQueries.shift() //See comment above
-        if (runningQueries.length === 0) {
-            backend.currentSession.queryResult.disconnect(executedQuery)
+        var resultIndex = xml.indexOf("result")
+        var booleanTag = xml.indexOf("<boolean>", resultIndex)
+        var booleanEndTag = xml.indexOf("</boolean>", resultIndex)
+        var result = xml.substring(booleanTag + 9, booleanEndTag)
+
+        var success = result === "1"
+
+        if (success) {
+            querySuccessResult(success, xml)
+        } else {
+            var resultTextIndex = xml.indexOf("result_text")
+            var resultText
+            if (resultTextIndex > 0) {
+                var base64Tag = xml.indexOf("<base64>", resultTextIndex)
+                var base64EndTag = xml.indexOf("</base64>", resultTextIndex)
+                resultText = StringUtils.base64_decode(xml.substring(base64Tag + 8, base64EndTag))
+                console.log(resultText)
+            }
+            var dialog = PopupUtils.open(Qt.resolvedUrl("../ui/components/ErrorDialog.qml"))
+            dialog.title = qsTr(i18n.tr("%1 failed")).arg(actionName)
+            if (resultText !== undefined) {
+                dialog.text = i18n.tr("Text returned by the server:\n") + resultText
+            }
+            querySuccessResult(success, xml)
+        }
+    }
+
+    function runNextQuery(session) { //parameter only for connection with loginDone
+        if (session !== undefined) { //handle the parameter
+            if (session === backend.currentSession) {
+                backend.loginDone.disconnect(runNextQuery)
+            } else {
+                return
+            }
         }
 
-        queryResult(session, withoutErrors, responseXml)
+        busy = true
+
+        var xhr = new XMLHttpRequest
+        xhr.open("POST", backend.currentSession.apiSource)
+        var onReadyStateChangeFunction = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
+                        if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
+                            backend.login() //Connection to loginDone will take care of retrying afterwards
+                            backend.loginDone.connect(runNextQuery)
+                        }
+                    } else {
+                        var xml = StringUtils.xmlFromResponse(xhr.responseText) //TODO: Use responseXml
+                        if (xml.trim() !== "") {
+                            queryExecuted(true, xml)
+                        } else {
+                            notification.show(i18n.tr("Error: Could not get Tapatalk API response using the given URL"))
+                            console.log("Error: Could not get Tapatalk API response using the given URL")
+                            queryExecuted(false, "")
+                        }
+                    }
+
+                } else {
+                    notification.show((xhr.status === 404) ? i18n.tr("Error 404: Could not find Tapatalk API for given URL") : i18n.tr("Connection error"))
+                    console.log((xhr.status === 404) ? "Error 404: Could not find Tapatalk API for given URL" : "Connection error")
+                    queryExecuted(session, false, "")
+                }
+            }
+        }
+        xhr.onreadystatechange = onReadyStateChangeFunction
+        xhr.send(queryQueue[0])
     }
 
 }

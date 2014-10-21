@@ -26,58 +26,12 @@
 
 import QtQuick 2.2
 import Ubuntu.Components 1.1
-import U1db 1.0 as U1db
-import "ui"
-import "ui/viewing"
-import "ui/components"
-import "backend"
+import Ubuntu.Components.Popups 1.0
 
-MainView {
-    id: mainView
-
-    applicationName: "com.ubuntu.developer.nikwen.forum-app"
-
-    width: units.gu(50)
-    height: units.gu(75)
-
-    useDeprecatedToolbar: false
-
-    U1db.Database {
-        id: db
-        path: "forums.u1db"
-    }
-
-    U1db.Document {
-        id: forumsDocument
-        database: db
-        docId: 'xda-default'
-        create: true
-        defaults: { "name": "XDA Developers", "url": "forum.xda-developers.com", "user": "", "password": "" }
-    }
-
-    PageStack {
-        id: pageStack
-
-        Component.onCompleted: {
-            pageStack.push(forumsListPage);
-        }
-    }
-
-    Notification {
-        id: notification
-    }
-
-    ForumsListPage {
-        id: forumsListPage
-        visible: false
-    }
-
-    LoginPage {
-        id: loginPage
-        visible: false
-    }
-
-    ForumBackend {
-        id: backend
+Dialog {
+    id: dialog
+    Button {
+        text: i18n.tr("OK")
+        onClicked: PopupUtils.close(dialog)
     }
 }

@@ -77,6 +77,7 @@ Object {
             property bool loginFinished: false
             property bool loggedIn: false
             property alias configModel: configModel
+            property alias loginRequest: loginRequest
 
             ForumConfigModel {
                 id: configModel
@@ -103,131 +104,30 @@ Object {
                 }
             }
 
-            property var queryQueue: [] //Array of arrays following this structure: [ queryId, queryString, isSuccessQuery ]; DO NOT use variant as it cannot handle objects properly
-            property bool processingQuery: false
-            property int currentQueryId: -1
-            property int nextQueryId: 0
+            ApiRequest {
+                id: loginRequest
+                actionName: i18n.tr("Login")
+                checkSuccess: true
 
-            signal queryResult(int queryId, var session, bool withoutErrors, string responseXml)
-            signal querySuccessResult(int queryId, var session, bool success, string responseXml)
+                onQuerySuccessResult:  {
+                    if (success) {
+                        console.log("logged in")
 
-            function checkRunNextQuery() {
-                console.log("Pending queries: " + queryQueue.length)
-                if (!processingQuery && queryQueue.length > 0) {
-                    runNextQuery()
-                }
-            }
-
-            onQueryResult: {
-                if (!queryQueue[0].isSuccessQuery) {
-                    processingQueryDone()
-                }
-            }
-
-            onQuerySuccessResult: processingQueryDone()
-
-            function processingQueryDone() {
-                currentQueryId = -1
-                processingQuery = false
-                queryQueue.shift() //removes first element
-                checkRunNextQuery()
-            }
-
-            function apiSuccessQuery(queryString) {
-                nextQueryId++
-                queryQueue.push({ "queryId": nextQueryId, "queryString": queryString, "isSuccessQuery": true })
-                checkRunNextQuery()
-                return nextQueryId
-            }
-
-            function apiQuery(queryString) {
-                nextQueryId++
-                queryQueue.push({ "queryId": nextQueryId, "queryString": queryString, "isSuccessQuery": false })
-                checkRunNextQuery()
-                return nextQueryId
-            }
-
-            function checkApiQuerySuccess(currentQueryId, session, withoutErrors, xml) {
-                queryResult.disconnect(checkApiQuerySuccess)
-
-                if (!withoutErrors) {
-                    querySuccessResult(currentQueryId, session, false, xml)
-                    return
-                }
-
-                var resultIndex = xml.indexOf("result")
-                var booleanTag = xml.indexOf("<boolean>", resultIndex)
-                var booleanEndTag = xml.indexOf("</boolean>", resultIndex)
-                var result = xml.substring(booleanTag + 9, booleanEndTag)
-
-                var success = result === "1"
-
-                if (success) {
-                    querySuccessResult(currentQueryId, session, success, xml)
-                } else {
-                    var resultTextIndex = xml.indexOf("result_text")
-                    var resultText
-                    if (resultTextIndex > 0) {
-                        var base64Tag = xml.indexOf("<base64>", resultTextIndex)
-                        var base64EndTag = xml.indexOf("</base64>", resultTextIndex)
-                        resultText = StringUtils.base64_decode(xml.substring(base64Tag + 8, base64EndTag))
-                        console.log(resultText)
-                    }
-                    var dialog = PopupUtils.open(errorDialog)
-                    dialog.title = i18n.tr("Action failed")
-                    if (resultText !== undefined) {
-                        dialog.text = i18n.tr("Text returned by the server:\n") + resultText
-                    }
-                    querySuccessResult(currentQueryId, session, success, xml)
-                }
-            }
-
-            function runNextQuery() { //parameter only for connection with loginDone - TODO: Does this comment still make sense?
-                processingQuery = true
-
-                if (session !== undefined) { //TODO: First if needed???
-                    if (session === backend.currentSession) {
-                        backend.loginDone.disconnect(runNextQuery)
+                        session.loggedIn = true
+                        session.loginFinished = true
+                        loginDone(session)
+                        if (session === currentSession) {
+                            notification.show(qsTr(i18n.tr("Logged in as %1")).arg(loginQuery.results[0].user))
+                        }
                     } else {
-                        return
-                    }
-                }
-
-                currentQueryId = queryQueue[0].queryId
-                if (queryQueue[0].isSuccessQuery) {
-                    queryResult.connect(checkApiQuerySuccess)
-                }
-
-                var xhr = new XMLHttpRequest
-                xhr.open("POST", backend.currentSession.apiSource)
-                var onReadyStateChangeFunction = function() {
-                    if (xhr.readyState === XMLHttpRequest.DONE) {
-                        if (xhr.status === 200) {
-                            if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
-                                if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
-                                    backend.login() //Connection to loginDone will take care of retrying afterwards
-                                    backend.loginDone.connect(runNextQuery)
-                                }
-                            } else {
-                                var xml = StringUtils.xmlFromResponse(xhr.responseText)
-                                if (xml.trim() !== "") {
-                                    queryResult(currentQueryId, session, true, xml)
-                                } else {
-                                    notification.show(i18n.tr("Error: Could not get Tapatalk API response using the given URL"))
-                                    console.log("Error: Could not get Tapatalk API response using the given URL")
-                                    queryResult(currentQueryId, session, false, "")
-                                }
-                            }
-
-                        } else {
-                            notification.show((xhr.status === 404) ? i18n.tr("Error 404: Could not find Tapatalk API for given URL") : i18n.tr("Connection error"))
-                            console.log((xhr.status === 404) ? "Error 404: Could not find Tapatalk API for given URL" : "Connection error")
-                            queryResult(currentQueryId, session, false, "")
+                        var willLogOut = logout(session)
+                        if (!willLogOut) {
+                            session.loggedIn = false
+                            session.loginFinished = true
+                            loginDone(session)
                         }
                     }
                 }
-                xhr.onreadystatechange = onReadyStateChangeFunction
-                xhr.send(queryQueue[0].queryString)
             }
         }
     }
@@ -255,44 +155,6 @@ Object {
         }
     }
 
-    ApiRequest {
-        id: loginRequest
-        checkSuccess: true
-
-        onQuerySuccessResult:  {
-            if (success) {
-                console.log("logged in")
-
-                session.loggedIn = true
-                session.loginFinished = true
-                loginDone(session)
-                if (session === currentSession) {
-                    notification.show(qsTr(i18n.tr("Logged in as %1")).arg(loginQuery.results[0].user))
-                }
-            } else {
-                var resultTextIndex = responseXml.indexOf("result_text")
-                var resultText
-                if (resultTextIndex > 0) {
-                    var base64Tag = responseXml.indexOf("<base64>", resultTextIndex)
-                    var base64EndTag = responseXml.indexOf("</base64>", resultTextIndex)
-                    resultText = StringUtils.base64_decode(responseXml.substring(base64Tag + 8, base64EndTag))
-                    console.log(resultText)
-                }
-                var willLogOut = logout(session)
-                if (!willLogOut) {
-                    session.loggedIn = false
-                    session.loginFinished = true
-                    loginDone(session)
-                }
-                var dialog = PopupUtils.open(errorDialog)
-                dialog.title = i18n.tr("Login failed")
-                if (resultText !== undefined) {
-                    dialog.text = i18n.tr("Text returned by the server:\n") + resultText
-                }
-            }
-        }
-    }
-
     function login() {
         var session = currentSession
         if (loginQuery.results[0] !== undefined && loginQuery.results[0].user !== undefined && loginQuery.results[0].password !== undefined && loginQuery.results[0].user !== "" && loginQuery.results[0].password !== "") {
@@ -301,7 +163,7 @@ Object {
             session.loginFinished = false //do not set loggedIn to false => ability to change login data
 
             var user = ""
-            if (loginQuery.results[0].user !== undefined) {
+            if (loginQuery.results[0].user !== undefined) { //TODO: Do not try to login at all if no user is set
                 user = loginQuery.results[0].user
             }
 
@@ -317,8 +179,8 @@ Object {
                 password = loginQuery.results[0].password
             }
 
-            loginRequest.query = '<?xml version="1.0"?><methodCall><methodName>login</methodName><params><param><value><base64>' + StringUtils.base64_encode(user) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(password) + '</base64></value></param></params></methodCall>'
-            loginRequest.start()
+            session.loginRequest.query = '<?xml version="1.0"?><methodCall><methodName>login</methodName><params><param><value><base64>' + StringUtils.base64_encode(user) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(password) + '</base64></value></param></params></methodCall>'
+            session.loginRequest.start()
         } else {
             console.log("no login")
             session.loginFinished = true
