@@ -35,8 +35,6 @@ import "../stringutils.js" as StringUtils
 
 Object {
 
-    signal loginDone(var session);
-
     property var sessions: []
     property var currentSession: (currentSessionIndex >= 0) ? sessions[currentSessionIndex] : undefined
     property int currentSessionIndex: -1
@@ -48,22 +46,6 @@ Object {
         database: db
         id: by_url
         expression: ["url", "user", "password"]
-    }
-
-    U1db.Query {
-        id: loginQuery
-        index: by_url
-        query: [currentSession.forumUrl, "*", "*"]
-
-        onResultsChanged: { //User changed login details in dialog
-            if (currentSession !== undefined && currentSession.configModel.hasLoaded) {
-                if (results[0].user !== "") {
-                    login()
-                } else if (currentSession.loggedIn) {
-                    logout(currentSession)
-                }
-            }
-        }
     }
 
     Component {
@@ -78,6 +60,8 @@ Object {
             property bool loggedIn: false
             property alias configModel: configModel
             property alias loginRequest: loginRequest
+
+            signal loginDone
 
             ForumConfigModel {
                 id: configModel
@@ -104,10 +88,27 @@ Object {
                 }
             }
 
+            U1db.Query {
+                id: loginDbQuery
+                index: by_url
+                query: [forumUrl, "*", "*"]
+
+                onResultsChanged: { //User changed login details in dialog
+                    if (configModel.hasLoaded) {
+                        if (results[0].user !== "") {
+                            session.login()
+                        } else if (currentSession.loggedIn) {
+                            session.logout()
+                        }
+                    }
+                }
+            }
+
             ApiRequest {
                 id: loginRequest
                 actionName: i18n.tr("Login")
                 checkSuccess: true
+                loginAgain: false
 
                 onQuerySuccessResult:  {
                     if (success) {
@@ -115,18 +116,82 @@ Object {
 
                         session.loggedIn = true
                         session.loginFinished = true
-                        loginDone(session)
+                        session.loginDone()
                         if (session === currentSession) {
-                            notification.show(qsTr(i18n.tr("Logged in as %1")).arg(loginQuery.results[0].user))
+                            notification.show(qsTr(i18n.tr("Logged in as %1")).arg(loginDbQuery.results[0].user))
+                        } else {
+                            console.log("not current session")
                         }
                     } else {
-                        var willLogOut = logout(session)
+                        console.log("login failed")
+                        var willLogOut = session.logout()
                         if (!willLogOut) {
                             session.loggedIn = false
                             session.loginFinished = true
-                            loginDone(session)
+                            session.loginDone()
                         }
                     }
+                }
+            }
+
+            function login() {
+                var user = loginDbQuery.results[0].user
+                var password = loginDbQuery.results[0].password
+
+                if (user === undefined || password === undefined || user === "" || password === "") {
+                    console.log("no login")
+                    loginFinished = true
+                    loginDone()
+                    return
+                }
+
+                console.log("login")
+
+                loginFinished = false //do not set loggedIn to false => ability to change login data
+
+                if (configModel.get(0).support_md5) {
+                    console.log("md5")
+                    password = Md5Utils.md5(password)
+                } else if (configModel.get(0).support_sha1) { //Untested yet
+                    console.log("sha1")
+                    password = Sha1Utils.sha1(password)
+                } else {
+                    console.log("no encryption")
+                }
+
+                loginRequest.query = '<?xml version="1.0"?><methodCall><methodName>login</methodName><params><param><value><base64>' + StringUtils.base64_encode(user) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(password) + '</base64></value></param></params></methodCall>'
+                loginRequest.start()
+            }
+
+            function logout() { //Return value: Whether it will try to log out; TODO: Show notification if unwanted logout
+                console.log("logout")
+                if (loggedIn) {
+                    loginFinished = false
+
+                    //Do not use ApiRequest here as it will do many unnecessary and unwanted things,
+                    //especially it will login again if the server has automatically logged the user out before
+                    var xhr = new XMLHttpRequest
+                    xhr.open("POST", apiSource)
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (loggedIn) { //Set to false if another attempt to login has already started
+                                console.log("logged out")
+                                loginFinished = true
+                                loginDone()
+                                loggedIn = false
+                            }
+                        }
+                    }
+                    xhr.send('<?xml version="1.0"?><methodCall><methodName>logout_user</methodName></methodCall>')
+
+                    return true
+                } else {
+                    if (!loginFinished) { //Pressed back while still logging in => Logout after login finished
+                        console.log("logout: connect to loginDone")
+                        loginDone.connect(logout)
+                    }
+
+                    return false
                 }
             }
         }
@@ -148,97 +213,11 @@ Object {
         } else {
             saveCurrentSession = currentSession
         }
-        logout(session)
+        session.logout()
         sessions.splice(index, 1) //Remove session from list
         if (currentSessionIndex != -1) {
             currentSessionIndex = sessions.indexOf(saveCurrentSession)
         }
     }
-
-    function login() {
-        var session = currentSession
-        if (loginQuery.results[0] !== undefined && loginQuery.results[0].user !== undefined && loginQuery.results[0].password !== undefined && loginQuery.results[0].user !== "" && loginQuery.results[0].password !== "") {
-            console.log("login")
-            var api = session.apiSource
-            session.loginFinished = false //do not set loggedIn to false => ability to change login data
-
-            var user = ""
-            if (loginQuery.results[0].user !== undefined) { //TODO: Do not try to login at all if no user is set
-                user = loginQuery.results[0].user
-            }
-
-            var password = ""
-            if (session.configModel.get(0).support_md5) {
-                console.log("md5")
-                password = Md5Utils.md5(loginQuery.results[0].password)
-            } else if (session.configModel.get(0).support_sha1) { //Untested yet
-                console.log("sha1")
-                password = Sha1Utils.sha1(loginQuery.results[0].password)
-            } else {
-                console.log("no encryption")
-                password = loginQuery.results[0].password
-            }
-
-            session.loginRequest.query = '<?xml version="1.0"?><methodCall><methodName>login</methodName><params><param><value><base64>' + StringUtils.base64_encode(user) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(password) + '</base64></value></param></params></methodCall>'
-            session.loginRequest.start()
-        } else {
-            console.log("no login")
-            session.loginFinished = true
-            loginDone(session)
-        }
-    }
-
-    //Return value: Whether it will try to log out
-    function logout(session) {
-        if (session === undefined) {
-            return false
-        }
-
-        console.log("logout")
-        if (session.loggedIn) {
-            session.loginFinished = false
-
-            //Do not use ApiRequest here as it will do many unnecessary and unwanted things, especially it will login again if the server has automatically logged the user out before
-            var xhr = new XMLHttpRequest
-            xhr.open("POST", session.apiSource)
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (session.loggedIn) { //Set to false if another attempt to login has already started
-                        console.log("logged out")
-                        session.loginFinished = true
-                        loginDone(session)
-                        session.loggedIn = false
-                    }
-                }
-            }
-            xhr.send('<?xml version="1.0"?><methodCall><methodName>logout_user</methodName></methodCall>');
-            return true
-        } else {
-            if (!session.loginFinished) { //Pressed back while still logging in => Logout after login finished
-                var otherLoginCount = 0 //A way to disconnect in case that the page was destroyed before login() has even been called
-
-                var connectFunction = function(loginSession) {
-                    console.log("connected function called")
-                    if (loginSession === session) {
-                        loginDone.disconnect(connectFunction)
-                        logout(session)
-                        console.log("logout in connected")
-                    } else {
-                        otherLoginCount++
-                        if (otherLoginCount >= 2) {
-                            loginDone.disconnect(connectFunction)
-                        }
-                    }
-                }
-
-                console.log("connect")
-                loginDone.connect(connectFunction)
-            }
-
-            return false
-        }
-    }
-
-
 
 }

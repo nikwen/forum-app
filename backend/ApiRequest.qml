@@ -34,6 +34,7 @@ Item {
     property string actionName: i18n.tr("Action") //Will be used for the error dialog title
     property bool checkSuccess: false
     property bool allowMultipleRequests: false
+    property bool loginAgain: true //Should not be used by anything else than the session's loginRequest
 
     property bool busy: false
     property var queryQueue: [] //Array of query strings; DO NOT use variant as it cannot handle objects properly
@@ -114,14 +115,8 @@ Item {
         }
     }
 
-    function runNextQuery(session) { //parameter only for connection with loginDone
-        if (session !== undefined) { //handle the parameter
-            if (session === backend.currentSession) {
-                backend.loginDone.disconnect(runNextQuery)
-            } else {
-                return
-            }
-        }
+    function runNextQuery() {
+        backend.currentSession.loginDone.disconnect(runNextQuery)
 
         busy = true
 
@@ -130,13 +125,13 @@ Item {
         var onReadyStateChangeFunction = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
-                        if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
-                            backend.login() //Connection to loginDone will take care of retrying afterwards
-                            backend.loginDone.connect(runNextQuery)
+                    if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn && loginAgain) {
+                        if (backend.currentSession.loginFinished) { //login might already have been started elsewhere
+                            backend.currentSession.login() //Connection to loginDone will take care of retrying afterwards
                         }
+                        backend.currentSession.loginDone.connect(runNextQuery)
                     } else {
-                        var xml = StringUtils.xmlFromResponse(xhr.responseText) //TODO: Use responseXml
+                        var xml = StringUtils.xmlFromResponse(xhr.responseText)
                         if (xml.trim() !== "") {
                             queryExecuted(true, xml)
                         } else {

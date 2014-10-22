@@ -97,17 +97,11 @@ ListView {
         id: forumListModel
 
         Component.onCompleted: {
-            backend.loginDone.connect(clearSetLoadingOnLoginDone)
+            backend.currentSession.loginDone.connect(clearSetLoading)
         }
 
         Component.onDestruction: {
-            backend.loginDone.disconnect(clearSetLoadingOnLoginDone)
-        }
-
-        function clearSetLoadingOnLoginDone(session) {
-            if (session === backend.currentSession) {
-                clearSetLoading()
-            }
+            backend.currentSession.loginDone.disconnect(clearSetLoading)
         }
 
         function clearSetLoading() {
@@ -245,21 +239,15 @@ ListView {
         }
 
         Component.onCompleted: {
-            backend.loginDone.connect(loadOnLoginDone)
+            backend.currentSession.loginDone.connect(loadForums)
         }
 
         Component.onDestruction: {
-            backend.loginDone.disconnect(loadOnLoginDone)
+            backend.currentSession.loginDone.disconnect(loadForums)
         }
 
         onParentForumIdChanged: if (backend.currentSession.loginFinished) loadForums()
         onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) loadForums()
-
-        function loadOnLoginDone(session) {
-            if (session === backend.currentSession) {
-                loadForums()
-            }
-        }
 
         function loadForums() {
             if (parentForumId < 0 && !viewSubscriptions) {
@@ -436,17 +424,11 @@ ListView {
         }
 
         Component.onCompleted: {
-            backend.loginDone.connect(loadOnLoginDone)
+            backend.currentSession.loginDone.connect(loadTopics)
         }
 
         Component.onDestruction: {
-            backend.loginDone.disconnect(loadOnLoginDone)
-        }
-
-        function loadOnLoginDone(session) {
-            if (session === backend.currentSession) {
-                loadTopics()
-            }
+            backend.currentSession.loginDone.disconnect(loadTopics)
         }
 
         onForumIdChanged: if (backend.currentSession.loginFinished) loadTopics()
