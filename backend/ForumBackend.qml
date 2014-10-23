@@ -165,6 +165,9 @@ Object {
 
             function logout(connectToLoginDone) { //Return value: Whether it will try to log out; Parameter: only needed when called from login function, do not provide otherwise!
                 console.log("logout")
+
+                loginDone.disconnect(logout)
+
                 if (loggedIn) {
                     loginFinished = false
 
@@ -222,6 +225,7 @@ Object {
         if (currentSessionIndex != -1) {
             currentSessionIndex = sessions.indexOf(saveCurrentSession)
         }
+        session.destroy()
     }
 
 }
