@@ -38,18 +38,28 @@ XmlListModel {
     query: "/methodResponse/params/param/value/struct"
 
     property bool hasLoaded: false
-    property bool isVBulletin: false
 
-    XmlRole { name: "support_md5"; query: "member[name='support_md5']/value/string()" }
-    XmlRole { name: "support_sha1"; query: "member[name='support_sha1']/value/string()" }
+    property string version
+    property bool isVBulletin: false
+    property bool supportMd5: false
+    property bool supportSHA1: false
+    property bool subscribeForum: true
+
+    XmlRole { name: "support_md5"; query: "member[name='support_md5']/value/number()" }
+    XmlRole { name: "support_sha1"; query: "member[name='support_sha1']/value/number()" }
     XmlRole { name: "version"; query: "member[name='version']/value/string()" }
+    XmlRole { name: "subscribe_forum"; query: "member[name='subscribe_forum']/value/number()" }
 
     onStatusChanged: {
         if (status === XmlListModel.Ready) {
             var element = get(0)
-            if (element.version.trim().indexOf("vb") === 0) {
-                isVBulletin = true
-            }
+
+            version = element.version.trim()
+            isVBulletin = version.indexOf("vb") === 0
+            supportMd5 = (typeof(element.support_md5) === "number") ? element.support_md5 : false
+            supportSHA1 = (typeof(element.support_sha1) === "number") ? element.support_sha1 : false
+            subscribeForum = (typeof(element.subscribe_forum) === "number") ? element.subscribe_forum : true
+
             console.log("version: " + element.version.trim())
 
             console.log("configModel has loaded")

@@ -41,6 +41,8 @@ ListView {
     property int totalPostCount: -1
     property bool canReply: false
     property bool isClosed: false
+    property bool canSubscribe: false
+    property bool isSubscribed: false
 
     property bool vBulletinAnnouncement: false
 
@@ -131,6 +133,32 @@ ListView {
                     var isClosedSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
 
                     isClosed = isClosedSubstring.trim() === "1"
+                }
+
+                //Check if can subscribe
+
+                var canSubscribeStringPosition = xml.indexOf("<name>can_subscribe</name>");
+                if (canSubscribeStringPosition < 0) {
+                    canSubscribe = true
+                } else {
+                    var openBoolTagPosition = xml.indexOf("<boolean>", canSubscribeStringPosition);
+                    var closeBoolTagPosition = xml.indexOf("</boolean>", openBoolTagPosition);
+                    var canSubscribeSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
+
+                    canSubscribe = canSubscribeSubstring.trim() === "1"
+                }
+
+                //Check if is subscribed
+
+                var isSubscribedStringPosition = xml.indexOf("<name>is_subscribed</name>");
+                if (isSubscribedStringPosition < 0) {
+                    isSubscribed = false
+                } else {
+                    var openBoolTagPosition = xml.indexOf("<boolean>", isSubscribedStringPosition);
+                    var closeBoolTagPosition = xml.indexOf("</boolean>", openBoolTagPosition);
+                    var isSubscribedSubstring = xml.substring(openBoolTagPosition + 9, closeBoolTagPosition); //equals + "<boolean>".length
+
+                    isSubscribed = isSubscribedSubstring.trim() === "1"
                 }
             }
         }

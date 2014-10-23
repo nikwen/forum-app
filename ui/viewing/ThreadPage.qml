@@ -30,6 +30,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
 import Ubuntu.Components.Popups 1.0
 import "../components"
+import "../../backend"
 
 PageWithBottomEdge {
     id: threadPage
@@ -76,12 +77,41 @@ PageWithBottomEdge {
 
     head.actions: [
         Action {
+            id: reloadAction
+            text: i18n.tr("Reload")
+            iconName: "reload"
+            onTriggered: {
+                threadList.reload()
+            }
+        },
+        Action {
             id: loginAction
             text: i18n.tr("Login")
             iconName: "contact"
             visible: !backend.currentSession.loggedIn
             onTriggered: {
                 pageStack.push(loginPage)
+            }
+        },
+        Action {
+            id: subscribeAction
+            text: threadList.isSubscribed ? i18n.tr("Unsubscribe") : i18n.tr("Subscribe")
+            iconName: threadList.isSubscribed ? "starred" : "non-starred"
+            visible: backend.currentSession.loggedIn && threadList.canSubscribe
+
+            onTriggered: subscriptionChange()
+
+            function subscriptionChange() {
+                if (threadList.isSubscribed) {
+                    subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>unsubscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
+                } else {
+                    subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>subscribe_topic</methodName><params><param><value>' + current_topic + '</value></param></params></methodCall>'
+                }
+
+                if (subscribeRequest.start()) {
+                    threadList.isSubscribed = !threadList.isSubscribed //If the api request fails, it will be changed back later
+                    subscribeRequest.notificationQueue.push(threadList.isSubscribed ? i18n.tr("Subscribed to this topic") : i18n.tr("Unsubscribed from this topic"))
+                }
             }
         },
         Action {
@@ -95,16 +125,24 @@ PageWithBottomEdge {
                 popup.itemSelector.selectedIndex = selected
 //                popup.itemSelector.positionViewAtIndex(selected, ListView.Center) //TODO: Add to UI Toolkit?
             }
-        },
-        Action {
-            id: reloadAction
-            text: i18n.tr("Reload")
-            iconName: "reload"
-            onTriggered: {
-                threadList.reload()
-            }
         }
     ]
+
+    ApiRequest {
+        id: subscribeRequest
+        checkSuccess: true
+        allowMultipleRequests: true
+        property var notificationQueue: [] //Needed when subscribeRequest.queryQueue.length > 1
+
+        onQuerySuccessResult: {
+            if (success) {
+                notification.show(notificationQueue.shift())
+            } else {
+                threadList.isSubscribed = !threadList.isSubscribed
+                notificationQueue.shift()
+            }
+        }
+    }
 
     head.contents: Label {
         width: parent.width

@@ -28,7 +28,8 @@
 import QtQuick 2.2
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
-import '../components'
+import "../components"
+import "../../backend"
 
 PageWithBottomEdge {
     id: forumsPage
@@ -41,10 +42,16 @@ PageWithBottomEdge {
     property alias current_forum: forumsList.current_forum
     property bool isForumOverview: current_forum === 0
 
-    property alias selectedTitle: forumsList.selected_title
+    property int selectedId: -1
+    property string selectedTitle: ""
+    property bool selectedCanSubscribe: false
+    property bool selectedIsSubscribed: false
 
     property alias loadingSpinnerRunning: loadingSpinner.running
     property bool showSections: false
+
+    property bool isSubscribed: false
+    property bool canSubscribe: false
 
     bottomEdgeTitle: i18n.tr("Subscriptions")
     bottomEdgeEnabled: !disableBottomEdge && current_forum >= 0 && backend.currentSession.loggedIn
@@ -117,10 +124,47 @@ PageWithBottomEdge {
         }
     }
 
+    Action {
+        id: subscribeAction
+        text: isSubscribed ? i18n.tr("Unsubscribe") : i18n.tr("Subscribe")
+        iconName: isSubscribed ? "starred" : "non-starred"
+        visible: backend.currentSession.loggedIn && !viewSubscriptions && backend.currentSession.configModel.subscribeForum && canSubscribe
+
+        onTriggered: subscriptionChange()
+
+        function subscriptionChange() {
+            if (isSubscribed) {
+                subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>unsubscribe_forum</methodName><params><param><value>' + current_forum + '</value></param></params></methodCall>'
+            } else {
+                subscribeRequest.query = '<?xml version="1.0"?><methodCall><methodName>subscribe_forum</methodName><params><param><value>' + current_forum + '</value></param></params></methodCall>'
+            }
+
+            if (subscribeRequest.start()) {
+                isSubscribed = !isSubscribed //If the api request fails, it will be changed back later
+                subscribeRequest.notificationQueue.push(isSubscribed ? i18n.tr("Subscribed to this subforum") : i18n.tr("Unsubscribed from this subforum"))
+            }
+        }
+    }
+
+    ApiRequest {
+        id: subscribeRequest
+        checkSuccess: true
+        allowMultipleRequests: true
+        property var notificationQueue: [] //Needed when subscribeRequest.queryQueue.length > 1
+
+        onQuerySuccessResult: {
+            if (success) {
+                notification.show(notificationQueue.shift())
+            } else {
+                isSubscribed = !isSubscribed
+                notificationQueue.shift()
+            }
+        }
+    }
+
     function onNewTopicCreated(subject, topicId) {
         selectedTitle = subject
-        forumsList.current_topic = -1
-        forumsList.current_topic = topicId //Show topic
+        pushThreadPage(topicId) //Show thread
 
         forumsList.reload()
     }
@@ -128,6 +172,7 @@ PageWithBottomEdge {
     readonly property var headerActions: [
         reloadAction,
         newTopicAction,
+        subscribeAction,
         loginAction
     ]
 
@@ -177,41 +222,52 @@ PageWithBottomEdge {
 
         mode: (forumsPage.head.sections.selectedIndex === 1) ? "TOP" : ((forumsPage.head.sections.selectedIndex === 2) ? "ANN" : "")
 
-        onSelected_forumChanged: {
-            if (selected_forum > 0) {
-                component = Qt.createComponent("SubForumPage.qml");
+    }
 
-                if (component.status === Component.Ready) {
-                    finishSubForumPageCreation();
-                } else {
-                    component.statusChanged.connect(finishSubForumPageCreation);
+    function pushSubForumPage(forumId, title, canSubscribe, isSubscribed) {
+        selectedId = forumId
+        selectedTitle = title
+        selectedCanSubscribe = (typeof(canSubscribe) === "bool" || typeof(canSubscribe) === "number") ? canSubscribe : true
+        selectedIsSubscribed = (typeof(isSubscribed) === "bool" || typeof(isSubscribed) === "number") ? isSubscribed : false
+        component = Qt.createComponent("SubForumPage.qml")
+
+        if (component.status === Component.Ready) {
+            finishSubForumPageCreation()
+        } else {
+            component.statusChanged.connect(finishSubForumPageCreation)
+        }
+    }
+
+    function finishSubForumPageCreation() {
+        var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedId, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
+        page.onIsSubscribedChanged.connect(function() { //Change is_subscribed attribute when the subscription state is changed
+            for (var i = 0; i < forumsList.model.count; i++) {
+                if (forumsList.model.get(i).id === selectedId) {
+                    forumsList.model.setProperty(i, "is_subscribed", page.isSubscribed ? 1 : 0) //is_subscribed requires a number
+                    break
                 }
             }
-        }
+        })
+        pageStack.push(page)
+    }
 
-        function finishSubForumPageCreation() {
-            var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selected_forum, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge})
-            pageStack.push(page)
-        }
+    function pushThreadPage(topicId, title) {
+        selectedId = topicId
+        selectedTitle = title
+        component = Qt.createComponent("ThreadPage.qml")
 
-        onCurrent_topicChanged: {
-            if (current_topic > 0) {
-                component = Qt.createComponent("ThreadPage.qml")
-
-                if (component.status === Component.Ready) {
-                    finishThreadPageCreation();
-                } else {
-                    component.statusChanged.connect(finishThreadPageCreation);
-                }
-            }
+        if (component.status === Component.Ready) {
+            finishThreadPageCreation()
+        } else {
+            component.statusChanged.connect(finishThreadPageCreation)
         }
+    }
 
-        function finishThreadPageCreation() {
-            var vBulletinAnnouncement = backend.currentSession.configModel.isVBulletin && forumsList.mode === "ANN"
-            var page = component.createObject(mainView, {"title": selectedTitle, "loadingSpinnerRunning": true, "forum_id": current_forum, "vBulletinAnnouncement": vBulletinAnnouncement})
-            page.current_topic = current_topic //Need to set vBulletinAnnouncement before current_topic!!! Therefore, this is executed after the creation of the Page.
-            pageStack.push(page)
-        }
+    function finishThreadPageCreation() {
+        var vBulletinAnnouncement = backend.currentSession.configModel.isVBulletin && forumsList.mode === "ANN"
+        var page = component.createObject(mainView, {"title": selectedTitle, "loadingSpinnerRunning": true, "forum_id": current_forum, "vBulletinAnnouncement": vBulletinAnnouncement})
+        page.current_topic = selectedId //Need to set vBulletinAnnouncement before current_topic!!! Therefore, this is executed after the creation of the Page.
+        pageStack.push(page)
     }
 
     Label {
