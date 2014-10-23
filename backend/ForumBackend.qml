@@ -110,7 +110,7 @@ Object {
                 checkSuccess: true
                 loginAgain: false
 
-                onQuerySuccessResult:  {
+                onQuerySuccessResult: {
                     if (success) {
                         console.log("logged in")
 
@@ -119,14 +119,11 @@ Object {
                         session.loginDone()
                         if (session === currentSession) {
                             notification.show(qsTr(i18n.tr("Logged in as %1")).arg(loginDbQuery.results[0].user))
-                        } else {
-                            console.log("not current session")
                         }
                     } else {
                         console.log("login failed")
-                        var willLogOut = session.logout()
+                        var willLogOut = session.logout(false)
                         if (!willLogOut) {
-                            session.loggedIn = false
                             session.loginFinished = true
                             session.loginDone()
                         }
@@ -140,8 +137,11 @@ Object {
 
                 if (user === undefined || password === undefined || user === "" || password === "") {
                     console.log("no login")
-                    loginFinished = true
-                    loginDone()
+                    var willLogOut = session.logout(false)
+                    if (!willLogOut) {
+                        loginFinished = true
+                        loginDone()
+                    }
                     return
                 }
 
@@ -163,7 +163,7 @@ Object {
                 loginRequest.start()
             }
 
-            function logout() { //Return value: Whether it will try to log out; TODO: Show notification if unwanted logout
+            function logout(connectToLoginDone) { //Return value: Whether it will try to log out; Parameter: only needed when called from login function, do not provide otherwise!
                 console.log("logout")
                 if (loggedIn) {
                     loginFinished = false
@@ -186,7 +186,11 @@ Object {
 
                     return true
                 } else {
-                    if (!loginFinished) { //Pressed back while still logging in => Logout after login finished
+                    if (connectToLoginDone !== false) {
+                        connectToLoginDone = true
+                    }
+
+                    if (!loginFinished && connectToLoginDone) { //Pressed back while still logging in => Logout after login finished
                         console.log("logout: connect to loginDone")
                         loginDone.connect(logout)
                     }
