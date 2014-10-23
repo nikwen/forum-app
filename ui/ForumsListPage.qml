@@ -54,10 +54,26 @@ Page {
         id: by_forum
         expression: ["name", "url"]
     }
+
     U1db.Query {
         id: forums
         index: by_forum
         query: ["*", "*"]
+    }
+
+    Connections {
+        target: pageStack
+
+        property var previousPage: null
+
+        onCurrentPageChanged: {
+            if (pageStack.currentPage === forumsListPage && previousPage !== null && (previousPage.objectName === "threadPage" || (previousPage.objectName === "forumsPage" && !previousPage.viewSubscriptions))) {
+                console.log("Destroy page")
+                previousPage.destroy()
+                backend.endSession(backend.currentSession)
+            }
+            previousPage = pageStack.currentPage
+        }
     }
 
     ListView {
@@ -90,7 +106,7 @@ Page {
 
             onClicked: {
                 var prefix = model.modelData.url.indexOf("http://") === 0 || model.modelData.url.indexOf("https://") === 0
-                var apiSource = (!prefix?"http://":"") + model.modelData.url + "/mobiquo/mobiquo.php"
+                var apiSource = (!prefix ? "http://" : "") + model.modelData.url + "/mobiquo/mobiquo.php"
                 var currentForumUrl = model.modelData.url
                 backend.newSession(currentForumUrl, apiSource)
 
@@ -98,13 +114,13 @@ Page {
             }
 
             function pushPage() {
-                component = Qt.createComponent("viewing/SubForumPage.qml");
+                component = Qt.createComponent(Qt.resolvedUrl("viewing/SubForumPage.qml"))
 
                 if (component.status === Component.Ready) {
-                    finishCreation();
+                    finishCreation()
                 } else {
                     console.log(component.errorString())
-                    component.statusChanged.connect(finishCreation);
+                    component.statusChanged.connect(finishCreation)
                 }
             }
 

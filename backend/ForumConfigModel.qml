@@ -29,6 +29,8 @@ import QtQuick.XmlListModel 2.0
 import Ubuntu.Components 1.1
 import "../stringutils.js" as StringUtils
 
+//The respective ApiRequest had to be placed in ForumBackend.qml as XmlListModel does not allow Items as children
+
 XmlListModel {
     id: configModel
     objectName: "configModel"
@@ -51,29 +53,16 @@ XmlListModel {
             console.log("version: " + element.version.trim())
 
             console.log("configModel has loaded")
-//            console.log(xml)
-            hasLoaded = true;
+
+            hasLoaded = true
         }
     }
 
     function loadConfig() {
-        hasLoaded = false;
-        var xhr = new XMLHttpRequest;
-        configModel.xml="";
-        xhr.open("POST", session.apiSource);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                configModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
-                if (xhr.status !== 200 && session === currentSession) {
-                    if (xhr.status === 404) {
-                        notification.show(qsTr(i18n.tr("Error 404: Could not find forum")))
-                    } else {
-                        notification.show(i18n.tr("Connection error"))
-                    }
-                }
-            }
-        }
-        xhr.send('<?xml version="1.0"?><methodCall><methodName>get_config</methodName></methodCall>');
+        hasLoaded = false
+        configModel.xml = ""
+
+        loadConfigRequest.start()
     }
 
 }

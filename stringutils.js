@@ -1,7 +1,12 @@
 .pragma library
 
 function xmlFromResponse(response) {
-    return response.substring(response.indexOf("<?xml"));
+    var index = response.indexOf("<?xml")
+    if (index === -1) {
+        return ""
+    } else {
+        return response.substring(index)
+    }
 }
 
 //Source: https://github.com/kvz/phpjs/blob/master/functions/url/base64_decode.js

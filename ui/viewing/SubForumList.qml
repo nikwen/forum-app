@@ -30,6 +30,7 @@ import QtQuick.XmlListModel 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
 import "../../stringutils.js" as StringUtils
+import "../../backend"
 
 
 ListView {
@@ -96,17 +97,11 @@ ListView {
         id: forumListModel
 
         Component.onCompleted: {
-            backend.loginDone.connect(clearSetLoadingOnLoginDone)
+            backend.currentSession.loginDone.connect(clearSetLoading)
         }
 
         Component.onDestruction: {
-            backend.loginDone.disconnect(clearSetLoadingOnLoginDone)
-        }
-
-        function clearSetLoadingOnLoginDone(session) {
-            if (session === backend.currentSession) {
-                clearSetLoading()
-            }
+            backend.currentSession.loginDone.disconnect(clearSetLoading)
         }
 
         function clearSetLoading() {
@@ -128,16 +123,32 @@ ListView {
     function loadMore(count) {
         moreLoading = true
         var tCount = topicCount();
-        topicModel.__loadTopics(tCount, tCount + count - 1);
+        topicModel.loadTopics(tCount, tCount + count - 1);
     }
 
     function reload() {
         forumListModel.clear()
         loadingSpinner.running = true
         if (mode === "") {
-            categoryModel.__loadForums()
+            categoryModel.loadForums()
         }
-        topicModel.__loadTopics()
+        topicModel.loadTopics()
+    }
+
+    ApiRequest {
+        id: categoryRequest
+
+        onQueryResult: {
+            if (withoutErrors) {
+                if (isForumOverview) {
+                    categoryModel.fetchedXml = responseXml
+                } else {
+                    categoryModel.xml = responseXml
+                }
+            } else {
+                categoryModel.loadingFinished()
+            }
+        }
     }
 
     XmlListModel {
@@ -199,7 +210,7 @@ ListView {
             checkingForChildren = true
 
             query = "/methodResponse/params/param/value/array/data/value/struct/member[name='child']/value/array/data/value/struct"
-            __loadForums()
+            loadForums()
         }
 
         function insertResults() { //If changed, adjust above as well
@@ -228,25 +239,19 @@ ListView {
         }
 
         Component.onCompleted: {
-            backend.loginDone.connect(loadOnLoginDone)
+            backend.currentSession.loginDone.connect(loadForums)
         }
 
         Component.onDestruction: {
-            backend.loginDone.disconnect(loadOnLoginDone)
+            backend.currentSession.loginDone.disconnect(loadForums)
         }
 
-        onParentForumIdChanged: if (backend.currentSession.loginFinished) __loadForums()
-        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) __loadForums()
+        onParentForumIdChanged: if (backend.currentSession.loginFinished) loadForums()
+        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) loadForums()
 
-        function loadOnLoginDone(session) {
-            if (session === backend.currentSession) {
-                __loadForums()
-            }
-        }
-
-        function __loadForums() {
+        function loadForums() {
             if (parentForumId < 0 && !viewSubscriptions) {
-                return;
+                return
             }
 
             console.log("loading categories")
@@ -254,36 +259,15 @@ ListView {
             hasLoadedCompletely = false
             lastFetchedPos = 0
 
-            var xhr = new XMLHttpRequest
             categoryModel.xml = ""
             fetchedXml = ""
-            xhr.open("POST", backend.currentSession.apiSource)
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
-                            if (backend.currentSession.loginFinished) { //login might already have been started in topicModel
-                                backend.login() //Connection to loginDone will care about reloading afterwards
-                            }
-                        } else {
-                            if (isForumOverview) {
-                                fetchedXml = StringUtils.xmlFromResponse(xhr.responseText)
-                            } else {
-                                categoryModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
-                            }
-                        }
-                    } else {
-                        notification.show(i18n.tr("Connection error"))
 
-                        loadingFinished()
-                    }
-                }
-            }
             if (!viewSubscriptions) {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_forum</methodName><params><param><value><boolean>true</boolean></value></param><param><value>'+parentForumId+'</value></param></params></methodCall>');
+                categoryRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_forum</methodName><params><param><value><boolean>true</boolean></value></param><param><value>' + parentForumId + '</value></param></params></methodCall>'
             } else {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_subscribed_forum</methodName></methodCall>')
+                categoryRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_subscribed_forum</methodName></methodCall>'
             }
+            categoryRequest.start()
         }
 
         onFetchedXmlChanged: parseFetchedXml()
@@ -348,6 +332,18 @@ ListView {
             return endPos + 1 // + 1 for ">"
         }
 
+    }
+
+    ApiRequest {
+        id: topicRequest
+
+        onQueryResult: {
+            if (withoutErrors) {
+                topicModel.xml = responseXml
+            } else {
+                topicModel.loadingFinished()
+            }
+        }
     }
 
     XmlListModel {
@@ -428,52 +424,28 @@ ListView {
         }
 
         Component.onCompleted: {
-            backend.loginDone.connect(loadOnLoginDone)
+            backend.currentSession.loginDone.connect(loadTopics)
         }
 
         Component.onDestruction: {
-            backend.loginDone.disconnect(loadOnLoginDone)
+            backend.currentSession.loginDone.disconnect(loadTopics)
         }
 
-        function loadOnLoginDone(session) {
-            if (session === backend.currentSession) {
-                __loadTopics()
-            }
-        }
+        onForumIdChanged: if (backend.currentSession.loginFinished) loadTopics()
+        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) loadTopics()
 
-        onForumIdChanged: if (backend.currentSession.loginFinished) __loadTopics()
-        onViewSubscriptionsChanged: if (viewSubscriptions && backend.currentSession.loginFinished) __loadTopics()
-
-        function __loadTopics(startNum, endNum) {
+        function loadTopics(startNum, endNum) {
             if (forumId <= 0 && !viewSubscriptions) {
-                return;
+                return
             }
 
             console.log("loading topics")
 
             hasLoadedCompletely = false
 
-            var xhr = new XMLHttpRequest;
-            topicModel.xml="";
-            xhr.open("POST", backend.currentSession.apiSource);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        if (xhr.getResponseHeader("Mobiquo_is_login") === "false" && backend.currentSession.loggedIn) {
-                            if (backend.currentSession.loginFinished) { //login might already have been started in categoryModel
-                                backend.login() //Connection to loginDone will care about reloading afterwards
-                            }
-                        } else {
-                            topicModel.xml = StringUtils.xmlFromResponse(xhr.responseText)
-                        }
-                    } else {
-                        notification.show(i18n.tr("Connection error"))
+            topicModel.xml = ""
 
-                        loadingFinished()
-                    }
-                }
-            }
-            var startEndParams = "";
+            var startEndParams = ""
             if (startNum !== undefined && endNum !== undefined) {
                 console.log("load topics: " + startNum + " - " + endNum)
                 startEndParams += '<param><value><int>'+startNum+'</int></value></param>'
@@ -484,10 +456,11 @@ ListView {
             }
 
             if (!viewSubscriptions) {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_topic</methodName><params><param><value>'+forumId+'</value></param>'+startEndParams+'<param><value>'+mode+'</value></param></params></methodCall>');
+                topicRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_topic</methodName><params><param><value>' + forumId + '</value></param>' + startEndParams + '<param><value>' + mode + '</value></param></params></methodCall>'
             } else {
-                xhr.send('<?xml version="1.0"?><methodCall><methodName>get_subscribed_topic</methodName><params>'+startEndParams+'</params></methodCall>');
+                topicRequest.query = '<?xml version="1.0"?><methodCall><methodName>get_subscribed_topic</methodName><params>' + startEndParams + '</params></methodCall>'
             }
+            topicRequest.start()
         }
     }
 
