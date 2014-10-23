@@ -43,6 +43,7 @@ Object {
 
     property int postsPerPage: 10
     property int topicsLoadCount: 20
+    property string signature: i18n.tr("Sent from my awesome Ubuntu Touch device using the Forum Browser app")
 
     U1db.Index {
         database: db
