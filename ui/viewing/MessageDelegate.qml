@@ -35,6 +35,7 @@ UbuntuShape {
     property string avatar
     property string authorText
     property string thanksInfo
+    property string postTime
 
     width: parent.width
     height: contentRect.height
@@ -85,11 +86,42 @@ UbuntuShape {
             anchors {
                 top: parent.top
                 left: rect.right
+                right: time.right
                 topMargin: units.gu(1)
                 leftMargin: units.gu(1)
             }
             color: "black"
             font.bold: true
+        }
+
+        Label {
+            id: time
+            text: formatTime(postTime)
+            anchors {
+                top: parent.top
+                right: parent.right
+                topMargin: units.gu(1)
+                leftMargin: units.gu(1)
+                rightMargin: units.gu(1)
+            }
+
+            function formatTime(time) {
+                if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
+                    time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
+                }
+
+                var postDate = new Date(time)
+
+                var todaysDate = new Date()
+
+                if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
+                    return Qt.formatTime(postDate, i18n.tr("hh:mm"))
+                } else if (postDate.getFullYear() === todaysDate.getFullYear()) {
+                    return Qt.formatDate(postDate, i18n.tr("dd MMM"))
+                } else {
+                    return Qt.formatDate(postDate, i18n.tr("dd/MM/yyyy")) //TODO: Localize!!!
+                }
+            }
         }
 
         Label {
