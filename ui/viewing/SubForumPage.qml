@@ -32,6 +32,7 @@ import '../components'
 
 PageWithBottomEdge {
     id: forumsPage
+    objectName: "forumsPage"
     title: i18n.tr("Forums")
 
     property bool disableBottomEdge: false
@@ -55,6 +56,20 @@ PageWithBottomEdge {
             bottomEdgePage.viewSubscriptions = true
             bottomEdgePage.title = i18n.tr("Subscriptions")
             bottomEdgePage.disableBottomEdge = true
+        }
+    }
+
+    Connections {
+        target: pageStack
+
+        property var previousPage: null
+
+        onCurrentPageChanged: {
+            if (pageStack.currentPage === forumsPage && previousPage !== null && (previousPage.objectName === "threadPage" || (previousPage.objectName === "forumsPage" && !previousPage.viewSubscriptions))) {
+                console.log("Destroy page")
+                previousPage.destroy()
+            }
+            previousPage = pageStack.currentPage
         }
     }
 
@@ -110,26 +125,6 @@ PageWithBottomEdge {
         forumsList.reload()
     }
 
-    Action {
-        id: mBackAction
-        text: i18n.tr("Back")
-        iconName: "back"
-        onTriggered: {
-            console.log("destroyPage")
-
-            //Logout if this is the top level forums list
-            if (isForumOverview) {
-                backend.endSession(backend.currentSession)
-            }
-
-            pageStack.pop()
-
-            if (!viewSubscriptions) {
-                forumsPage.destroy(500)
-            }
-        }
-    }
-
     readonly property var headerActions: [
         reloadAction,
         newTopicAction,
@@ -154,7 +149,6 @@ PageWithBottomEdge {
             name: "no_topics"
             head: forumsPage.head
             actions: headerActions
-            backAction: mBackAction
         },
         PageHeadState {
             id: topicsState
@@ -167,7 +161,6 @@ PageWithBottomEdge {
                 sections.model: [i18n.tr("Standard"), i18n.tr("Stickies"), i18n.tr("Announcements")]
                 sections.selectedIndex: 0
                 actions: headerActions
-                backAction: mBackAction
             }
         }
     ]

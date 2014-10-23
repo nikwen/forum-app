@@ -54,10 +54,26 @@ Page {
         id: by_forum
         expression: ["name", "url"]
     }
+
     U1db.Query {
         id: forums
         index: by_forum
         query: ["*", "*"]
+    }
+
+    Connections {
+        target: pageStack
+
+        property var previousPage: null
+
+        onCurrentPageChanged: {
+            if (pageStack.currentPage === forumsListPage && previousPage !== null && (previousPage.objectName === "threadPage" || (previousPage.objectName === "forumsPage" && !previousPage.viewSubscriptions))) {
+                console.log("Destroy page")
+                previousPage.destroy()
+                backend.endSession(backend.currentSession)
+            }
+            previousPage = pageStack.currentPage
+        }
     }
 
     ListView {

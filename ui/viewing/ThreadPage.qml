@@ -33,6 +33,7 @@ import "../components"
 
 PageWithBottomEdge {
     id: threadPage
+    objectName: "threadPage"
     flickable: null
 
     property alias current_topic: threadList.current_topic
@@ -55,8 +56,22 @@ PageWithBottomEdge {
         }
     }
 
-    Component.onCompleted: {
+    Component.onCompleted: { //TODO: Check if still needed
         header.show() //Workaround to show the header when it was previously hidden in SubForumPage
+    }
+
+    Connections {
+        target: pageStack
+
+        property var previousPage: null
+
+        onCurrentPageChanged: {
+            if (pageStack.currentPage === threadPage && previousPage !== null && (previousPage.objectName === "threadPage" || (previousPage.objectName === "forumsPage" && !previousPage.viewSubscriptions))) {
+                console.log("Destroy page")
+                previousPage.destroy()
+            }
+            previousPage = pageStack.currentPage
+        }
     }
 
     head.actions: [
@@ -107,15 +122,6 @@ PageWithBottomEdge {
                     fontSize = "medium"
                 }
             }
-        }
-    }
-
-    head.backAction: Action {
-        text: i18n.tr("Back")
-        iconName: "back"
-        onTriggered: {
-            pageStack.pop()
-            threadPage.destroy(500)
         }
     }
 
