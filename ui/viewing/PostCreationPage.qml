@@ -27,14 +27,15 @@
 import QtQuick 2.2
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
+import Ubuntu.Components.Themes.Ambiance 0.1
 import "../../stringutils.js" as StringUtils
 import "../../backend"
+import "../components"
 
 Page {
     id: postCreationPage
     anchors.fill: parent
-
-    readonly property string signature: i18n.tr("Sent from my awesome Ubuntu Touch device using the Forum Browser app")
 
     signal posted();
 
@@ -43,16 +44,44 @@ Page {
 
     title: i18n.tr("New Post")
 
-    Flickable {
-        anchors {
-            top: parent.top
-            bottom: parent.bottom
-            left: parent.left
-            right: parent.right
-            margins: units.gu(1)
-        }
+    head.actions: [
+        Action {
+            id: submitAction
+            text: i18n.tr("Submit")
+            iconName: "ok"
 
-        contentHeight: column.height
+            onTriggered: submit()
+
+            function submit() {
+                var message = messageTextField.text
+
+                if (appendSignatureCheckBox.checked) {
+                    message += "\n\n" + backend.signature
+                }
+
+                submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
+
+                submitRequest.start()
+            }
+        }
+    ]
+
+    ApiRequest {
+        id: submitRequest
+        checkSuccess: true
+
+        onQuerySuccessResult: {
+            if (success) {
+                pageStack.pop()
+                posted()
+            }
+        }
+    }
+
+    Flickable {
+        anchors.fill: parent
+
+        contentHeight: column.height + units.gu(1) //For a margin at the bottom
 
         Column {
             id: column
@@ -60,25 +89,56 @@ Page {
             width: parent.width
             spacing: units.gu(1)
 
-            Label {
+            ListItem.Header {
                 text: i18n.tr("Subject:")
             }
 
-            TextField {
+            TextArea {
                 id: subjectTextField
                 width: parent.width
+                autoSize: true
+                maximumLineCount: 1
+                placeholderText: i18n.tr("Enter Subject")
+
+                anchors {
+                    right: parent.right
+                    left: parent.left
+                    rightMargin: units.gu(2)
+                    leftMargin: units.gu(2)
+                }
+
+                style: TextAreaStyle {
+                    overlaySpacing: 0
+                    frameSpacing: 0
+                    background: Item {}
+                }
 
                 KeyNavigation.priority: KeyNavigation.BeforeItem
                 KeyNavigation.tab: messageTextField
             }
 
-            Label {
+            ListItem.Header {
                 text: i18n.tr("Message:")
             }
 
             TextArea {
                 id: messageTextField
-                width: parent.width
+                autoSize: true
+                maximumLineCount: 0
+                placeholderText: i18n.tr("Enter Message")
+
+                anchors {
+                    right: parent.right
+                    left: parent.left
+                    rightMargin: units.gu(2)
+                    leftMargin: units.gu(2)
+                }
+
+                style: TextAreaStyle {
+                    overlaySpacing: 0
+                    frameSpacing: 0
+                    background: Item {}
+                }
 
                 KeyNavigation.priority: KeyNavigation.BeforeItem
                 KeyNavigation.backtab: subjectTextField
@@ -86,8 +146,14 @@ Page {
 
             Row {
                 id: signatureRow
-                width: parent.width
                 spacing: units.gu(1)
+
+                anchors {
+                    right: parent.right
+                    left: parent.left
+                    rightMargin: units.gu(2)
+                    leftMargin: units.gu(2)
+                }
 
                 CheckBox {
                     id: appendSignatureCheckBox
@@ -102,38 +168,6 @@ Page {
 
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width - signatureRow.spacing - appendSignatureCheckBox.width
-                }
-            }
-
-            Button {
-                id: submitButton
-                text: i18n.tr("Submit")
-                width: parent.width
-
-                onClicked: submit()
-
-                ApiRequest {
-                    id: submitRequest
-                    checkSuccess: true
-
-                    onQuerySuccessResult: {
-                        if (success) {
-                            pageStack.pop()
-                            posted()
-                        }
-                    }
-                }
-
-                function submit() {
-                    var message = messageTextField.text
-
-                    if (appendSignatureCheckBox.checked) {
-                        message += "\n\n" + backend.signature
-                    }
-
-                    submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
-
-                    submitRequest.start()
                 }
             }
 

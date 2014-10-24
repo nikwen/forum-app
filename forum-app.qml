@@ -42,6 +42,8 @@ MainView {
 
     useDeprecatedToolbar: false
 
+    anchorToKeyboard: true
+
     U1db.Database {
         id: db
         path: "forums.u1db"
