@@ -33,9 +33,10 @@ import "../../stringutils.js" as StringUtils
 import "../../backend"
 import "../components"
 
+//TODO-r: Signature settings
+
 Page {
     id: postCreationPage
-    anchors.fill: parent
 
     signal posted();
 
@@ -55,13 +56,13 @@ Page {
             function submit() {
                 var message = messageTextField.text
 
-                if (appendSignatureCheckBox.checked) {
+                if (backend.signature !== "") {
                     message += "\n\n" + backend.signature
                 }
 
                 submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
 
-                submitRequest.start()
+                submitRequest.start() //TODO: Loading dialog
             }
         }
     ]
@@ -78,100 +79,80 @@ Page {
         }
     }
 
-    Flickable {
-        anchors.fill: parent
+    ListItem.Header {
+        id: subjectHeader
+        text: i18n.tr("Subject:")
 
-        contentHeight: column.height + units.gu(1) //For a margin at the bottom
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            topMargin: units.gu(1)
+        }
+    }
 
-        Column {
-            id: column
-            height: childrenRect.height
-            width: parent.width
-            spacing: units.gu(1)
+    TextArea { //TODO: Fix topMargin; issue related to background???
+        id: subjectTextField
+        width: parent.width
+        autoSize: true
+        maximumLineCount: 1
+        placeholderText: i18n.tr("Enter Subject")
 
-            ListItem.Header {
-                text: i18n.tr("Subject:")
-            }
-
-            TextArea {
-                id: subjectTextField
-                width: parent.width
-                autoSize: true
-                maximumLineCount: 1
-                placeholderText: i18n.tr("Enter Subject")
-
-                anchors {
-                    right: parent.right
-                    left: parent.left
-                    rightMargin: units.gu(2)
-                    leftMargin: units.gu(2)
-                }
-
-                style: TextAreaStyle {
-                    overlaySpacing: 0
-                    frameSpacing: 0
-                    background: Item {}
-                }
-
-                KeyNavigation.priority: KeyNavigation.BeforeItem
-                KeyNavigation.tab: messageTextField
-            }
-
-            ListItem.Header {
-                text: i18n.tr("Message:")
-            }
-
-            TextArea {
-                id: messageTextField
-                autoSize: true
-                maximumLineCount: 0
-                placeholderText: i18n.tr("Enter Message")
-
-                anchors {
-                    right: parent.right
-                    left: parent.left
-                    rightMargin: units.gu(2)
-                    leftMargin: units.gu(2)
-                }
-
-                style: TextAreaStyle {
-                    overlaySpacing: 0
-                    frameSpacing: 0
-                    background: Item {}
-                }
-
-                KeyNavigation.priority: KeyNavigation.BeforeItem
-                KeyNavigation.backtab: subjectTextField
-            }
-
-            Row {
-                id: signatureRow
-                spacing: units.gu(1)
-
-                anchors {
-                    right: parent.right
-                    left: parent.left
-                    rightMargin: units.gu(2)
-                    leftMargin: units.gu(2)
-                }
-
-                CheckBox {
-                    id: appendSignatureCheckBox
-                    checked: true
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Label {
-                    id: signatureLabel
-                    text: backend.signature
-                    wrapMode: Text.Wrap
-
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - signatureRow.spacing - appendSignatureCheckBox.width
-                }
-            }
-
+        anchors {
+            top: subjectHeader.bottom
+            right: parent.right
+            left: parent.left
+            topMargin: units.gu(1)
+            rightMargin: units.gu(2)
+            leftMargin: units.gu(2)
         }
 
+        style: TextAreaStyle {
+            overlaySpacing: 0
+            frameSpacing: 0
+            background: Item {}
+        }
+
+        KeyNavigation.priority: KeyNavigation.BeforeItem
+        KeyNavigation.tab: messageTextField
+    }
+
+    ListItem.Header {
+        id: messageHeader
+        text: i18n.tr("Message:")
+
+        anchors {
+            top: subjectTextField.bottom
+            left: parent.left
+            right: parent.right
+            topMargin: units.gu(1)
+        }
+    }
+
+    TextArea { //TODO: Fix topMargin; issue related to background???
+        id: messageTextField
+        autoSize: false
+        maximumLineCount: 0
+        placeholderText: i18n.tr("Enter Message")
+
+        anchors {
+            top: messageHeader.bottom
+            bottom: parent.bottom
+            right: parent.right
+            left: parent.left
+            topMargin: units.gu(1)
+            bottomMargin: units.gu(1)
+            rightMargin: units.gu(2)
+            leftMargin: units.gu(2)
+        }
+
+        style: TextAreaStyle {
+            overlaySpacing: 0
+            frameSpacing: 0
+            background: Item {}
+        }
+
+        KeyNavigation.priority: KeyNavigation.BeforeItem
+        KeyNavigation.backtab: subjectTextField
     }
 }
