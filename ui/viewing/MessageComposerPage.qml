@@ -38,12 +38,14 @@ import "../components"
 Page {
     id: postCreationPage
 
-    signal posted();
+    signal posted(string subject, int topicId)
 
     property int forum_id: -1
     property int topic_id: -1
 
-    title: i18n.tr("New Post")
+    property string mode: "post" //Can be either "post" or "thread"
+
+    title: (mode === "post") ? i18n.tr("New Post") : i18n.tr("New Topic")
 
     head.actions: [
         Action {
@@ -60,7 +62,11 @@ Page {
                     message += "\n\n" + backend.signature
                 }
 
-                submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
+                if (mode === "post") {
+                    submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
+                } else {
+                    submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>new_topic</methodName><params><param><value>' + forum_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
+                }
 
                 submitRequest.start() //TODO: Loading dialog
             }
@@ -73,8 +79,18 @@ Page {
 
         onQuerySuccessResult: {
             if (success) {
-                pageStack.pop()
-                posted()
+                if (mode === "post") {
+                    pageStack.pop()
+                    posted(subjectTextField.text, topic_id)
+                } else {
+                    var idIndex = responseXml.indexOf("topic_id");
+                    var stringTag = responseXml.indexOf("<string>", idIndex)
+                    var stringEndTag = responseXml.indexOf("</string>", idIndex)
+                    var id = parseInt(responseXml.substring(stringTag + 8, stringEndTag))
+
+                    pageStack.pop()
+                    posted(subjectTextField.text, id)
+                }
             }
         }
     }

@@ -45,7 +45,7 @@ PageWithBottomEdge {
 
     property int pageCount: Math.floor(threadList.totalPostCount/backend.postsPerPage + (threadList.totalPostCount % backend.postsPerPage === 0 ? 0 : 1))
 
-    bottomEdgePageSource: "PostCreationPage.qml"
+    bottomEdgePageSource: "MessageComposerPage.qml"
     bottomEdgeTitle: i18n.tr("New Post")
     bottomEdgeEnabled: backend.currentSession.loggedIn && threadList.canReply && !threadList.isClosed && !vBulletinAnnouncement
 
@@ -53,6 +53,7 @@ PageWithBottomEdge {
         if (bottomEdgePage !== null) {
             bottomEdgePage.forum_id = forum_id
             bottomEdgePage.topic_id = current_topic
+            bottomEdgePage.mode = "post"
             bottomEdgePage.posted.connect(threadList.reload)
         }
     }

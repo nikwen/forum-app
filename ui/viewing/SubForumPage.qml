@@ -108,7 +108,7 @@ PageWithBottomEdge {
         iconName: "compose"
         visible: backend.currentSession.loggedIn && current_forum > 0 && forumsList.canPost && forumsList.mode === "" && forumsList.hasTopics //hasTopics as a workaround for disabling posting in category-only subforums; current_forum > 0 also disables the action when viewSubscriptions === true
         onTriggered: {
-            component = Qt.createComponent("ThreadCreationPage.qml")
+            component = Qt.createComponent("MessageComposerPage.qml")
 
             if (component.status === Component.Ready) {
                 finishNewTopicPageCreation()
@@ -118,7 +118,7 @@ PageWithBottomEdge {
         }
 
         function finishNewTopicPageCreation() {
-            var page = component.createObject(mainView, {"forum_id": current_forum})
+            var page = component.createObject(mainView, { "forum_id": current_forum, "mode": "thread" })
             page.posted.connect(onNewTopicCreated)
             pageStack.push(page)
         }
@@ -163,8 +163,7 @@ PageWithBottomEdge {
     }
 
     function onNewTopicCreated(subject, topicId) {
-        selectedTitle = subject
-        pushThreadPage(topicId) //Show thread
+        pushThreadPage(topicId, subject) //Show thread
 
         forumsList.reload()
     }
