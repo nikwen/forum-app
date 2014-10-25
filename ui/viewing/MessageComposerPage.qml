@@ -33,8 +33,6 @@ import "../../stringutils.js" as StringUtils
 import "../../backend"
 import "../components"
 
-//TODO-r: Signature settings
-
 Page {
     id: postCreationPage
 
@@ -46,6 +44,8 @@ Page {
     property string mode: "post" //Can be either "post" or "thread"
 
     title: (mode === "post") ? i18n.tr("New Post") : i18n.tr("New Topic")
+
+    property var dialog
 
     head.actions: [
         Action {
@@ -68,7 +68,9 @@ Page {
                     submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>new_topic</methodName><params><param><value>' + forum_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
                 }
 
-                submitRequest.start() //TODO: Loading dialog
+                submitRequest.start()
+                Qt.inputMethod.hide()
+                dialog = PopupUtils.open(loadingDialog)
             }
         }
     ]
@@ -79,11 +81,15 @@ Page {
 
         onQuerySuccessResult: {
             if (success) {
+                subjectTextField.enabled = false //Needed, otherwise the keyboard will show again after closing the dialog
+                messageTextField.enabled = false
+                PopupUtils.close(dialog)
+
                 if (mode === "post") {
                     pageStack.pop()
                     posted(subjectTextField.text, topic_id)
                 } else {
-                    var idIndex = responseXml.indexOf("topic_id");
+                    var idIndex = responseXml.indexOf("topic_id")
                     var stringTag = responseXml.indexOf("<string>", idIndex)
                     var stringEndTag = responseXml.indexOf("</string>", idIndex)
                     var id = parseInt(responseXml.substring(stringTag + 8, stringEndTag))
@@ -91,6 +97,8 @@ Page {
                     pageStack.pop()
                     posted(subjectTextField.text, id)
                 }
+            } else {
+                //TODO: Show error
             }
         }
     }
@@ -170,5 +178,30 @@ Page {
 
         KeyNavigation.priority: KeyNavigation.BeforeItem
         KeyNavigation.backtab: subjectTextField
+    }
+
+    Component {
+         id: loadingDialog
+
+         Dialog {
+             id: dialog
+             modal: true
+
+             Row {
+                 width: parent.width
+                 spacing: units.gu(2)
+
+                 ActivityIndicator {
+                     id: loadingSpinner
+                     running: true
+                     anchors.verticalCenter: parent.verticalCenter
+                 }
+
+                 Label {
+                     text: qsTr(i18n.tr("Submitting %1...")).arg((mode === "post") ? i18n.tr("Post") : i18n.tr("Thread"))
+                     anchors.verticalCenter: parent.verticalCenter
+                 }
+             }
+         }
     }
 }
