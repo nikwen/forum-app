@@ -98,7 +98,7 @@ Page {
                     posted(subjectTextField.text, id)
                 }
             } else {
-                //TODO: Show error
+                PopupUtils.close(dialog)
             }
         }
     }

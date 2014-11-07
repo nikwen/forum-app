@@ -144,7 +144,7 @@ Item {
                 } else {
                     notification.show((xhr.status === 404) ? i18n.tr("Error 404: Could not find Tapatalk API for given URL") : i18n.tr("Connection error"))
                     console.log((xhr.status === 404) ? "Error 404: Could not find Tapatalk API for given URL" : "Connection error")
-                    queryExecuted(session, false, "")
+                    queryExecuted(false, "")
                 }
             }
         }
