@@ -115,7 +115,7 @@ Page {
         }
     }
 
-    TextArea { //TODO: Fix topMargin; issue related to background???
+    TextArea {
         id: subjectTextField
         width: parent.width
         autoSize: true
@@ -126,7 +126,7 @@ Page {
             top: subjectHeader.bottom
             right: parent.right
             left: parent.left
-            topMargin: units.gu(1)
+            topMargin: units.gu(2)
             rightMargin: units.gu(2)
             leftMargin: units.gu(2)
         }
@@ -149,11 +149,10 @@ Page {
             top: subjectTextField.bottom
             left: parent.left
             right: parent.right
-            topMargin: units.gu(1)
         }
     }
 
-    TextArea { //TODO: Fix topMargin; issue related to background???
+    TextArea {
         id: messageTextField
         autoSize: false
         maximumLineCount: 0
@@ -164,7 +163,7 @@ Page {
             bottom: parent.bottom
             right: parent.right
             left: parent.left
-            topMargin: units.gu(1)
+            topMargin: units.gu(2)
             bottomMargin: units.gu(1)
             rightMargin: units.gu(2)
             leftMargin: units.gu(2)
