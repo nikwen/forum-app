@@ -65,7 +65,7 @@ Page {
         }
     }
 
-    TextArea { //TODO: Fix topMargin; issue related to background???
+    TextArea {
         id: signatureTextField
         autoSize: false
         maximumLineCount: 0
