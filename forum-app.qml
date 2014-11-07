@@ -57,6 +57,17 @@ MainView {
         defaults: { "name": "XDA Developers", "url": "forum.xda-developers.com", "user": "", "password": "" }
     }
 
+    U1db.Database {
+        id: draftsDb
+        path: "drafts.u1db"
+    }
+
+    U1db.Index {
+        id: draftsIndex
+        database: draftsDb
+        expression: [ "forum_url", "username", "forum_id", "topic_id", "subject", "message" ]
+    }
+
     PageStack {
         id: pageStack
 

@@ -29,6 +29,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import Ubuntu.Components.Themes.Ambiance 0.1
+import U1db 1.0 as U1db
 import "../../stringutils.js" as StringUtils
 import "../../backend"
 import "../components"
@@ -47,6 +48,24 @@ Page {
 
     property var dialog
 
+    property string docId: ""
+
+    U1db.Query {
+        id: draftsQuery
+        index: draftsIndex
+        query: [ backend.currentSession.forumUrl, backend.currentSession.user, forum_id, topic_id, "*", "*" ]
+
+        onResultsChanged: {
+            var results = draftsQuery.results //NOTE: The first two checks of the if condition will have to be fixed when adding proper replying with quoting
+            if (subjectTextField.text === "" && messageTextField.text === "" && results[0] !== undefined && results[0].subject !== undefined && results[0].message !== undefined && (results[0].subject !== "" || results[0].message !== "")) {
+                console.log("Filling composer with draft data")
+                docId = draftsQuery.documents[0]
+                subjectTextField.text = results[0].subject
+                messageTextField.text = results[0].message
+            }
+        }
+    }
+
     head.actions: [
         Action {
             id: submitAction
@@ -56,7 +75,7 @@ Page {
             onTriggered: submit()
 
             function submit() {
-                var message = messageTextField.text
+                var message = messageTextField.text //TODO-r: Do not submit if no message is given!!! (The server won't complain as the signature will still be added to the message.)
 
                 if (backend.signature !== "") {
                     message += "\n\n" + backend.signature
@@ -75,12 +94,37 @@ Page {
         }
     ]
 
+    head.backAction: Action {
+        id: backAction
+        text: i18n.tr("Back")
+        iconName: "back"
+
+        onTriggered: {
+            if (subjectTextField.text !== "" || messageTextField.text !== "") {
+                var doc = { "forum_url": backend.currentSession.forumUrl, "username": backend.currentSession.user, "forum_id": forum_id, "topic_id": topic_id, "subject": subjectTextField.text, "message": messageTextField.text }
+                if (docId === "") {
+                    draftsDb.putDoc(doc)
+                } else {
+                    draftsDb.putDoc(doc, docId)
+                }
+            } else if (docId !== "") {
+                draftsDb.deleteDoc(docId)
+            }
+
+            pageStack.pop()
+        }
+    }
+
     ApiRequest {
         id: submitRequest
         checkSuccess: true
 
         onQuerySuccessResult: {
             if (success) {
+                if (docId !== "") {
+                    draftsDb.deleteDoc(docId)
+                }
+
                 subjectTextField.enabled = false //Needed, otherwise the keyboard will show again after closing the dialog
                 messageTextField.enabled = false
                 PopupUtils.close(dialog)

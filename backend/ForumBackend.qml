@@ -66,6 +66,8 @@ Object {
             property alias configModel: configModel
             property alias loginRequest: loginRequest
 
+            readonly property string user: (loginDbQuery.results[0].user !== undefined) ? loginDbQuery.results[0].user : ""
+
             signal loginDone
 
             ForumConfigModel {

@@ -45,7 +45,7 @@ Page {
        Action {
             id: save
             iconName: "ok"
-            text: docId !== ""?i18n.tr("Edit"):i18n.tr("Add")
+            text: docId !== "" ? i18n.tr("Edit") : i18n.tr("Add")
             onTriggered: {
                 if (nameTextField.text !== "" && urlTextField.text !== "") {
                     //Remove protocol from url (so that there are no multiple instances of one forum but with different prefixes)
