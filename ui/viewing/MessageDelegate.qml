@@ -132,18 +132,30 @@ UbuntuShape {
             }
         }
 
-        Label {
-            id: contentLabel
-            text: parseBBCode(content)
-            wrapMode: Text.Wrap
+        BBCodeView {
+            id: bbCodeView
+            code: content
+
             anchors {
                 top: title.visible ? title.bottom : author.bottom
                 left: rect.right
                 right: parent.right
                 margins: units.gu(1)
             }
-            onLinkActivated: Qt.openUrlExternally(link)
         }
+
+//        Label {
+//            id: contentLabel
+//            text: parseBBCode(content)
+//            wrapMode: Text.Wrap
+//            anchors {
+//                top: title.visible ? title.bottom : author.bottom
+//                left: rect.right
+//                right: parent.right
+//                margins: units.gu(1)
+//            }
+//            onLinkActivated: Qt.openUrlExternally(link)
+//        }
 
         Label {
             id: thanksLabel
@@ -152,7 +164,7 @@ UbuntuShape {
             text: qsTr((thanksCount === 1) ? i18n.tr("%1 user thanked %2 for this useful post") : i18n.tr("%1 users thanked %2 for this useful post")).arg(thanksCount).arg(authorText)
             fontSize: "small"
             anchors {
-                top: contentLabel.bottom
+                top: bbCodeView.bottom
                 left: rect.right
                 right: parent.right
                 margins: visible ? units.gu(1) : 0
@@ -179,22 +191,22 @@ UbuntuShape {
         }
     }
 
-    function parseBBCode(text) {
-        var bb = [];
-        bb[0] = /\[url\](.*?)\[\/url\]/gi;
-        bb[1] = /\[url\="?(.*?)"?\](.*?)\[\/url\]/gi;
-        bb[2] = /\[img\](.*?)\[\/img\]/gi;
+//    function parseBBCode(text) {
+//        var bb = [];
+//        bb[0] = /\[url\](.*?)\[\/url\]/gi;
+//        bb[1] = /\[url\="?(.*?)"?\](.*?)\[\/url\]/gi;
+//        bb[2] = /\[img\](.*?)\[\/img\]/gi;
 
-        var html =[];
-        html[0] = "<a href=\"$1\">$1</a>";
-        html[1] = "<a href=\"$1\">$2</a>";
-        html[2] = "<img src=\"$1\">";
+//        var html =[];
+//        html[0] = "<a href=\"$1\">$1</a>";
+//        html[1] = "<a href=\"$1\">$2</a>";
+//        html[2] = "<img src=\"$1\">";
 
-        for (var i = 0; i < bb.length; i++) {
-            text = text.replace(bb[i], html[i]);
-        }
+//        for (var i = 0; i < bb.length; i++) {
+//            text = text.replace(bb[i], html[i]);
+//        }
 
-        return text;
-    }
+//        return text;
+//    }
 
 }
