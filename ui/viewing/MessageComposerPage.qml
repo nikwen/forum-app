@@ -43,6 +43,7 @@ Page {
     property int topic_id: -1
 
     property string mode: "post" //Can be either "post" or "thread"
+                                 //Needs to be the first property set!!!
 
     title: (mode === "post") ? i18n.tr("New Post") : i18n.tr("New Topic")
 
@@ -53,11 +54,11 @@ Page {
     U1db.Query {
         id: draftsQuery
         index: draftsIndex
-        query: [ backend.currentSession.forumUrl, backend.currentSession.user, forum_id, topic_id, "*", "*" ]
+        query: [ backend.currentSession.forumUrl, backend.currentSession.user, mode, forum_id, topic_id, "*", "*" ]
 
         onResultsChanged: {
             var results = draftsQuery.results //NOTE: The first two checks of the if condition will have to be fixed when adding proper replying with quoting
-            if (subjectTextField.text === "" && messageTextField.text === "" && results[0] !== undefined && results[0].subject !== undefined && results[0].message !== undefined && (results[0].subject !== "" || results[0].message !== "")) {
+            if (subjectTextField.text === "" && messageTextField.text === "" && forum_id !== -1 && (mode === "thread" || topic_id !== -1) && results[0] !== undefined && results[0].subject !== undefined && results[0].message !== undefined && (results[0].subject !== "" || results[0].message !== "")) {
                 console.log("Filling composer with draft data")
                 docId = draftsQuery.documents[0]
                 subjectTextField.text = results[0].subject
@@ -101,7 +102,7 @@ Page {
 
         onTriggered: {
             if (subjectTextField.text !== "" || messageTextField.text !== "") {
-                var doc = { "forum_url": backend.currentSession.forumUrl, "username": backend.currentSession.user, "forum_id": forum_id, "topic_id": topic_id, "subject": subjectTextField.text, "message": messageTextField.text }
+                var doc = { "forum_url": backend.currentSession.forumUrl, "username": backend.currentSession.user, "mode": mode, "forum_id": forum_id, "topic_id": topic_id, "subject": subjectTextField.text, "message": messageTextField.text }
                 if (docId === "") {
                     draftsDb.putDoc(doc)
                 } else {

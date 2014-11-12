@@ -65,7 +65,7 @@ MainView {
     U1db.Index {
         id: draftsIndex
         database: draftsDb
-        expression: [ "forum_url", "username", "forum_id", "topic_id", "subject", "message" ]
+        expression: [ "forum_url", "username", "mode", "forum_id", "topic_id", "subject", "message" ]
     }
 
     PageStack {

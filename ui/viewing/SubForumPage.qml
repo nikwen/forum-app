@@ -118,7 +118,8 @@ PageWithBottomEdge {
         }
 
         function finishNewTopicPageCreation() {
-            var page = component.createObject(mainView, { "forum_id": current_forum, "mode": "thread" })
+            var page = component.createObject(mainView, { "mode": "thread" })
+            page.forum_id = current_forum //Needs to be set after mode
             page.posted.connect(onNewTopicCreated)
             pageStack.push(page)
         }

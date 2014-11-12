@@ -51,9 +51,9 @@ PageWithBottomEdge {
 
     onBottomEdgeReleased: {
         if (bottomEdgePage !== null) {
+            bottomEdgePage.mode = "post"
             bottomEdgePage.forum_id = forum_id
             bottomEdgePage.topic_id = current_topic
-            bottomEdgePage.mode = "post"
             bottomEdgePage.posted.connect(threadList.reload)
         }
     }
