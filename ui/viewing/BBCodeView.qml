@@ -8,6 +8,7 @@ Item {
 
     property string code: ""
     property var bbRoot: parse("", code) //of type passage
+    onBbRootChanged: printParsedPost(bbRoot)
 
     height: label.height
 
@@ -36,7 +37,7 @@ Item {
             var tag = content.substring(pos + 1, content.indexOf("]", pos)).toLowerCase()
             if (arrayContains(tagsWithChildren, tag)) { //else: don't parse
                 var notFormattedText = content.substring(oldPos, pos)
-                if (!notFormattedText === "") {
+                if (notFormattedText !== "") {
                     root.childElements.push(parse("", notFormattedText))
                 }
                 var endPos = pos + tag.length
@@ -55,6 +56,7 @@ Item {
                     }
                 }
                 if (moreStartTags === 0) { //else: user forgot closing tag => ignore tag
+                    console.log(pos + tag.length + 2, endPos - 2, content.length)
                     root.childElements.push(parse(tag, content.substring(pos + tag.length + 2, endPos - 2))) //TODO: Check: content substring
                     oldPos = endPos + tag.length + 1
                     pos = oldPos
@@ -70,6 +72,22 @@ Item {
             }
         }
         return root
+    }
+
+    function printParsedPost(root, indentation) {
+        var indentationString = ""
+        for (var i = 0; i < indentation; i++) {
+            indentationString += " "
+        }
+
+        if (root.text !== "") {
+            console.log(indentationString + root.text)
+        } else {
+            console.log(indentationString + "Children:")
+            for (var child in root.childElements) {
+                printParsedPost(root.childElements[child], indentation + 2)
+            }
+        }
     }
 
     function arrayContains(array, value) {
