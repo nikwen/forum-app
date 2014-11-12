@@ -76,7 +76,14 @@ Page {
             onTriggered: submit()
 
             function submit() {
-                var message = messageTextField.text //TODO-r: Do not submit if no message is given!!! (The server won't complain as the signature will still be added to the message.)
+                var message = messageTextField.text
+
+                if (message.trim() === "") {
+                    var errorDialog = PopupUtils.open(Qt.resolvedUrl("../components/ErrorDialog.qml"))
+                    errorDialog.title = qsTr(i18n.tr("%1 failed")).arg(submitRequest.actionName) //for consistency ;)
+                    errorDialog.text = i18n.tr("Please enter a message")
+                    return
+                }
 
                 if (backend.signature !== "") {
                     message += "\n\n" + backend.signature
