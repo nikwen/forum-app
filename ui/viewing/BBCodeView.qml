@@ -28,6 +28,7 @@ Item {
         }
     }
 
+    //TODO-r: Tags with arguments
     function parse(tagType, content) { //Post content which should be parsed
         var oldPos = 0
         var pos = -1
@@ -57,7 +58,7 @@ Item {
                 }
                 if (moreStartTags === 0) { //else: user forgot closing tag => ignore tag
                     console.log(pos + tag.length + 2, endPos - 2, content.length)
-                    root.childElements.push(parse(tag, content.substring(pos + tag.length + 2, endPos - 2))) //TODO: Check: content substring
+                    root.childElements.push(parse(tag, content.substring(pos + tag.length + 2, endPos - 2)))
                     oldPos = endPos + tag.length + 1
                     pos = oldPos
                 }
