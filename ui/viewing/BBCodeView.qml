@@ -8,14 +8,14 @@ Item {
 
     property string code: ""
     property var bbRoot: parse("", code) //of type passage
-    onBbRootChanged: printParsedPost(bbRoot)
+//    onBbRootChanged: printParsedPost(bbRoot)
 
-    height: label.height
+    height: passageView.height
 
-    Label {
-        id: label
+    PassageView {
+        id: passageView
+        dataItem: bbRoot
         width: parent.width
-        text: bbRoot.text
     }
 
     Component {
