@@ -37,7 +37,7 @@ import "../components"
 Page {
     id: postCreationPage
 
-    signal posted(string subject, int topicId)
+    signal posted(string subject, int forumId, int topicId)
 
     property int forum_id: -1
     property int topic_id: -1
@@ -139,7 +139,7 @@ Page {
 
                 if (mode === "post") {
                     pageStack.pop()
-                    posted(subjectTextField.text, topic_id)
+                    posted(subjectTextField.text, forum_id, topic_id)
                 } else {
                     var idIndex = responseXml.indexOf("topic_id")
                     var stringTag = responseXml.indexOf("<string>", idIndex)
@@ -147,7 +147,7 @@ Page {
                     var id = parseInt(responseXml.substring(stringTag + 8, stringEndTag))
 
                     pageStack.pop()
-                    posted(subjectTextField.text, id)
+                    posted(subjectTextField.text, forum_id, id)
                 }
             } else {
                 PopupUtils.close(dialog)
