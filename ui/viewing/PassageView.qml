@@ -27,17 +27,17 @@ Item {
                         model: (dataItem !== undefined) ? dataItem.childElements : 0
 
                         delegate: Item {
-                            height: loader.item.height
+                            height: (loader.item !== null) ? loader.item.height : loader.height
 
                             anchors {
                                 left: parent.left
                                 right: parent.right
-                                leftMargin: (modelData.tagType !== "") ? units.gu(2) : 0
+                                leftMargin: getMarginForTag(modelData.tagType)
                             }
 
                             Loader {
                                 id: loader
-                                source: "PassageView.qml"
+                                source: getSourceForTag(modelData.tagType)
                                 width: parent.width
                             }
 
@@ -45,6 +45,25 @@ Item {
                                 target: loader.item
                                 property: "dataItem"
                                 value: modelData
+                            }
+
+                            function getSourceForTag(tag) {
+                                var bbCodeDirectoryPrefix = "bbcode/"
+                                if (tag === "quote") {
+                                    return bbCodeDirectoryPrefix + "QuotePassageView.qml"
+                                } else {
+                                    return "PassageView.qml"
+                                }
+                            }
+
+                            function getMarginForTag(tag) {
+                                if (tag === "quote") {
+                                    return units.gu(1)
+                                } else if (tag !== "") {
+                                    return units.gu(2)
+                                } else {
+                                    return 0
+                                }
                             }
                         }
 
