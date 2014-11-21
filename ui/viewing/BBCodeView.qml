@@ -41,10 +41,13 @@ Item {
             //Check if the tag has arguments
             var equalsPos = content.indexOf("=", pos + 1)
             var spacePos = content.indexOf(" ", pos + 1)
-            var argumentsStartPos = (spacePos === -1) ? equalsPos : ((equalsPos === -1) ? -1 : Math.min(equalsPos, bracketClosePos))
-            var hasArguments = argumentsStartPos !== -1
+            console.log(pos, spacePos, equalsPos, bracketClosePos)
+            var argumentsStartPos = (spacePos === -1) ? Math.min(equalsPos, bracketClosePos) : ((equalsPos === -1) ? Math.min(spacePos, bracketClosePos) : Math.min(spacePos, equalsPos, bracketClosePos))
+            var hasArguments = (argumentsStartPos !== -1) && (argumentsStartPos !== bracketClosePos)
+            var hasArgumentNames = hasArguments && (argumentsStartPos === spacePos)
 
             var tag = content.substring(pos + 1, hasArguments ? argumentsStartPos : bracketClosePos).toLowerCase()
+            console.log("Tag: \"" + tag + "\"")
             var arguments = []
 //            if (hasArguments) { //TODO-r: Only works for some forums, e.g. not for XDA
 //                var argumentString = content.substring(equalsPos + 2, bracketClosePos) // +2 also excludes the "equals"
@@ -59,12 +62,13 @@ Item {
                 var endPos = pos + tag.length //TODO-r: Add arguments string length
                 var moreStartTags = 1
                 while (moreStartTags > 0) {
-                    endPos = content.indexOf(tag, endPos + tag.length)
+                    endPos = content.toLowerCase().indexOf(tag, endPos + tag.length)
                     if (endPos === -1) {
                         console.log("Error: endPos === -1")
                         break
                     }
                     var currentTag = content.substring(content.lastIndexOf("[", endPos), content.indexOf("]", endPos) + 1).toLowerCase() //TODO-r: Why lastIndexOf()???
+                    console.log("Current tag: \"" + tag + "\"")
                     if (currentTag === "[" + tag + "]") {
                         moreStartTags++
                     } else if (currentTag === "[/" + tag + "]") { //TODO-r: What's about other tags which are closed?
