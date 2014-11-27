@@ -26,8 +26,8 @@
 
 import QtQuick 2.2
 import Ubuntu.Components 1.1
-import U1db 1.0 as U1db
 import Ubuntu.Components.ListItems 1.0 as ListItem
+import U1db 1.0 as U1db
 
 Page {
     id: forumsListPage
@@ -39,6 +39,12 @@ Page {
             text: i18n.tr("Add Forum")
             iconName: "add"
             onTriggered: pageStack.push(Qt.resolvedUrl("AddForumPage.qml"))
+        },
+        Action {
+            id: settingsAction
+            text: i18n.tr("Settings")
+            iconName: "settings"
+            onTriggered: pageStack.push(Qt.resolvedUrl("settings/SettingsPage.qml"))
         },
         Action {
             id: aboutAction

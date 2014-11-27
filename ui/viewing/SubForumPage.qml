@@ -42,7 +42,8 @@ PageWithBottomEdge {
     property alias current_forum: forumsList.current_forum
     property bool isForumOverview: current_forum === 0
 
-    property int selectedId: -1
+    property int selectedTopicId: -1
+    property int selectedForumId: -1
     property string selectedTitle: ""
     property bool selectedCanSubscribe: false
     property bool selectedIsSubscribed: false
@@ -108,7 +109,7 @@ PageWithBottomEdge {
         iconName: "compose"
         visible: backend.currentSession.loggedIn && current_forum > 0 && forumsList.canPost && forumsList.mode === "" && forumsList.hasTopics //hasTopics as a workaround for disabling posting in category-only subforums; current_forum > 0 also disables the action when viewSubscriptions === true
         onTriggered: {
-            component = Qt.createComponent("ThreadCreationPage.qml")
+            component = Qt.createComponent("MessageComposerPage.qml")
 
             if (component.status === Component.Ready) {
                 finishNewTopicPageCreation()
@@ -118,7 +119,8 @@ PageWithBottomEdge {
         }
 
         function finishNewTopicPageCreation() {
-            var page = component.createObject(mainView, {"forum_id": current_forum})
+            var page = component.createObject(mainView, { "mode": "thread" })
+            page.forum_id = current_forum //Needs to be set after mode
             page.posted.connect(onNewTopicCreated)
             pageStack.push(page)
         }
@@ -162,9 +164,8 @@ PageWithBottomEdge {
         }
     }
 
-    function onNewTopicCreated(subject, topicId) {
-        selectedTitle = subject
-        pushThreadPage(topicId) //Show thread
+    function onNewTopicCreated(subject, forumId, topicId) {
+        pushThreadPage(forumId, topicId, subject) //Show thread
 
         forumsList.reload()
     }
@@ -225,7 +226,7 @@ PageWithBottomEdge {
     }
 
     function pushSubForumPage(forumId, title, canSubscribe, isSubscribed) {
-        selectedId = forumId
+        selectedForumId = forumId
         selectedTitle = title
         selectedCanSubscribe = (typeof(canSubscribe) === "bool" || typeof(canSubscribe) === "number") ? canSubscribe : true
         selectedIsSubscribed = (typeof(isSubscribed) === "bool" || typeof(isSubscribed) === "number") ? isSubscribed : false
@@ -239,10 +240,10 @@ PageWithBottomEdge {
     }
 
     function finishSubForumPageCreation() {
-        var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedId, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
+        var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedForumId, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
         page.onIsSubscribedChanged.connect(function() { //Change is_subscribed attribute when the subscription state is changed
             for (var i = 0; i < forumsList.model.count; i++) {
-                if (forumsList.model.get(i).id === selectedId) {
+                if (forumsList.model.get(i).id === selectedForumId) {
                     forumsList.model.setProperty(i, "is_subscribed", page.isSubscribed ? 1 : 0) //is_subscribed requires a number
                     break
                 }
@@ -251,8 +252,9 @@ PageWithBottomEdge {
         pageStack.push(page)
     }
 
-    function pushThreadPage(topicId, title) {
-        selectedId = topicId
+    function pushThreadPage(forumId, topicId, title) {
+        selectedForumId = forumId
+        selectedTopicId = topicId
         selectedTitle = title
         component = Qt.createComponent("ThreadPage.qml")
 
@@ -265,8 +267,8 @@ PageWithBottomEdge {
 
     function finishThreadPageCreation() {
         var vBulletinAnnouncement = backend.currentSession.configModel.isVBulletin && forumsList.mode === "ANN"
-        var page = component.createObject(mainView, {"title": selectedTitle, "loadingSpinnerRunning": true, "forum_id": current_forum, "vBulletinAnnouncement": vBulletinAnnouncement})
-        page.current_topic = selectedId //Need to set vBulletinAnnouncement before current_topic!!! Therefore, this is executed after the creation of the Page.
+        var page = component.createObject(mainView, {"title": selectedTitle, "loadingSpinnerRunning": true, "forum_id": selectedForumId, "vBulletinAnnouncement": vBulletinAnnouncement})
+        page.current_topic = selectedTopicId //Need to set vBulletinAnnouncement before current_topic!!! Therefore, this is executed after the creation of the Page.
         pageStack.push(page)
     }
 

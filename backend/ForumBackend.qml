@@ -41,12 +41,16 @@ Object {
 
     property int postsPerPage: 10
     property int topicsLoadCount: 20
-    property string signature: i18n.tr("Sent from my awesome Ubuntu Touch device using the Forum Browser app")
+    property alias signature: settingsBackend.signature
 
     U1db.Index {
         database: db
         id: by_url
         expression: ["url", "user", "password"]
+    }
+
+    SettingsBackend {
+        id: settingsBackend
     }
 
     Component {
@@ -61,6 +65,8 @@ Object {
             property bool loggedIn: false
             property alias configModel: configModel
             property alias loginRequest: loginRequest
+
+            readonly property string user: (loginDbQuery.results[0].user !== undefined) ? loginDbQuery.results[0].user : ""
 
             signal loginDone
 

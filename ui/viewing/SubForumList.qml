@@ -60,9 +60,9 @@ ListView {
 
         onTriggered: {
             if (model.topic) {
-                forumsPage.pushThreadPage(model.id, text)
+                forumsPage.pushThreadPage(model.forum_id, model.topic_id, text)
             } else {
-                forumsPage.pushSubForumPage(model.id, text, model.can_subscribe, model.is_subscribed)
+                forumsPage.pushSubForumPage(model.forum_id, text, model.can_subscribe, model.is_subscribed)
             }
         }
 
@@ -214,7 +214,7 @@ ListView {
                 var element = get(i)
                 //We need to declare even unused properties here
                 //Needed when there are both topics and categories in a subforum
-                var pushObject = {"topic": false, "id": element.id, "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": -1, "has_new": 0, "can_subscribe": viewSubscriptions ? 1 : element.can_subscribe, "is_subscribed": viewSubscriptions ? 1 : element.is_subscribed}
+                var pushObject = { "topic": false, "forum_id": element.id, "topic_id": -1, "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": -1, "has_new": 0, "can_subscribe": viewSubscriptions ? 1 : element.can_subscribe, "is_subscribed": viewSubscriptions ? 1 : element.is_subscribed }
                 if (!isForumOverview) {
                     forumListModel.insert(i, pushObject)
                 } else {
@@ -352,7 +352,8 @@ ListView {
         property bool viewSubscriptions: forumsList.viewSubscriptions
         query: "/methodResponse/params/param/value/struct/member/value/array/data/value/struct"
 
-        XmlRole { name: "id"; query: "member[name='topic_id']/value/number()" }
+        XmlRole { name: "id"; query: "member[name='topic_id']/value/string/number()" }
+        XmlRole { name: "forum_id"; query: "member[name='forum_id']/value/string/number()" }
         XmlRole { name: "title"; query: "member[name='topic_title']/value/base64/string()" }
 //        XmlRole { name: "description"; query: "member[name='short_content']/value/base64/string()" }
         XmlRole { name: "author"; query: "member[name='topic_author_name']/value/base64/string()" }
@@ -381,7 +382,7 @@ ListView {
                             var element = get(i);
                             //We need to declare even unused properties here
                             //Needed when there are both topics and categories in a subforum
-                            forumListModel.append({"topic": true, "id": element.id, "name": element.title.trim(), "description": "", "logo": "", "author": element.author.trim(), "posts": element.posts, "has_new": element.has_new, "can_subscribe": 1, "is_subscribed": 0});
+                            forumListModel.append({ "topic": true, "forum_id": element.forum_id, "topic_id": element.id, "name": element.title.trim(), "description": "", "logo": "", "author": element.author.trim(), "posts": element.posts, "has_new": element.has_new, "can_subscribe": 1, "is_subscribed": 0 });
                         }
                     }
                 }
