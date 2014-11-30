@@ -4,7 +4,7 @@ import Ubuntu.Components 1.1
 Item {
     id: rootItem
 
-    readonly property variant tagsWithChildren: [ "quote", "code", "hide" ] //lower-case
+    readonly property variant tagsWithChildren: [ "quote", "code", "hide", "img" ] //lower-case
 
     property string code: ""
     property var bbRoot: parse("", [], code) //of type passage
@@ -80,6 +80,11 @@ Item {
                     root.childElements.push(parse(tag, arguments, content.substring(bracketClosePos + 1, endPos - 2)))
                     oldPos = endPos + tag.length + 1
                     pos = oldPos
+                } else {
+                    if (endPos === -1) { //TODO-r: Check if done right
+                        oldPos = pos
+                        pos = pos + tag.length
+                    }
                 }
             }
         }
