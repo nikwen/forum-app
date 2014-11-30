@@ -11,7 +11,7 @@ Item {
     Layouts {
         id: layouts
         width: parent.width
-        height: childrenRect.height //TODO-r: Issue while scrolling: Text not parsed yet => height too low => Skipping posts and lags
+        height: childrenRect.height
 
         layouts: [
             ConditionalLayout {
@@ -39,6 +39,7 @@ Item {
                                 id: loader
                                 source: getSourceForTag(modelData.tagType)
                                 width: parent.width
+                                asynchronous: false
                             }
 
                             Binding {
