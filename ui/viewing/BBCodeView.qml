@@ -9,6 +9,7 @@ Item {
     property string code: ""
     property var bbRoot: parse("", [], code) //of type passage
 //    onBbRootChanged: printParsedPost(bbRoot)
+//    onCodeChanged: console.log(code)
 
     height: passageView.height
 

@@ -49,9 +49,9 @@ Item {
                             }
 
                             function getSourceForTag(tag) {
-                                console.log("Tag:", tag)
+//                                console.log("Tag:", tag)
                                 var bbCodeDirectoryPrefix = "bbcode/"
-                                if (tag === "quote") {
+                                if (tag === "quote") { //TODO-r: Tapatalk API passes [code] tags from XDA as [quote]
                                     return bbCodeDirectoryPrefix + "QuotePassageView.qml"
                                 } else {
                                     return "PassageView.qml"
