@@ -1,6 +1,8 @@
 import QtQuick 2.2
 import Ubuntu.Components 1.1
 
+//TODO-r: Move parsing algorithmn into ThreadList, so that parsing will happen only once. This will also fix scrolling issues which arise from asynchronous parsing.
+
 Item {
     id: rootItem
 
@@ -8,8 +10,6 @@ Item {
 
     property string code: ""
     property var bbRoot: parse("", [], code) //of type passage
-//    onBbRootChanged: printParsedPost(bbRoot)
-//    onCodeChanged: console.log(code)
 
     height: passageView.height
 
@@ -97,22 +97,6 @@ Item {
             }
         }
         return root
-    }
-
-    function printParsedPost(root, indentation) {
-        var indentationString = ""
-        for (var i = 0; i < indentation; i++) {
-            indentationString += " "
-        }
-
-        if (root.text !== "") {
-            console.log(indentationString + root.text)
-        } else {
-            console.log(indentationString + "Children:")
-            for (var child in root.childElements) {
-                printParsedPost(root.childElements[child], indentation + 2)
-            }
-        }
     }
 
     function arrayContains(array, value) {
