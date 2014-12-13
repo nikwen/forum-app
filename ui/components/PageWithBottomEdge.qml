@@ -64,7 +64,7 @@
 
 */
 
-import QtQuick 2.2
+import QtQuick 2.3
 import Ubuntu.Components 1.1
 
 Page {
