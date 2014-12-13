@@ -29,7 +29,6 @@ import QtQuick 2.2
 import QtQuick.XmlListModel 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
-import "../../stringutils.js" as StringUtils
 import "../../backend"
 
 
@@ -51,10 +50,10 @@ ListView {
     onModeChanged: reload()
 
     delegate: SubForumListItem {
-        text: StringUtils.base64_decode(model.name)
-        subText: StringUtils.base64_decode(model.description)
+        text: Qt.atob(model.name)
+        subText: Qt.atob(model.description)
         replies: model.topic ? (model.posts + 1) : 0 //+1 to include OP
-        author: model.topic ? StringUtils.base64_decode(model.author) : ""
+        author: model.topic ? Qt.atob(model.author) : ""
         has_new: model.has_new
         progression: true
 

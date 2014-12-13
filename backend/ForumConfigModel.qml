@@ -27,7 +27,6 @@
 import QtQuick 2.2
 import QtQuick.XmlListModel 2.0
 import Ubuntu.Components 1.1
-import "../stringutils.js" as StringUtils
 
 //The respective ApiRequest had to be placed in ForumBackend.qml as XmlListModel does not allow Items as children
 

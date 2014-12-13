@@ -30,7 +30,6 @@ import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import Ubuntu.Components.Themes.Ambiance 0.1
 import U1db 1.0 as U1db
-import "../../stringutils.js" as StringUtils
 import "../../backend"
 import "../components"
 
@@ -90,9 +89,9 @@ Page {
                 }
 
                 if (mode === "post") {
-                    submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
+                    submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>reply_post</methodName><params><param><value>' + forum_id + '</value></param><param><value>' + topic_id + '</value></param><param><value><base64>' + Qt.btoa(subjectTextField.text) + '</base64></value></param><param><value><base64>' + Qt.btoa(message) + '</base64></value></param></params></methodCall>'
                 } else {
-                    submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>new_topic</methodName><params><param><value>' + forum_id + '</value></param><param><value><base64>' + StringUtils.base64_encode(subjectTextField.text) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(message) + '</base64></value></param></params></methodCall>'
+                    submitRequest.query = '<?xml version="1.0"?><methodCall><methodName>new_topic</methodName><params><param><value>' + forum_id + '</value></param><param><value><base64>' + Qt.btoa(subjectTextField.text) + '</base64></value></param><param><value><base64>' + Qt.btoa(message) + '</base64></value></param></params></methodCall>'
                 }
 
                 submitRequest.start()

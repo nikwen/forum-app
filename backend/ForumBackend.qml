@@ -31,7 +31,6 @@ import Ubuntu.Components.Popups 1.0
 import U1db 1.0 as U1db
 import "../md5utils.js" as Md5Utils
 import "../sha1utils.js" as Sha1Utils
-import "../stringutils.js" as StringUtils
 
 Object {
 
@@ -166,7 +165,7 @@ Object {
                     console.log("no encryption")
                 }
 
-                loginRequest.query = '<?xml version="1.0"?><methodCall><methodName>login</methodName><params><param><value><base64>' + StringUtils.base64_encode(user) + '</base64></value></param><param><value><base64>' + StringUtils.base64_encode(password) + '</base64></value></param></params></methodCall>'
+                loginRequest.query = '<?xml version="1.0"?><methodCall><methodName>login</methodName><params><param><value><base64>' + Qt.btoa(user) + '</base64></value></param><param><value><base64>' + Qt.btoa(password) + '</base64></value></param></params></methodCall>'
                 loginRequest.start()
             }
 

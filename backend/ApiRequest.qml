@@ -27,7 +27,6 @@
 import QtQuick 2.2
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
-import "../stringutils.js" as StringUtils
 
 Item {
     property string query
@@ -103,7 +102,7 @@ Item {
             if (resultTextIndex > 0) {
                 var base64Tag = xml.indexOf("<base64>", resultTextIndex)
                 var base64EndTag = xml.indexOf("</base64>", resultTextIndex)
-                resultText = StringUtils.base64_decode(xml.substring(base64Tag + 8, base64EndTag))
+                resultText = Qt.atob(xml.substring(base64Tag + 8, base64EndTag))
                 console.log(resultText)
             }
             var dialog = PopupUtils.open(Qt.resolvedUrl("../ui/components/ErrorDialog.qml"))
@@ -131,7 +130,7 @@ Item {
                         }
                         backend.currentSession.loginDone.connect(runNextQuery)
                     } else {
-                        var xml = StringUtils.xmlFromResponse(xhr.responseText)
+                        var xml = xmlFromResponse(xhr.responseText)
                         if (xml.trim() !== "") {
                             queryExecuted(true, xml)
                         } else {
@@ -150,6 +149,15 @@ Item {
         }
         xhr.onreadystatechange = onReadyStateChangeFunction
         xhr.send(queryQueue[0])
+    }
+
+    function xmlFromResponse(response) {
+        var index = response.indexOf("<?xml")
+        if (index === -1) {
+            return ""
+        } else {
+            return response.substring(index)
+        }
     }
 
 }
