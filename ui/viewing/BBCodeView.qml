@@ -56,7 +56,7 @@ Item {
 //            }
 
             if (arrayContains(tagsWithChildren, tag)) { //else: don't parse
-                var notFormattedText = content.substring(oldPos, pos)
+                var notFormattedText = content.substring(oldPos, pos).trim()
                 if (notFormattedText !== "") {
                     root.childElements.push(parse("", [], notFormattedText))
                 }
@@ -77,7 +77,7 @@ Item {
                     }
                 }
                 if (moreStartTags === 0) { //else: user forgot closing tag => ignore tag
-                    root.childElements.push(parse(tag, arguments, content.substring(bracketClosePos + 1, endPos - 2)))
+                    root.childElements.push(parse(tag, arguments, content.substring(bracketClosePos + 1, endPos - 2).trim()))
                     oldPos = endPos + tag.length + 1
                     pos = oldPos
                 } else {
@@ -89,10 +89,10 @@ Item {
             }
         }
         if (root.childElements.length === 0) {
-            root.text = content
+            root.text = content.trim()
         } else {
-            var restText = content.substring(oldPos, content.length)
-            if (restText.trim() !== "") {
+            var restText = content.substring(oldPos, content.length).trim()
+            if (restText !== "") {
                 root.childElements.push(parse("", [], restText))
             }
         }
