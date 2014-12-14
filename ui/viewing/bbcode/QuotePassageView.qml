@@ -9,6 +9,13 @@ Rectangle {
 
     property alias dataItem: passageView.dataItem
 
+    onDataItemChanged: {
+        if (dataItem.tagArguments["name"] !== undefined) {
+            console.log("Quote name:", dataItem.tagArguments["name"])
+            console.log("Quote post:", dataItem.tagArguments["post"])
+        }
+    }
+
     Label {
         id: quoteLabel
 
