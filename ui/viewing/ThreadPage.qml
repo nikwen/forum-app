@@ -38,7 +38,7 @@ PageWithBottomEdge {
     flickable: null
 
     property alias current_topic: threadList.current_topic
-    property int forum_id: -1
+    property string forum_id: "-1"
     property alias vBulletinAnnouncement: threadList.vBulletinAnnouncement
 
     property alias loadingSpinnerRunning: loadingSpinner.running

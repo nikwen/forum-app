@@ -150,16 +150,15 @@ ListView {
 
         property bool hasLoadedCompletely: true
 
-        property int parentForumId: -1
+        property string parentForumId: "-1"
         property bool viewSubscriptions: forumsList.viewSubscriptions
         query: viewSubscriptions ? "/methodResponse/params/param/value/struct/member[name='forums']/value/array/data/value/struct" : "/methodResponse/params/param/value/array/data/value/struct"
 
-        XmlRole { name: "id"; query: "member[name='forum_id']/value/number()" }
+        XmlRole { name: "id"; query: "member[name='forum_id']/value/string/string()" }
         XmlRole { name: "name"; query: "member[name='forum_name']/value/base64/string()" }
         XmlRole { name: "description"; query: "member[name='description']/value/base64/string()" }
-        XmlRole { name: "logo"; query: "member[name='logo_url']/value/string()" }
-        XmlRole { name: "can_subscribe"; query: "member[name='can_subscribe']/value/number()" }
-        XmlRole { name: "is_subscribed"; query: "member[name='is_subscribed']/value/number()" }
+        XmlRole { name: "can_subscribe"; query: "member[name='can_subscribe']/value/boolean/number()" }
+        XmlRole { name: "is_subscribed"; query: "member[name='is_subscribed']/value/boolean/number()" }
 
         property bool checkingForChildren: false
 
@@ -173,14 +172,14 @@ ListView {
                 if (!checkingForChildren) {
                     console.debug("categoryModel has: " + count + " items");
 
-                    if (count !== 1 || parentForumId !== get(0).id) {
-                        insertResults()
-                    } else { //Header with a child attribute
+                    if (count === 1 && parentForumId === get(0).id) { //Header with a child attribute
                         if (!topicModel.hasLoadedCompletely) {
                             topicModel.onHasLoadedCompletelyChanged.connect(loadChildren)
                         } else {
                             loadChildren()
                         }
+                    } else {
+                        insertResults()
                     }
                 } else {
                     checkingForChildren = false
@@ -205,7 +204,6 @@ ListView {
             checkingForChildren = true
 
             query = "/methodResponse/params/param/value/array/data/value/struct/member[name='child']/value/array/data/value/struct"
-            loadForums()
         }
 
         function insertResults() { //If changed, adjust above as well
@@ -213,7 +211,7 @@ ListView {
                 var element = get(i)
                 //We need to declare even unused properties here
                 //Needed when there are both topics and categories in a subforum
-                var pushObject = { "topic": false, "forum_id": element.id, "topic_id": -1, "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "logo": element.logo.trim(), "author": "", "posts": -1, "has_new": 0, "can_subscribe": viewSubscriptions ? 1 : element.can_subscribe, "is_subscribed": viewSubscriptions ? 1 : element.is_subscribed }
+                var pushObject = { "topic": false, "forum_id": element.id, "topic_id": "-1", "name": element.name.trim(), "description": viewSubscriptions ? "" : element.description.trim(), "author": "", "posts": -1, "has_new": false, "can_subscribe": viewSubscriptions ? true : Boolean(element.can_subscribe), "is_subscribed": viewSubscriptions ? true : Boolean(element.is_subscribed) }
                 if (!isForumOverview) {
                     forumListModel.insert(i, pushObject)
                 } else {
@@ -349,12 +347,11 @@ ListView {
 
         property int forumId: current_forum
         property bool viewSubscriptions: forumsList.viewSubscriptions
-        query: "/methodResponse/params/param/value/struct/member/value/array/data/value/struct"
+        query: "/methodResponse/params/param/value/struct/member[name='topics']/value/array/data/value/struct"
 
-        XmlRole { name: "id"; query: "member[name='topic_id']/value/string/number()" }
-        XmlRole { name: "forum_id"; query: "member[name='forum_id']/value/string/number()" }
+        XmlRole { name: "id"; query: "member[name='topic_id']/value/string/string()" }
+        XmlRole { name: "forum_id"; query: "member[name='forum_id']/value/string/string()" }
         XmlRole { name: "title"; query: "member[name='topic_title']/value/base64/string()" }
-//        XmlRole { name: "description"; query: "member[name='short_content']/value/base64/string()" }
         XmlRole { name: "author"; query: "member[name='topic_author_name']/value/base64/string()" }
         XmlRole { name: "posts"; query: "member[name='reply_number']/value/int/number()" }
         XmlRole { name: "has_new"; query: "member[name='new_post']/value/boolean/number()" }
@@ -381,7 +378,7 @@ ListView {
                             var element = get(i);
                             //We need to declare even unused properties here
                             //Needed when there are both topics and categories in a subforum
-                            forumListModel.append({ "topic": true, "forum_id": element.forum_id, "topic_id": element.id, "name": element.title.trim(), "description": "", "logo": "", "author": element.author.trim(), "posts": element.posts, "has_new": element.has_new, "can_subscribe": 1, "is_subscribed": 0 });
+                            forumListModel.append({ "topic": true, "forum_id": element.forum_id, "topic_id": element.id, "name": element.title.trim(), "description": "", "author": element.author.trim(), "posts": (typeof(element.posts) === "number") ? element.posts : 0, "has_new": Boolean(element.has_new), "can_subscribe": true, "is_subscribed": false });
                         }
                     }
                 }

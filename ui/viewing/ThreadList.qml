@@ -81,10 +81,10 @@ ListView {
         property int firstDisplayedPost: -1
         property int lastDisplayedPost: -1
 
-        property int topic_id: -1
+        property string topic_id: "-1"
         query: "/methodResponse/params/param/value/struct/member[name='posts']/value/array/data/value/struct"
 
-        XmlRole { name: "id"; query: "member[name='post_id']/value/string()" }
+        XmlRole { name: "id"; query: "member[name='post_id']/value/string/string()" }
         XmlRole { name: "title"; query: "member[name='post_title']/value/base64/string()" }
         XmlRole { name: "content"; query: "member[name='post_content']/value/base64/string()" }
         XmlRole { name: "author"; query: "member[name='post_author_name']/value/base64/string()" }
