@@ -2,6 +2,8 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 import Ubuntu.Layouts 1.0
 
+//TODO-r: Issue with size of PassageView when resizing the window
+
 Item {
 
     property var dataItem: undefined

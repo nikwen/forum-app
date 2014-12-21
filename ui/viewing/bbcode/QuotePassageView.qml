@@ -9,17 +9,11 @@ Rectangle {
 
     property alias dataItem: passageView.dataItem
 
-    onDataItemChanged: {
-        if (dataItem.tagArguments["name"] !== undefined) {
-            console.log("Quote name:", dataItem.tagArguments["name"])
-            console.log("Quote post:", dataItem.tagArguments["post"])
-        }
-    }
-
     Label {
         id: quoteLabel
+        wrapMode: Text.Wrap
 
-        text: i18n.tr("<b>Quote</b>")
+        text: (dataItem.tagArguments["name"] !== undefined) ? qsTr(i18n.tr("<b>Quote</b> (Originally posted by <b>%1</b>)")).arg(dataItem.tagArguments["name"]) : i18n.tr("<b>Quote</b>")
 
         anchors {
             top: parent.top
