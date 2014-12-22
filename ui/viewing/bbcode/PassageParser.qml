@@ -1,5 +1,7 @@
 import QtQuick 2.3
 
+//TODO-r: trim() should also remove <br /> line breaks!!!
+
 Item {
     id: passageParser
 
@@ -37,7 +39,7 @@ Item {
             if (hasArguments) {
                 //Split the arguments string to get the different key/value pairs.
                 var argumentsString = content.substring(argumentsStartPos, bracketClosePos)
-                var argumentsSplitted = argumentsString.split(" ")
+                var argumentsSplitted = argumentsString.split(" ") //TODO-r: Issue when the user name contains a blank
                 for (var i = 0; i < argumentsSplitted.length; i++) {
                     if (argumentsSplitted[i] === "") {
                         continue

@@ -2,28 +2,31 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 import Ubuntu.Layouts 1.0
 
-//TODO-r: Issue with size of PassageView when resizing the window
+//TODO-r: Wrapping an image with a [url] tag.
 
 Item {
 
     property var dataItem: undefined
 
-    height: layouts.height
+    height: childrenRect.height
 
     Layouts {
         id: layouts
         width: parent.width
-        height: childrenRect.height
 
         layouts: [
             ConditionalLayout {
                 name: "column"
-                when: dataItem !== undefined && dataItem.text === "" //TODO-r: What does the following do: "[quote][/quote]"
+                when: dataItem !== undefined && dataItem.text === ""
 
                 Column {
                     id: passageColumn
                     width: parent.width
                     height: childrenRect.height
+
+                    onHeightChanged: {
+                        layouts.height = height
+                    }
 
                     Repeater {
                         model: (dataItem !== undefined) ? dataItem.childElements : 0
@@ -70,8 +73,6 @@ Item {
                                 }
                             }
                         }
-
-
                     }
                 }
             },
@@ -88,24 +89,27 @@ Item {
 
                     onLinkActivated: Qt.openUrlExternally(link)
 
-                    function replaceBBMarkupWithHtml(text) {
-                        var bb = [];
-                        bb[0] = /\[url\](.*?)\[\/url\]/gi;
-                        bb[1] = /\[url\="?(.*?)"?\](.*?)\[\/url\]/gi;
+                    onHeightChanged: {
+                        layouts.height = height
+                    }
 
-                        var html =[];
-                        html[0] = "<a href=\"$1\">$1</a>";
-                        html[1] = "<a href=\"$1\">$2</a>";
+                    function replaceBBMarkupWithHtml(text) {
+                        var bb = []
+                        bb[0] = /\[url\](.*?)\[\/url\]/gi
+                        bb[1] = /\[url\="?(.*?)"?\](.*?)\[\/url\]/gi
+
+                        var html =[]
+                        html[0] = "<a href=\"$1\">$1</a>"
+                        html[1] = "<a href=\"$1\">$2</a>"
 
                         for (var i = 0; i < bb.length; i++) {
-                            text = text.replace(bb[i], html[i]);
+                            text = text.replace(bb[i], html[i])
                         }
 
-                        return text;
+                        return text
                     }
                 }
             }
         ]
     }
-
 }
