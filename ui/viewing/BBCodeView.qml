@@ -45,62 +45,53 @@ Item {
             //The Tapatalk plugin seems to pass all arguments in a standardized form:
             // * [quote uid=123 name="author" post=12345678]
             //Not all arguments have to be supplied by all forums though.
-            var equalsPos = content.indexOf("=", pos + 1)
             var spacePos = content.indexOf(" ", pos + 1)
-            var argumentsStartPos = (spacePos === -1) ? Math.min(equalsPos, bracketClosePos) : ((equalsPos === -1) ? Math.min(spacePos, bracketClosePos) : Math.min(spacePos, equalsPos, bracketClosePos))
-            var hasArguments = (argumentsStartPos !== -1) && (argumentsStartPos !== bracketClosePos)
-            var hasArgumentNames = hasArguments && (argumentsStartPos === spacePos)
-
-            //TODO-r: Remove the equals form
+            var argumentsStartPos = (spacePos !== -1) ? spacePos + 1 : -1
+            var hasArguments = (argumentsStartPos !== -1) && (argumentsStartPos < bracketClosePos)
 
             //Get the tag, separated from the arguments
-            var tag = content.substring(pos + 1, hasArguments ? argumentsStartPos : bracketClosePos).toLowerCase()
+            var tag = content.substring(pos + 1, hasArguments ? spacePos : bracketClosePos).toLowerCase()
 
             //Get the arguments of the current tag.
             var arguments = []
             if (hasArguments) {
-                if (hasArgumentNames) {
-                    //Split the arguments string to get the different key/value pairs.
-                    var argumentsString = content.substring(argumentsStartPos, bracketClosePos)
-                    var argumentsSplitted = argumentsString.split(" ")
-                    for (var i = 0; i < argumentsSplitted.length; i++) {
-                        if (argumentsSplitted[i] === "") { //The first string is always empty //TODO-r: Adjust argumentsStartPos
-                            continue
-                        }
-
-                        //Split "key=value" pairs.
-                        //Do not use split() method here because that would also split the string if the value contains an equals char.
-                        var keyEqualsPos = argumentsSplitted[i].indexOf("=")
-                        if (keyEqualsPos < 0) {
-                            console.log("Error when parsing key/value pair:", argumentsSplitted[i])
-                            continue
-                        }
-                        var key = argumentsSplitted[i].substring(0, keyEqualsPos)
-                        var value = argumentsSplitted[i].substring(keyEqualsPos + 1)
-
-                        //Remove leading and trailing quotation marks from strings.
-                        while (value.charAt(0) === "\"") {
-                            value = value.substring(1)
-                        }
-                        while (value.charAt(value.length - 1) === "\"") {
-                            value = value.substring(0, value.length - 1)
-                        }
-
-                        arguments[key] = value
+                //Split the arguments string to get the different key/value pairs.
+                var argumentsString = content.substring(argumentsStartPos, bracketClosePos)
+                var argumentsSplitted = argumentsString.split(" ")
+                for (var i = 0; i < argumentsSplitted.length; i++) {
+                    if (argumentsSplitted[i] === "") {
+                        continue
                     }
-                } else {
-                    var argumentString = content.substring(equalsPos + 1, bracketClosePos) //+2 to exclude the "equals" symbol
-                    arguments = argumentString.split(";")
+
+                    //Split "key=value" pairs.
+                    //Do not use split() method here because that would also split the string if the value contains an equals char.
+                    var keyEqualsPos = argumentsSplitted[i].indexOf("=")
+                    if (keyEqualsPos < 0) {
+                        console.log("Error when parsing key/value pair:", argumentsSplitted[i])
+                        continue
+                    }
+                    var key = argumentsSplitted[i].substring(0, keyEqualsPos)
+                    var value = argumentsSplitted[i].substring(keyEqualsPos + 1)
+
+                    //Remove leading and trailing quotation marks from strings.
+                    while (value.charAt(0) === "\"") {
+                        value = value.substring(1)
+                    }
+                    while (value.charAt(value.length - 1) === "\"") {
+                        value = value.substring(0, value.length - 1)
+                    }
+
+                    arguments[key] = value
                 }
             }
 
             if (arrayContains(tagsWithChildren, tag)) { //else: don't parse
                 //Push not formatted text before the tag as an independent passage.
-                var notFormattedText = content.substring(oldPos, pos).trim()
+                var notFormattedText = content.substring(oldPos, pos).trim() //TODO-r: Do this only if the tag can be parsed (i.e. a closing tag could be found)
                 if (notFormattedText !== "") {
                     root.childElements.push(parse("", [], notFormattedText))
                 }
-                var endPos = pos //TODO-r: Add arguments string length?
+                var endPos = pos
                 var moreStartTags = 1
 
                 //Get the text between the brackets by looking for the respective closing bracket.
