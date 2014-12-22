@@ -63,7 +63,7 @@ Item {
                             function getMarginForTag(tag) {
                                 if (tag === "quote") {
                                     return units.gu(1)
-                                } else if (tag !== "") { //TODO-r: Why margin for images?
+                                } else if (tag !== "" && tag !== "img") {
                                     return units.gu(2)
                                 } else {
                                     return 0
