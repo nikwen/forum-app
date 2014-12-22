@@ -15,7 +15,7 @@ Item {
         var pos = -1
 
         //Create a root item which will contain all subsequent passages or, if none can be found, the unformatted text.
-        var root = passage.createObject(passageParser, { "tagType": tagType, "tagArguments": tagArguments }) //TODO-r: Proper parent here
+        var root = passage.createObject(passageParser, { "tagType": tagType, "tagArguments": tagArguments }) //No other parent here in order to simplify the fuction signature
 
         //Search for possible tags in the post by finding opening brackets.
         while ((pos = content.indexOf("[", pos + 1)) !== -1) {
