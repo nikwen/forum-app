@@ -123,13 +123,9 @@ Item {
                     root.childElements.push(parse(tag, arguments, content.substring(bracketClosePos + 1, endPos - 2).trim()))
                     oldPos = endPos + tag.length + 1
                     pos = oldPos
-                } else {
-                    if (endPos === -1) {
-                        oldPos = pos
-                        pos = pos + tag.length
-                    } else {
-                        console.log("endpos !== -1 in else") //TODO-r: To check whether condition may be removed
-                    }
+                } else { //Exited while-loop via break
+                    oldPos = pos
+                    pos = pos + tag.length
                 }
             }
         }
