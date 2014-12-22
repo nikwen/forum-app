@@ -49,15 +49,16 @@ ListView {
     clip: true
 
     delegate: MessageDelegate {
-        titleText: Qt.atob(model.title).trim()
-        content: Qt.atob(model.content).trim()
-        authorText: Qt.atob(model.author).trim()
-        avatar: model.avatar.trim()
-        thanksInfo: model.thanks_info.trim()
-        postTime: model.post_time.trim()
+        titleText: model.title
+        postBody: model.postBody
+        authorText: model.author
+        avatar: model.avatar
+        thanksInfo: model.thanksInfo
+        postTime: model.postTime
     }
 
     function loadPosts(startNum, count) {
+        parsedThreadModel.clear() //TODO-r: Only reload if not already loading
         totalPostCount = -1
         loadingSpinner.running = true;
         threadModel.loadPosts(startNum, count);
@@ -67,7 +68,11 @@ ListView {
         loadPosts(firstDisplayedPost, backend.postsPerPage) //lastDisplayedPost might not be the latest any more
     }
 
-    model: XmlListModel {
+    model: ListModel {
+        id: parsedThreadModel
+    }
+
+    XmlListModel {
         id: threadModel
         objectName: "threadModel"
 
@@ -87,6 +92,13 @@ ListView {
 
         onStatusChanged: {
             if (status === 1) {
+                //Parse the fetched posts and append the results to parsedThreadModel
+
+                for (var i = 0; i < count; i++) {
+                    var element = get(i)
+                    parsedThreadModel.append({ "id": element.id, "title": Qt.atob(element.title).trim(), "postBody": passageParser.parse("", [], Qt.atob(element.content)), "author": Qt.atob(element.author).trim(), "avatar": element.avatar.trim(), "thanksInfo": element.thanks_info.trim(), "postTime": element.post_time.trim() })
+                }
+
                 //Extract the total number of posts from XML
                 //Excerpt from the returned XML: <member><name>total_post_num</name><value><int>3</int></value></member>
 
@@ -173,7 +185,6 @@ ListView {
             loadThreadListRequest.start()
         }
 
-
     }
 
     ApiRequest {
@@ -185,5 +196,8 @@ ListView {
         }
     }
 
+    PassageParser {
+        id: passageParser
+    }
 
 }

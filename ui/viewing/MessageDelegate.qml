@@ -23,8 +23,9 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
 
 UbuntuShape {
+
     property string titleText
-    property string content
+    property Passage postBody
     property string avatar
     property string authorText
     property string thanksInfo
@@ -132,9 +133,9 @@ UbuntuShape {
             }
         }
 
-        BBCodeView {
-            id: bbCodeView
-            code: content
+        PassageView {
+            id: bbRootView
+            dataItem: postBody
 
             anchors {
                 top: title.visible ? title.bottom : author.bottom
@@ -144,19 +145,6 @@ UbuntuShape {
             }
         }
 
-//        Label {
-//            id: contentLabel
-//            text: parseBBCode(content)
-//            wrapMode: Text.Wrap
-//            anchors {
-//                top: title.visible ? title.bottom : author.bottom
-//                left: rect.right
-//                right: parent.right
-//                margins: units.gu(1)
-//            }
-//            onLinkActivated: Qt.openUrlExternally(link)
-//        }
-
         Label {
             id: thanksLabel
             wrapMode: Text.Wrap
@@ -164,7 +152,7 @@ UbuntuShape {
             text: qsTr((thanksCount === 1) ? i18n.tr("%1 user thanked %2 for this useful post") : i18n.tr("%1 users thanked %2 for this useful post")).arg(thanksCount).arg(authorText)
             fontSize: "small"
             anchors {
-                top: bbCodeView.bottom
+                top: bbRootView.bottom
                 left: rect.right
                 right: parent.right
                 margins: visible ? units.gu(1) : 0
@@ -190,23 +178,5 @@ UbuntuShape {
             }
         }
     }
-
-//    function parseBBCode(text) {
-//        var bb = [];
-//        bb[0] = /\[url\](.*?)\[\/url\]/gi;
-//        bb[1] = /\[url\="?(.*?)"?\](.*?)\[\/url\]/gi;
-//        bb[2] = /\[img\](.*?)\[\/img\]/gi;
-
-//        var html =[];
-//        html[0] = "<a href=\"$1\">$1</a>";
-//        html[1] = "<a href=\"$1\">$2</a>";
-//        html[2] = "<img src=\"$1\">";
-
-//        for (var i = 0; i < bb.length; i++) {
-//            text = text.replace(bb[i], html[i]);
-//        }
-
-//        return text;
-//    }
 
 }

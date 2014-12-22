@@ -1,33 +1,13 @@
-import QtQuick 2.2
-import Ubuntu.Components 1.1
-
-//TODO-r: Move parsing algorithmn into ThreadList, so that parsing will happen only once. This will also fix scrolling issues which arise from asynchronous parsing.
+import QtQuick 2.3
 
 Item {
-    id: rootItem
+    id: passageParser
 
     readonly property variant tagsWithChildren: [ "quote", "img", "spoiler" ] //lower-case
 
-    property string code: ""
-    property var bbRoot: parse("", [], code) //of type passage
-
-    height: passageView.height
-
-    PassageView {
-        id: passageView
-        dataItem: bbRoot
-        width: parent.width
-    }
-
     Component {
         id: passage
-        Item {
-            property string tagType: ""
-            property var tagArguments: [] //The supplied key/value pairs will be added to the array using: tagArguments[key]=value
-            //Only one of the following two is used at a time
-            property string text: ""
-            property var childElements: []
-        }
+        Passage {}
     }
 
     function parse(tagType, tagArguments, content) { //Post content which should be parsed
@@ -35,7 +15,7 @@ Item {
         var pos = -1
 
         //Create a root item which will contain all subsequent passages or, if none can be found, the unformatted text.
-        var root = passage.createObject(rootItem, { "tagType": tagType, "tagArguments": tagArguments }) //TODO-r: Proper parent here
+        var root = passage.createObject(passageParser, { "tagType": tagType, "tagArguments": tagArguments }) //TODO-r: Proper parent here
 
         //Search for possible tags in the post by finding opening brackets.
         while ((pos = content.indexOf("[", pos + 1)) !== -1) {
@@ -151,4 +131,5 @@ Item {
         }
         return false
     }
+
 }
