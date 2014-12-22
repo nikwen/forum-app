@@ -59,10 +59,14 @@ ListView {
     }
 
     function loadPosts(startNum, count) {
-        parsedThreadModel.clear() //TODO-r: Only reload if not already loading
+        if (!threadModel.hasLoadedCompletely) { //Do nothing if it is already loading
+            return
+        }
+
+        parsedThreadModel.clear()
         totalPostCount = -1
-        loadingSpinner.running = true;
-        threadModel.loadPosts(startNum, count);
+        loadingSpinner.running = true
+        threadModel.loadPosts(startNum, count)
     }
 
     function reload() {
@@ -79,6 +83,8 @@ ListView {
 
         property int firstDisplayedPost: -1
         property int lastDisplayedPost: -1
+
+        property bool hasLoadedCompletely: true
 
         property string topic_id: "-1"
         query: "/methodResponse/params/param/value/struct/member[name='posts']/value/array/data/value/struct"
@@ -165,12 +171,16 @@ ListView {
 
                     isSubscribed = isSubscribedSubstring.trim() === "1"
                 }
+
+                hasLoadedCompletely = true
             }
         }
 
         onTopic_idChanged: loadPosts(0, backend.postsPerPage)
 
         function loadPosts(startNum, count) {
+            hasLoadedCompletely = false
+
             firstDisplayedPost = startNum
             lastDisplayedPost = startNum + count - 1
 
