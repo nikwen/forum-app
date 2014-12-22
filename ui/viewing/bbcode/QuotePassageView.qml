@@ -1,7 +1,6 @@
 import QtQuick 2.3
 import Ubuntu.Components 1.1
 import Ubuntu.Layouts 1.0
-import ".."
 
 Rectangle {
     height: quoteLabel.height + 2 * quoteLabel.anchors.margins + passageView.height + 2 * passageView.anchors.margins

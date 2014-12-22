@@ -51,12 +51,10 @@ Item {
                             }
 
                             function getSourceForTag(tag) {
-//                                console.log("Tag:", tag)
-                                var bbCodeDirectoryPrefix = "bbcode/"
                                 if (tag === "quote") {
-                                    return bbCodeDirectoryPrefix + "QuotePassageView.qml"
+                                    return "QuotePassageView.qml"
                                 } else if (tag === "img") {
-                                    return bbCodeDirectoryPrefix + "ImgPassageView.qml"
+                                    return "ImgPassageView.qml"
                                 } else {
                                     return "PassageView.qml"
                                 }
@@ -65,7 +63,7 @@ Item {
                             function getMarginForTag(tag) {
                                 if (tag === "quote") {
                                     return units.gu(1)
-                                } else if (tag !== "") {
+                                } else if (tag !== "") { //TODO-r: Why margin for images?
                                     return units.gu(2)
                                 } else {
                                     return 0
