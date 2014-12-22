@@ -66,11 +66,6 @@ Item {
             }
 
             if (arrayContains(tagsWithChildren, tag)) { //else: don't parse
-                //Push not formatted text before the tag as an independent passage.
-                var notFormattedText = content.substring(oldPos, pos).trim() //TODO-r: Do this only if the tag can be parsed (i.e. a closing tag could be found)
-                if (notFormattedText !== "") {
-                    root.childElements.push(parse("", [], notFormattedText))
-                }
                 var endPos = pos
                 var moreStartTags = 1
 
@@ -100,6 +95,13 @@ Item {
                 //If the tag has been closed properly, push a new passage.
                 //Otherwise ignore the tag and continue to look for tags after the tag.
                 if (moreStartTags === 0) {
+                    //Push not formatted text before the tag as an independent passage.
+                    var notFormattedText = content.substring(oldPos, pos).trim()
+                    if (notFormattedText !== "") {
+                        root.childElements.push(parse("", [], notFormattedText))
+                    }
+
+                    //Push the new formatted passage.
                     root.childElements.push(parse(tag, arguments, content.substring(bracketClosePos + 1, endPos - 2).trim()))
                     oldPos = endPos + tag.length + 1
                     pos = oldPos
