@@ -1,7 +1,5 @@
 import QtQuick 2.3
 
-//TODO-r: trim() should also remove <br /> line breaks!!!
-
 Item {
     id: passageParser
 
@@ -136,6 +134,8 @@ Item {
         return false
     }
 
+    //In addition to what the normal trim() method does, this will also remove html
+    //line breaks (<br />) at the beginning and at the end of the given string.
     function htmlTrim(string) {
         while (true) {
             var trimmedString = string.trim()

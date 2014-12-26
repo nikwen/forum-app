@@ -23,6 +23,7 @@ Item {
                     id: passageColumn
                     width: parent.width
                     height: childrenRect.height
+                    spacing: units.gu(2.5)
 
                     onHeightChanged: {
                         layouts.height = height
