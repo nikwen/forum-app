@@ -98,13 +98,13 @@ Item {
                 //Otherwise ignore the tag and continue to look for tags after the tag.
                 if (moreStartTags === 0) {
                     //Push not formatted text before the tag as an independent passage.
-                    var notFormattedText = content.substring(oldPos, pos).trim()
+                    var notFormattedText = htmlTrim(content.substring(oldPos, pos))
                     if (notFormattedText !== "") {
                         root.childElements.push(parse("", [], notFormattedText))
                     }
 
                     //Push the new formatted passage.
-                    root.childElements.push(parse(tag, arguments, content.substring(bracketClosePos + 1, endPos - 2).trim()))
+                    root.childElements.push(parse(tag, arguments, htmlTrim(content.substring(bracketClosePos + 1, endPos - 2))))
                     oldPos = endPos + tag.length + 1
                     pos = oldPos
                 } else { //Exited while-loop via break
@@ -117,9 +117,9 @@ Item {
         //If no tags were found, set the text property of root to the post content.
         //Otherwise push the text after the last tag as an unformatted passage.
         if (root.childElements.length === 0) {
-            root.text = content.trim()
+            root.text = htmlTrim(content)
         } else {
-            var restText = content.substring(oldPos, content.length).trim()
+            var restText = htmlTrim(content.substring(oldPos, content.length))
             if (restText !== "") {
                 root.childElements.push(parse("", [], restText))
             }
@@ -134,6 +134,23 @@ Item {
             }
         }
         return false
+    }
+
+    function htmlTrim(string) {
+        while (true) {
+            var trimmedString = string.trim()
+            var breakIndex = string.indexOf("<br />")
+            var breakLastIndex = string.lastIndexOf("<br />")
+            if (trimmedString !== string) {
+                string = trimmedString
+            } else if (breakIndex === 0) {
+                string = string.substring(6)
+            } else if (breakLastIndex === string.length - 6) {
+                string = string.substring(0, breakLastIndex)
+            } else { //if nothing changes anymore
+                return string
+            }
+        }
     }
 
 }
