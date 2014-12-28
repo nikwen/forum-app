@@ -38,7 +38,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-                                leftMargin: getMarginForTag(modelData.tagType)
                             }
 
                             Loader {
@@ -61,16 +60,6 @@ Item {
                                     return "ImgPassageView.qml"
                                 } else {
                                     return "PassageView.qml"
-                                }
-                            }
-
-                            function getMarginForTag(tag) {
-                                if (tag === "quote") {
-                                    return units.gu(1)
-                                } else if (tag !== "" && tag !== "img") {
-                                    return units.gu(2)
-                                } else {
-                                    return 0
                                 }
                             }
                         }
