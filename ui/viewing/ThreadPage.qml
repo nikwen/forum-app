@@ -25,6 +25,8 @@ import Ubuntu.Components.Popups 1.0
 import "../components"
 import "../../backend"
 
+//TODO: Horizontal swiping
+
 PageWithBottomEdge {
     id: threadPage
     objectName: "threadPage"
@@ -162,104 +164,16 @@ PageWithBottomEdge {
         anchors.centerIn: threadList
     }
 
-    Row {
-        id: buttonsRow
-
-        anchors {
-            top: parent.top
-            topMargin: units.gu(1)
-            bottomMargin: units.gu(1)
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        spacing: units.gu(2)
-
-        Icon {
-            name: "media-skip-backward"
-            width: units.gu(4)
-            height: units.gu(4)
-
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    if (threadList.firstDisplayedPost !== 0) {
-                        threadList.loadPosts(0, backend.postsPerPage);
-                    }
-                }
-            }
-        }
-
-        Icon {
-            name: "media-playback-start-rtl"
-            width: units.gu(4)
-            height: units.gu(4)
-
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    if (threadList.firstDisplayedPost > 0) {
-                        threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
-                    }
-                }
-            }
-        }
-
-        Label {
-            id: pageLabel
-            anchors.verticalCenter: parent.verticalCenter
-            fontSize: "large"
-
-            text: threadList.totalPostCount !== -1 ? (Math.floor(threadList.firstDisplayedPost/backend.postsPerPage + 1) + " / " + pageCount) : ""
-        }
-
-        Icon {
-            name: "media-playback-start"
-            width: units.gu(4)
-            height: units.gu(4)
-
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
-                        threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
-                    }
-                }
-            }
-        }
-
-        Icon {
-            name: "media-skip-forward"
-            width: units.gu(4)
-            height: units.gu(4)
-
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
-                    var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
-                    if (beginningLastPage !== threadList.firstDisplayedPost) {
-                        threadList.loadPosts(beginningLastPage, backend.postsPerPage);
-                    }
-                }
-            }
-        }
-    }
-
     ThreadList {
         id: threadList
+        height: parent.height
         anchors {
-            top: buttonsRow.bottom
             left: parent.left
             right: parent.right
-            bottom: parent.bottom
         }
     }
 
-    Component {
+    Component { //TODO-r: Fix
         id: pageSelectionDialog
 
         Dialog {

@@ -58,6 +58,14 @@ ListView {
         postTime: model.postTime
     }
 
+    header: ThreadPageButtonRow {
+        visible: parsedThreadModel.count > 0
+    }
+
+    footer: ThreadPageButtonRow {
+        visible: parsedThreadModel.count > 0
+    }
+
     function loadPosts(startNum, count) {
         if (!threadModel.hasLoadedCompletely) { //Do nothing if it is already loading
             return

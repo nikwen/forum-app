@@ -10,7 +10,7 @@ Item {
 
     height: childrenRect.height
 
-    Layouts {
+    Layouts { //TODO-r: Use synchronous Loader to fix remaining scrolling issues
         id: layouts
         width: parent.width
 
