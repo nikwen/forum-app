@@ -37,7 +37,7 @@ Page {
 
         OneLineSubtitledListItem {
             text: i18n.tr("Signature")
-            subText: backend.signature
+            subText: (backend.signature !== "") ? backend.signature : i18n.tr("Displays a signature below all of your posts…")
             progression: true
 
             onClicked: {
