@@ -42,8 +42,8 @@ PageWithBottomEdge {
     property alias current_forum: forumsList.current_forum
     property bool isForumOverview: current_forum === 0
 
-    property int selectedTopicId: -1
-    property int selectedForumId: -1
+    property string selectedTopicId: "-1"
+    property string selectedForumId: "-1"
     property string selectedTitle: ""
     property bool selectedCanSubscribe: false
     property bool selectedIsSubscribed: false
@@ -228,8 +228,8 @@ PageWithBottomEdge {
     function pushSubForumPage(forumId, title, canSubscribe, isSubscribed) {
         selectedForumId = forumId
         selectedTitle = title
-        selectedCanSubscribe = (typeof(canSubscribe) === "bool" || typeof(canSubscribe) === "number") ? canSubscribe : true
-        selectedIsSubscribed = (typeof(isSubscribed) === "bool" || typeof(isSubscribed) === "number") ? isSubscribed : false
+        selectedCanSubscribe = (typeof(canSubscribe) === "boolean" || typeof(canSubscribe) === "number") ? canSubscribe : true
+        selectedIsSubscribed = (typeof(isSubscribed) === "boolean" || typeof(isSubscribed) === "number") ? isSubscribed : false
         component = Qt.createComponent("SubForumPage.qml")
 
         if (component.status === Component.Ready) {

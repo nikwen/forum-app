@@ -44,10 +44,10 @@ XmlListModel {
     property bool supportSHA1: false
     property bool subscribeForum: true
 
-    XmlRole { name: "support_md5"; query: "member[name='support_md5']/value/number()" }
-    XmlRole { name: "support_sha1"; query: "member[name='support_sha1']/value/number()" }
-    XmlRole { name: "version"; query: "member[name='version']/value/string()" }
-    XmlRole { name: "subscribe_forum"; query: "member[name='subscribe_forum']/value/number()" }
+    XmlRole { name: "support_md5"; query: "member[name='support_md5']/value/string/string()" }
+    XmlRole { name: "support_sha1"; query: "member[name='support_sha1']/value/string/string()" }
+    XmlRole { name: "version"; query: "member[name='version']/value/string/string()" }
+    XmlRole { name: "subscribe_forum"; query: "member[name='subscribe_forum']/value/string/string()" }
 
     onStatusChanged: {
         if (status === XmlListModel.Ready) {
@@ -55,9 +55,9 @@ XmlListModel {
 
             version = element.version.trim()
             isVBulletin = version.indexOf("vb") === 0
-            supportMd5 = (typeof(element.support_md5) === "number") ? element.support_md5 : false
-            supportSHA1 = (typeof(element.support_sha1) === "number") ? element.support_sha1 : false
-            subscribeForum = (typeof(element.subscribe_forum) === "number") ? element.subscribe_forum : true
+            supportMd5 = element.support_md5 === "1"
+            supportSHA1 = element.support_sha1 === "1"
+            subscribeForum = (element.subscribe_forum !== "") ? element.subscribe_forum === "1" : true
 
             console.log("version: " + element.version.trim())
 
