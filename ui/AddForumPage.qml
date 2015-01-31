@@ -49,10 +49,21 @@ Page {
             onTriggered: {
                 if (nameTextField.text !== "" && urlTextField.text !== "") {
                     //Remove protocol from url (so that there are no multiple instances of one forum but with different prefixes)
-                    var url = urlTextField.text
+                    var url = urlTextField.text.trim()
                     var pos = url.indexOf("://")
                     if (pos === 4 || pos === 5) {
                         url = url.substring(pos + 3)
+                    }
+
+                    //Remove trailing slashes from url (see above for reasons)
+                    while ((pos = url.lastIndexOf("/")) !== -1 && pos === url.length - 1) { //-1 check to catch urls which only consist of slashes
+                        url = url.substring(0, url.length - 1)
+                    }
+
+                    //Return if the url only consisted of slashes
+                    if (url.trim() === "") {
+                        notification.show(i18n.tr("Error: Url is invalid"))
+                        return
                     }
 
                     //Check if name or url already exist
