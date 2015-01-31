@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.3
 import Ubuntu.Components 1.1
 
 //Source: https://raw.githubusercontent.com/iBeliever/ubuntu-ui-extras/master/Notification.qml
