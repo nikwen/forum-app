@@ -29,7 +29,6 @@ import QtQuick 2.3
 import QtQuick.XmlListModel 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
-import "../../stringutils.js" as StringUtils
 import "../../backend"
 
 
@@ -57,9 +56,9 @@ ListView {
     clip: true
 
     delegate: MessageDelegate {
-        titleText: StringUtils.base64_decode(model.title).trim()
-        content: StringUtils.base64_decode(model.content).trim()
-        authorText: StringUtils.base64_decode(model.author).trim()
+        titleText: Qt.atob(model.title).trim()
+        content: Qt.atob(model.content).trim()
+        authorText: Qt.atob(model.author).trim()
         avatar: model.avatar.trim()
         thanksInfo: model.thanks_info.trim()
         postTime: model.post_time.trim()
