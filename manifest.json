@@ -1,7 +1,7 @@
 {
     "name": "com.ubuntu.developer.nikwen.forum-app",
     "description": "Forum Browser for Ubuntu",
-    "framework": "ubuntu-sdk-14.10-qml-dev3",
+    "framework": "ubuntu-sdk-14.10-qml",
     "architecture": "all",
     "title": "Forum Browser",
     "hooks": {
