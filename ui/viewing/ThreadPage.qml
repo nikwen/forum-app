@@ -159,7 +159,7 @@ PageWithBottomEdge {
         }
     }
 
-    ActivityIndicator {
+    ActivityIndicator { //TODO-r: Also spin while no UI is visible yet
         id: loadingSpinner
         anchors.centerIn: threadList
     }
