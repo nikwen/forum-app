@@ -62,7 +62,7 @@ ListView {
         visible: parsedThreadModel.count > 0
     }
 
-    footer: ThreadPageButtonRow {
+    footer: ThreadPageButtonRow { //TODO-r: Hard to click buttons with bottom edge hint in front of it
         visible: parsedThreadModel.count > 0
     }
 

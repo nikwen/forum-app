@@ -32,20 +32,26 @@ Rectangle {
     property string postTime
 
     width: parent.width
-    height: childrenRect.height + (thanksLabel.visible ? units.gu(1) : -units.gu(1))
+    height: childrenRect.height + (thanksLabel.visible ? units.gu(4) : units.gu(2))
     anchors {
         horizontalCenter: parent.horizontalCenter
     }
     color: "white"
+    radius: units.gu(0.5)
 
     Item {
         id: headerRect
         height: childrenRect.height
-        width: parent.width
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            margins: units.gu(2)
+        }
 
         Item {
             id: iconItem
-            width: units.gu(7)
+            width: units.gu(5)
             height: width
 
             anchors {
@@ -78,11 +84,8 @@ Rectangle {
                 top: parent.top
                 left: iconItem.right
                 right: time.right
-                topMargin: units.gu(1)
                 leftMargin: units.gu(1)
             }
-            color: "black"
-            font.bold: true
         }
 
         Label {
@@ -91,9 +94,7 @@ Rectangle {
             anchors {
                 top: parent.top
                 right: parent.right
-                topMargin: units.gu(1)
                 leftMargin: units.gu(1)
-                rightMargin: units.gu(1)
             }
 
             function formatTime(time) {
@@ -119,14 +120,12 @@ Rectangle {
             id: title
             text: titleText
             wrapMode: Text.Wrap
-            font.italic: true
             visible: titleText !== undefined && titleText !== ""
             anchors {
                 top: author.bottom
                 left: iconItem.right
                 right: parent.right
                 leftMargin: units.gu(1)
-                rightMargin: units.gu(1)
             }
         }
     }
@@ -139,7 +138,7 @@ Rectangle {
             top: headerRect.bottom
             left: parent.left
             right: parent.right
-            margins: units.gu(1)
+            margins: units.gu(2)
         }
     }
 
@@ -153,7 +152,7 @@ Rectangle {
             top: bbRootView.bottom
             left: parent.left
             right: parent.right
-            margins: visible ? units.gu(1) : 0
+            margins: visible ? units.gu(2) : 0
         }
 
         property int thanksCount: occurrences(thanksInfo, "userid")
