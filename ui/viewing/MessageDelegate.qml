@@ -37,7 +37,7 @@ Rectangle {
         horizontalCenter: parent.horizontalCenter
     }
     color: "white"
-    radius: units.gu(0.5)
+//    radius: units.gu(0.5)
 
     Item {
         id: headerRect

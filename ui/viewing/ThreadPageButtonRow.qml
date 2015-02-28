@@ -11,7 +11,7 @@ Item {
         width: parent.width
         height: units.gu(6)
         color: "white"
-        radius: units.gu(0.5)
+//        radius: units.gu(0.5)
         anchors.verticalCenter: parent.verticalCenter
 
         Row {
