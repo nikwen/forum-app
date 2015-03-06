@@ -22,172 +22,192 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 import "bbcode"
 
-Rectangle {
-
-    property string titleText
-    property Passage postBody
-    property string avatar
-    property string authorText
-    property string thanksInfo
-    property string postTime
-    property int postNumber
+UbuntuShape {
 
     width: parent.width
-    height: childrenRect.height + (thanksLabel.visible ? units.gu(4) : units.gu(2))
+    height: contentRect.height
     anchors {
         horizontalCenter: parent.horizontalCenter
     }
     color: "white"
-//    radius: units.gu(0.5)
 
-    Item {
-        id: headerRect
-        height: childrenRect.height
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            margins: units.gu(2)
-        }
+    property alias titleText: contentRect.titleText
+    property alias postBody: contentRect.postBody
+    property alias avatar: contentRect.avatar
+    property alias authorText: contentRect.authorText
+    property alias thanksInfo: contentRect.thanksInfo
+    property alias postTime: contentRect.postTime
+    property alias postNumber: contentRect.postNumber
+
+    Rectangle {
+        id: contentRect
+
+        property string titleText
+        property Passage postBody
+        property string avatar
+        property string authorText
+        property string thanksInfo
+        property string postTime
+        property int postNumber
+
+        width: parent.width
+        height: childrenRect.height + (thanksLabel.visible ? units.gu(4) : units.gu(2))
+//        anchors {
+//            horizontalCenter: parent.horizontalCenter
+//        }
+//        color: "white"
+        color: "transparent"
+    //    radius: units.gu(0.5)
 
         Item {
-            id: iconItem
-            width: units.gu(5)
-            height: width
-
+            id: headerRect
+            height: childrenRect.height
             anchors {
                 top: parent.top
                 left: parent.left
+                right: parent.right
+                margins: units.gu(2)
             }
 
-            Image {
-                id: avatarp
-                source: if(avatar === "") { "../../graphics/contact.svg" } else { avatar }
+            Item {
+                id: iconItem
                 width: units.gu(5)
                 height: width
-                anchors.centerIn: parent
 
-                onStatusChanged: { if(avatarp.status === Image.Ready || avatar === "") { load_image.running=false; } }
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                }
+
+                Image {
+                    id: avatarp
+                    source: if(avatar === "") { "../../graphics/contact.svg" } else { avatar }
+                    width: units.gu(5)
+                    height: width
+                    anchors.centerIn: parent
+
+                    onStatusChanged: { if(avatarp.status === Image.Ready || avatar === "") { load_image.running=false; } }
+                }
+
+                ActivityIndicator {
+                    id: load_image
+                    z: 100
+                    anchors.centerIn: parent
+                    running: true
+                }
             }
 
-            ActivityIndicator {
-                id: load_image
-                z: 100
-                anchors.centerIn: parent
-                running: true
+            Label {
+                id: author
+                text: authorText
+                anchors {
+                    top: parent.top
+                    left: iconItem.right
+                    right: time.right
+                    leftMargin: units.gu(1)
+                }
+            }
+
+            Label {
+                id: time
+                text: formatTime(postTime)
+                anchors {
+                    bottom: iconItem.bottom
+                    left: iconItem.right
+                    right: parent.right
+                    leftMargin: units.gu(1)
+                }
+
+                function formatTime(time) {
+                    if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
+                        time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
+                    }
+
+                    var postDate = new Date(time)
+
+                    var todaysDate = new Date()
+
+                    if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
+                        //TRANSLATORS: Refers to the time when a post was made
+                        return qsTr(i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
+                    } else if (postDate.getFullYear() === todaysDate.getFullYear()) {
+                        //TRANSLATORS: Refers to the date when a post was made
+                        return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
+                    } else {
+                        //TRANSLATORS: Refers to the date when a post was made
+                        return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy"))) //TODO: Localize (+ translator comments for format strings)!!!
+                    }
+                }
+            }
+
+            Label {
+                id: postNumberLabel
+                text: "#" + postNumber
+                anchors { //TODO-r: Left limit
+                    top: parent.top
+                    right: parent.right
+                    rightMargin: units.gu(0.5)
+                }
             }
         }
 
         Label {
-            id: author
-            text: authorText
+            id: titleLabel
+            text: titleText
+            wrapMode: Text.Wrap
+            visible: titleText !== undefined && titleText !== ""
             anchors {
-                top: parent.top
-                left: iconItem.right
-                right: time.right
-                leftMargin: units.gu(1)
+                top: headerRect.bottom
+                left: parent.left
+                right: parent.right
+                margins: visible ? units.gu(2) : units.gu(0)
             }
         }
 
-        Label {
-            id: time
-            text: formatTime(postTime)
+        PassageView {
+            id: bbRootView
+            dataItem: postBody
+
             anchors {
-                bottom: iconItem.bottom
-                left: iconItem.right
+                top: titleLabel.bottom
+                left: parent.left
                 right: parent.right
-                leftMargin: units.gu(1)
-            }
-
-            function formatTime(time) {
-                if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
-                    time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
-                }
-
-                var postDate = new Date(time)
-
-                var todaysDate = new Date()
-
-                if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
-                    //TRANSLATORS: Refers to the time when a post was made
-                    return qsTr(i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
-                } else if (postDate.getFullYear() === todaysDate.getFullYear()) {
-                    //TRANSLATORS: Refers to the date when a post was made
-                    return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
-                } else {
-                    //TRANSLATORS: Refers to the date when a post was made
-                    return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy"))) //TODO: Localize (+ translator comments for format strings)!!!
-                }
+                margins: units.gu(2)
+                topMargin: titleLabel.visible ? units.gu(2) : units.gu(0)
             }
         }
 
         Label {
-            id: postNumberLabel
-            text: "#" + postNumber
-            anchors { //TODO-r: Left limit
-                top: parent.top
+            id: thanksLabel
+            wrapMode: Text.Wrap
+            visible: thanksInfo !== undefined && thanksInfo !== "" && thanksCount > 0
+            text: qsTr((thanksCount === 1) ? i18n.tr("%1 user thanked %2 for this useful post") : i18n.tr("%1 users thanked %2 for this useful post")).arg(thanksCount).arg(authorText)
+            fontSize: "small"
+            anchors {
+                top: bbRootView.bottom
+                left: parent.left
                 right: parent.right
-                rightMargin: units.gu(0.5)
+                margins: visible ? units.gu(2) : 0
             }
-        }
-    }
 
-    Label {
-        id: titleLabel
-        text: titleText
-        wrapMode: Text.Wrap
-        visible: titleText !== undefined && titleText !== ""
-        anchors {
-            top: headerRect.bottom
-            left: parent.left
-            right: parent.right
-            margins: visible ? units.gu(2) : units.gu(0)
-        }
-    }
+            property int thanksCount: occurrences(thanksInfo, "userid")
 
-    PassageView {
-        id: bbRootView
-        dataItem: postBody
+            function occurrences(string, subString) {
+                var n = 0
+                var pos = 0
+                var step = subString.length
 
-        anchors {
-            top: titleLabel.bottom
-            left: parent.left
-            right: parent.right
-            margins: units.gu(2)
-            topMargin: titleLabel.visible ? units.gu(2) : units.gu(0)
-        }
-    }
-
-    Label {
-        id: thanksLabel
-        wrapMode: Text.Wrap
-        visible: thanksInfo !== undefined && thanksInfo !== "" && thanksCount > 0
-        text: qsTr((thanksCount === 1) ? i18n.tr("%1 user thanked %2 for this useful post") : i18n.tr("%1 users thanked %2 for this useful post")).arg(thanksCount).arg(authorText)
-        fontSize: "small"
-        anchors {
-            top: bbRootView.bottom
-            left: parent.left
-            right: parent.right
-            margins: visible ? units.gu(2) : 0
-        }
-
-        property int thanksCount: occurrences(thanksInfo, "userid")
-
-        function occurrences(string, subString) {
-            var n = 0
-            var pos = 0
-            var step = subString.length
-
-            while (true) {
-                pos = string.indexOf(subString,pos)
-                if (pos >= 0) {
-                    n++
-                    pos += step
-                } else {
-                    break
+                while (true) {
+                    pos = string.indexOf(subString,pos)
+                    if (pos >= 0) {
+                        n++
+                        pos += step
+                    } else {
+                        break
+                    }
                 }
+                return n
             }
-            return n
         }
     }
 }
