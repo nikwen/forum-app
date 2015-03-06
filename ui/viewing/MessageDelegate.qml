@@ -30,6 +30,7 @@ Rectangle {
     property string authorText
     property string thanksInfo
     property string postTime
+    property int postNumber
 
     width: parent.width
     height: childrenRect.height + (thanksLabel.visible ? units.gu(4) : units.gu(2))
@@ -92,7 +93,8 @@ Rectangle {
             id: time
             text: formatTime(postTime)
             anchors {
-                top: parent.top
+                bottom: iconItem.bottom
+                left: iconItem.right
                 right: parent.right
                 leftMargin: units.gu(1)
             }
@@ -107,26 +109,39 @@ Rectangle {
                 var todaysDate = new Date()
 
                 if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
-                    return Qt.formatTime(postDate, i18n.tr("hh:mm"))
+                    //TRANSLATORS: Refers to the time when a post was made
+                    return qsTr(i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
                 } else if (postDate.getFullYear() === todaysDate.getFullYear()) {
-                    return Qt.formatDate(postDate, i18n.tr("dd MMM"))
+                    //TRANSLATORS: Refers to the date when a post was made
+                    return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
                 } else {
-                    return Qt.formatDate(postDate, i18n.tr("dd/MM/yyyy")) //TODO: Localize!!!
+                    //TRANSLATORS: Refers to the date when a post was made
+                    return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy"))) //TODO: Localize (+ translator comments for format strings)!!!
                 }
             }
         }
 
         Label {
-            id: title
-            text: titleText
-            wrapMode: Text.Wrap
-            visible: titleText !== undefined && titleText !== ""
-            anchors {
-                top: author.bottom
-                left: iconItem.right
+            id: postNumberLabel
+            text: "#" + postNumber
+            anchors { //TODO-r: Left limit
+                top: parent.top
                 right: parent.right
-                leftMargin: units.gu(1)
+                rightMargin: units.gu(0.5)
             }
+        }
+    }
+
+    Label {
+        id: titleLabel
+        text: titleText
+        wrapMode: Text.Wrap
+        visible: titleText !== undefined && titleText !== ""
+        anchors {
+            top: headerRect.bottom
+            left: parent.left
+            right: parent.right
+            margins: visible ? units.gu(2) : units.gu(0)
         }
     }
 
@@ -135,10 +150,11 @@ Rectangle {
         dataItem: postBody
 
         anchors {
-            top: headerRect.bottom
+            top: titleLabel.bottom
             left: parent.left
             right: parent.right
             margins: units.gu(2)
+            topMargin: titleLabel.visible ? units.gu(2) : units.gu(0)
         }
     }
 

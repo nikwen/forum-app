@@ -56,6 +56,7 @@ ListView {
         avatar: model.avatar
         thanksInfo: model.thanksInfo
         postTime: model.postTime
+        postNumber: model.index + firstDisplayedPost + 1
     }
 
     header: ThreadPageButtonRow {
