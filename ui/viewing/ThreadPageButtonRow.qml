@@ -27,37 +27,57 @@ Item {
                 height: childrenRect.height
                 anchors.centerIn: parent
 
-                spacing: units.gu(2)
+                spacing: units.gu(1)
 
-                Icon {
-                    name: "media-skip-backward"
-                    width: units.gu(4)
-                    height: units.gu(4)
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    MouseArea {
-                        anchors.fill: parent
+                    Icon { //TODO-r: Really height of Label
+                        name: "go-first"
+                        width: height
+                        height: firstLabel.height
 
-                        onClicked: {
-                            if (threadList.firstDisplayedPost !== 0) {
-                                threadList.loadPosts(0, backend.postsPerPage);
+                        MouseArea { //TODO-r: Center in Row
+                            anchors.fill: parent
+
+                            onClicked: {
+                                if (threadList.firstDisplayedPost !== 0) {
+                                    threadList.loadPosts(0, backend.postsPerPage);
+                                }
                             }
                         }
                     }
+
+                    Label {
+                        id: firstLabel
+                        text: i18n.tr("First")
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                 }
 
-                Icon {
-                    name: "media-playback-start-rtl"
-                    width: units.gu(4)
-                    height: units.gu(4)
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    MouseArea {
-                        anchors.fill: parent
+                    Icon {
+                        name: "go-previous"
+                        width: height
+                        height: backLabel.height
 
-                        onClicked: {
-                            if (threadList.firstDisplayedPost > 0) {
-                                threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
+                        MouseArea {
+                            anchors.fill: parent
+
+                            onClicked: {
+                                if (threadList.firstDisplayedPost > 0) {
+                                    threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
+                                }
                             }
                         }
+                    }
+
+                    Label {
+                        id: backLabel
+                        text: i18n.tr("Back")
+                        anchors.verticalCenter: parent.verticalCenter
                     }
                 }
 
@@ -69,35 +89,55 @@ Item {
                     text: threadList.totalPostCount !== -1 ? (Math.floor(threadList.firstDisplayedPost/backend.postsPerPage + 1) + " / " + pageCount) : ""
                 }
 
-                Icon {
-                    name: "media-playback-start"
-                    width: units.gu(4)
-                    height: units.gu(4)
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    MouseArea {
-                        anchors.fill: parent
+                    Label {
+                        id: nextLabel
+                        text: i18n.tr("Next")
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
 
-                        onClicked: {
-                            if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
-                                threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
+                    Icon {
+                        name: "go-next"
+                        width: height
+                        height: nextLabel.height
+
+                        MouseArea {
+                            anchors.fill: parent
+
+                            onClicked: {
+                                if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
+                                    threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
+                                }
                             }
                         }
                     }
                 }
 
-                Icon {
-                    name: "media-skip-forward"
-                    width: units.gu(4)
-                    height: units.gu(4)
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    MouseArea {
-                        anchors.fill: parent
+                    Label {
+                        id: lastLabel
+                        text: i18n.tr("Last")
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
 
-                        onClicked: {
-                            var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
-                            var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
-                            if (beginningLastPage !== threadList.firstDisplayedPost) {
-                                threadList.loadPosts(beginningLastPage, backend.postsPerPage);
+                    Icon {
+                        name: "go-last"
+                        width: height
+                        height: lastLabel.height
+
+                        MouseArea {
+                            anchors.fill: parent
+
+                            onClicked: {
+                                var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
+                                var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
+                                if (beginningLastPage !== threadList.firstDisplayedPost) {
+                                    threadList.loadPosts(beginningLastPage, backend.postsPerPage);
+                                }
                             }
                         }
                     }
