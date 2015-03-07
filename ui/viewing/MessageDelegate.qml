@@ -26,38 +26,21 @@ UbuntuShape {
 
     width: parent.width
     height: contentRect.height
-    anchors {
-        horizontalCenter: parent.horizontalCenter
-    }
     color: "white"
 
-    property alias titleText: contentRect.titleText
-    property alias postBody: contentRect.postBody
-    property alias avatar: contentRect.avatar
-    property alias authorText: contentRect.authorText
-    property alias thanksInfo: contentRect.thanksInfo
-    property alias postTime: contentRect.postTime
-    property alias postNumber: contentRect.postNumber
+    property string titleText
+    property Passage postBody
+    property string avatar
+    property string authorText
+    property string thanksInfo
+    property string postTime
+    property int postNumber
 
-    Rectangle {
+    Item {
         id: contentRect
-
-        property string titleText
-        property Passage postBody
-        property string avatar
-        property string authorText
-        property string thanksInfo
-        property string postTime
-        property int postNumber
 
         width: parent.width
         height: childrenRect.height + (thanksLabel.visible ? units.gu(4) : units.gu(2))
-//        anchors {
-//            horizontalCenter: parent.horizontalCenter
-//        }
-//        color: "white"
-        color: "transparent"
-    //    radius: units.gu(0.5)
 
         Item {
             id: headerRect
@@ -80,17 +63,21 @@ UbuntuShape {
                 }
 
                 Image {
-                    id: avatarp
+                    id: avatarImage
                     source: if(avatar === "") { "../../graphics/contact.svg" } else { avatar }
                     width: units.gu(5)
                     height: width
                     anchors.centerIn: parent
 
-                    onStatusChanged: { if(avatarp.status === Image.Ready || avatar === "") { load_image.running=false; } }
+                    onStatusChanged: {
+                        if (avatarImage.status === Image.Ready || avatar === "") {
+                            imageActivityIndicator.running = false
+                        }
+                    }
                 }
 
                 ActivityIndicator {
-                    id: load_image
+                    id: imageActivityIndicator
                     z: 100
                     anchors.centerIn: parent
                     running: true
@@ -126,6 +113,8 @@ UbuntuShape {
                     var postDate = new Date(time)
 
                     var todaysDate = new Date()
+
+                    //TODO-r: Format: 3 hours ago, 2 days ago, March 2014
 
                     if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
                         //TRANSLATORS: Refers to the time when a post was made

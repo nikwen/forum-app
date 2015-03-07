@@ -2,6 +2,8 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
+//TODO-r: Solution similar to gallery navigation on m.heise.de
+
 Item {
     width: parent.width
     height: units.gu(8)
