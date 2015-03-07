@@ -2,6 +2,8 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 import Ubuntu.Layouts 1.0
 
+//TODO: Show only 5 lines + a "show more" label
+
 Rectangle {
     height: quoteLabel.height + 2 * quoteLabel.anchors.margins + passageView.height + 2 * passageView.anchors.margins
     color: "#EEEEEE"
