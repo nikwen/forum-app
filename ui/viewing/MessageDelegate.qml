@@ -88,21 +88,24 @@ UbuntuShape {
             Label {
                 id: author
                 text: authorText
+                elide: Text.ElideRight
                 anchors {
                     top: parent.top
                     left: iconItem.right
-                    right: time.right
+                    right: postNumberLabel.left
+                    rightMargin: units.gu(1)
                     leftMargin: units.gu(1)
                 }
             }
 
             Label {
                 id: time
-                text: formatIsoTime(postTime) + ((editTime !== "") ? qsTr(i18n.tr(" (last edited: %1)")).arg(formatUnixTimestamp(editTime)) : "") //TODO-r: Edit date start with lowercase letter
+                text: formatIsoTime(postTime) + ((editTime !== "") ? qsTr(i18n.tr(" (last edited %1)")).arg(formatUnixTimestamp(editTime)) : "") //TODO-r: Edit date start with lowercase letter
+                elide: Text.ElideRight
                 anchors {
                     bottom: iconItem.bottom
                     left: iconItem.right
-                    right: parent.right
+                    right: postNumberLabel.right
                     leftMargin: units.gu(1)
                 }
 
@@ -141,7 +144,7 @@ UbuntuShape {
             Label {
                 id: postNumberLabel
                 text: "#" + postNumber
-                anchors { //TODO-r: Left limit
+                anchors {
                     top: parent.top
                     right: parent.right
                     rightMargin: units.gu(0.5)
