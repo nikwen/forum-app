@@ -34,6 +34,7 @@ UbuntuShape {
     property string authorText
     property string thanksInfo
     property string postTime
+    property string editTime
     property int postNumber
 
     Item {
@@ -97,7 +98,7 @@ UbuntuShape {
 
             Label {
                 id: time
-                text: formatTime(postTime)
+                text: formatIsoTime(postTime) + ((editTime !== "") ? qsTr(i18n.tr(" (last edited: %1)")).arg(formatUnixTimestamp(editTime)) : "") //TODO-r: Edit date start with lowercase letter
                 anchors {
                     bottom: iconItem.bottom
                     left: iconItem.right
@@ -105,13 +106,7 @@ UbuntuShape {
                     leftMargin: units.gu(1)
                 }
 
-                function formatTime(time) {
-                    if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
-                        time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
-                    }
-
-                    var postDate = new Date(time)
-
+                function formatTime(postDate) {
                     var todaysDate = new Date()
 
                     //TODO-r: Format: 3 hours ago, 2 days ago, March 2014
@@ -126,6 +121,20 @@ UbuntuShape {
                         //TRANSLATORS: Refers to the date when a post was made
                         return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy"))) //TODO: Localize (+ translator comments for format strings)!!!
                     }
+                }
+
+                function formatUnixTimestamp(time) {
+                    var date = new Date(time * 1000)
+                    return formatTime(date)
+                }
+
+                function formatIsoTime(time) {
+                    if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
+                        time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
+                    }
+
+                    var date = new Date(time)
+                    return formatTime(date)
                 }
             }
 

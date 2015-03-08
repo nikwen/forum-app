@@ -56,6 +56,7 @@ ListView {
         avatar: model.avatar
         thanksInfo: model.thanksInfo
         postTime: model.postTime
+        editTime: model.editTime
         postNumber: model.index + firstDisplayedPost + 1
     }
 
@@ -105,6 +106,7 @@ ListView {
         XmlRole { name: "avatar"; query: "member[name='icon_url']/value/string/string()" }
         XmlRole { name: "thanks_info"; query: "member[name='thanks_info']/value/array/data/string()" }
         XmlRole { name: "post_time"; query: "member[name='post_time']/value/dateTime.iso8601/string()" }
+        XmlRole { name: "edit_time"; query: "member[name='edit_time']/value/string/string()" }
 
         onStatusChanged: {
             if (status === 1) {
@@ -112,7 +114,7 @@ ListView {
 
                 for (var i = 0; i < count; i++) {
                     var element = get(i)
-                    parsedThreadModel.append({ "id": element.id, "title": Qt.atob(element.title).trim(), "postBody": passageParser.parse("", [], Qt.atob(element.content)), "author": Qt.atob(element.author).trim(), "avatar": element.avatar.trim(), "thanksInfo": element.thanks_info.trim(), "postTime": element.post_time.trim() })
+                    parsedThreadModel.append({ "id": element.id, "title": Qt.atob(element.title).trim(), "postBody": passageParser.parse("", [], Qt.atob(element.content)), "author": Qt.atob(element.author).trim(), "avatar": element.avatar.trim(), "thanksInfo": element.thanks_info.trim(), "postTime": element.post_time.trim(), "editTime": element.edit_time.trim() })
                 }
 
                 //Extract the total number of posts from XML

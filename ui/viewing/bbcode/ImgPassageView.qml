@@ -2,6 +2,7 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 
 //TODO-r: More visually pleasing while loading image and while showing error message, maybe put a grey box around the view in that case (like for quotes)
+//TODO-r: Binding loop
 
 Item {
     property var dataItem
