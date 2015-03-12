@@ -28,6 +28,7 @@ PageWithBottomEdge {
     id: forumsPage
     objectName: "forumsPage"
     title: i18n.tr("Forums")
+    flickable: null
 
     property bool disableBottomEdge: false
     property alias viewSubscriptions: forumsList.viewSubscriptions //Not via mode for maintainability (e.g. you easily forget to add a && mode === "SUBS" when adding a mode === "" to an if-statement for basic topic list features)
@@ -47,12 +48,15 @@ PageWithBottomEdge {
     property bool isSubscribed: false
     property bool canSubscribe: false
 
+    property real appHeaderHeight: 0
+
     bottomEdgeTitle: i18n.tr("Subscriptions")
     bottomEdgeEnabled: !disableBottomEdge && current_forum >= 0 && backend.currentSession.loggedIn
     bottomEdgePageSource: (!disableBottomEdge && current_forum >= 0) ? Qt.resolvedUrl("SubForumPage.qml") : ""
 
     onBottomEdgeReleased: {
         if (!isCollapsed) {
+            bottomEdgePage.appHeaderHeight = appHeaderHeight
             bottomEdgePage.loadingSpinnerRunning = true
             bottomEdgePage.viewSubscriptions = true
             bottomEdgePage.title = i18n.tr("Subscriptions")
@@ -206,13 +210,21 @@ PageWithBottomEdge {
 
     ActivityIndicator {
         id: loadingSpinner
-        anchors.centerIn: forumsList
+
+        anchors {
+            centerIn: forumsList
+            verticalCenterOffset: appHeaderHeight / 2
+        }
+
+        Component.onCompleted: { //Determines header height (needed for offset), then sets flickable
+            appHeaderHeight = mainView.height - forumsList.height
+            parent.flickable = forumsList
+        }
     }
 
-    SubForumList {
+    SubForumList { //TODO-r: Fix bottom edge
         id: forumsList
-        height: parent.height //No anchors.fill due to bottom edge
-        width: parent.width
+        anchors.fill: parent
 
         mode: (forumsPage.head.sections.selectedIndex === 1) ? "TOP" : ((forumsPage.head.sections.selectedIndex === 2) ? "ANN" : "")
 
@@ -279,11 +291,6 @@ PageWithBottomEdge {
             right: parent.right
             margins: units.gu(2)
         }
-    }
-
-    Scrollbar {
-        flickableItem: forumsList
-        align: Qt.AlignTrailing
     }
 
 }

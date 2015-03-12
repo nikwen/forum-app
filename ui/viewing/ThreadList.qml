@@ -40,8 +40,6 @@ ListView {
     property bool vBulletinAnnouncement: false
 
     anchors {
-        topMargin: units.gu(1)
-        bottomMargin: units.gu(1)
         leftMargin: units.gu(1)
         rightMargin: units.gu(1)
     }

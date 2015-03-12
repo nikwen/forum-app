@@ -112,7 +112,7 @@ UbuntuShape {
                 function formatTime(postDate) {
                     var todaysDate = new Date()
 
-                    //TODO-r: Format: 3 hours ago, 2 days ago, March 2014
+                    //TODO-r: Format: 3 hours ago, 2 days ago, March 2014, just now
 
                     if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
                         //TRANSLATORS: Refers to the time when a post was made

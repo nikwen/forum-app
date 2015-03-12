@@ -53,10 +53,6 @@ PageWithBottomEdge {
         }
     }
 
-    Component.onCompleted: { //TODO: Check if still needed
-        header.show() //Workaround to show the header when it was previously hidden in SubForumPage
-    }
-
     Connections {
         target: pageStack
 
@@ -159,18 +155,20 @@ PageWithBottomEdge {
         }
     }
 
+     //TODO-r: Fix bottom edge
     ActivityIndicator { //TODO-r: Also spin while no UI is visible yet
         id: loadingSpinner
         anchors.centerIn: threadList
+
+        Component.onCompleted: { //Determines header height and sets offset, then sets flickable
+            anchors.verticalCenterOffset = (mainView.height - threadList.height) / 2
+            parent.flickable = threadList
+        }
     }
 
     ThreadList {
         id: threadList
-        height: parent.height
-        anchors {
-            left: parent.left
-            right: parent.right
-        }
+        anchors.fill: parent
     }
 
     Component { //TODO-r: Fix
