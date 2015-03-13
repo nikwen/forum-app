@@ -71,9 +71,7 @@ UbuntuShape {
                     anchors.centerIn: parent
 
                     onStatusChanged: {
-                        if (avatarImage.status === Image.Ready || avatar === "") {
-                            imageActivityIndicator.running = false
-                        } else if (avatarImage.status === Image.Error) { //Load default avatar in case of a loading error
+                        if (avatarImage.status === Image.Error) { //Load default avatar in case of a loading error
                             avatar = ""
                         }
                     }
@@ -81,9 +79,8 @@ UbuntuShape {
 
                 ActivityIndicator {
                     id: imageActivityIndicator
-                    z: 100
                     anchors.centerIn: parent
-                    running: true
+                    running: avatarImage.status !== Image.Ready
                 }
             }
 
