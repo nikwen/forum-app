@@ -42,7 +42,6 @@ PageWithBottomEdge {
     property bool selectedCanSubscribe: false
     property bool selectedIsSubscribed: false
 
-    property alias loadingSpinnerRunning: loadingSpinner.running
     property bool showSections: false
 
     property bool isSubscribed: false
@@ -57,7 +56,6 @@ PageWithBottomEdge {
     onBottomEdgeReleased: {
         if (!isCollapsed) {
             bottomEdgePage.appHeaderHeight = appHeaderHeight
-            bottomEdgePage.loadingSpinnerRunning = true
             bottomEdgePage.viewSubscriptions = true
             bottomEdgePage.title = i18n.tr("Subscriptions")
             bottomEdgePage.disableBottomEdge = true
@@ -208,8 +206,10 @@ PageWithBottomEdge {
         }
     ]
 
-    ActivityIndicator {
+    ActivityIndicator { //TODO-r: Empty error view when loading fails in ApiRequest
         id: loadingSpinner
+
+        running: forumsList.model.count === 0 && !forumsList.modelsHaveLoadedCompletely
 
         anchors {
             centerIn: forumsList
@@ -245,7 +245,7 @@ PageWithBottomEdge {
     }
 
     function finishSubForumPageCreation() {
-        var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedForumId, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
+        var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedForumId, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
         page.onIsSubscribedChanged.connect(function() { //Change is_subscribed attribute when the subscription state is changed
             for (var i = 0; i < forumsList.model.count; i++) {
                 if (forumsList.model.get(i).id === selectedForumId) {
@@ -280,7 +280,7 @@ PageWithBottomEdge {
     Label {
         id: emptyView
         text: viewSubscriptions ? i18n.tr("You are not subscribed to any topics or forums") : ((forumsList.mode === "") ? i18n.tr("No topics available here") : ((forumsList.mode === "TOP") ? i18n.tr("No stickies available here") : i18n.tr("No announcements available here")))
-        visible: forumsList.model.count === 0 && !loadingSpinnerRunning && (current_forum > 0 || viewSubscriptions)
+        visible: forumsList.model.count === 0 && forumsList.modelsHaveLoadedCompletely && (current_forum > 0 || viewSubscriptions)
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignHCenter

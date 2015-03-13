@@ -83,16 +83,11 @@ ListView {
         id: forumListModel
 
         Component.onCompleted: {
-            backend.currentSession.loginDone.connect(clearSetLoading)
+            backend.currentSession.loginDone.connect(clear)
         }
 
         Component.onDestruction: {
-            backend.currentSession.loginDone.disconnect(clearSetLoading)
-        }
-
-        function clearSetLoading() {
-            clear()
-            loadingSpinnerRunning = true
+            backend.currentSession.loginDone.disconnect(clear)
         }
     }
 
@@ -114,7 +109,6 @@ ListView {
 
     function reload() {
         forumListModel.clear()
-        loadingSpinner.running = true
         if (mode === "") {
             categoryModel.loadForums()
         }
@@ -217,7 +211,6 @@ ListView {
 
         function loadingFinished() {
             hasLoadedCompletely = true
-            loadingSpinner.running = !(topicModel.hasLoadedCompletely || current_forum === 0)
 
             if (isForumOverview) {
                 parseFetchedXml()
@@ -406,7 +399,6 @@ ListView {
 
             moreLoading = false
             hasLoadedCompletely = true
-            loadingSpinner.running = !categoryModel.hasLoadedCompletely
         }
 
         Component.onCompleted: {

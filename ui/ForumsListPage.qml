@@ -127,7 +127,6 @@ Page {
                 var page = component.createObject(mainView, {"current_forum": 0, "title": text})
                 if (page === null) console.log(component.errorString())
                 pageStack.push(page)
-                page.loadingSpinnerRunning = true
             }
 
             onPressAndHold: {
