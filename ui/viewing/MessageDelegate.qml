@@ -65,7 +65,7 @@ UbuntuShape {
 
                 Image {
                     id: avatarImage
-                    source: if(avatar === "") { "../../graphics/contact.svg" } else { avatar }
+                    source: (avatar === "") ? "../../graphics/contact.svg" : avatar
                     width: units.gu(5)
                     height: width
                     anchors.centerIn: parent
@@ -73,6 +73,8 @@ UbuntuShape {
                     onStatusChanged: {
                         if (avatarImage.status === Image.Ready || avatar === "") {
                             imageActivityIndicator.running = false
+                        } else if (avatarImage.status === Image.Error) { //Load default avatar in case of a loading error
+                            avatar = ""
                         }
                     }
                 }
