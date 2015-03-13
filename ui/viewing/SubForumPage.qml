@@ -287,6 +287,7 @@ PageWithBottomEdge {
         fontSize: "large"
         anchors {
             verticalCenter: parent.verticalCenter
+            verticalCenterOffset: appHeaderHeight / 2
             left: parent.left
             right: parent.right
             margins: units.gu(2)

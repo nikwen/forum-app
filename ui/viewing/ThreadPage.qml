@@ -115,7 +115,6 @@ PageWithBottomEdge {
                 var popup = PopupUtils.open(pageSelectionDialog, pageLabel)
                 var selected = threadList.firstDisplayedPost / backend.postsPerPage
                 popup.itemSelector.selectedIndex = selected
-//                popup.itemSelector.positionViewAtIndex(selected, ListView.Center) //TODO: Add to UI Toolkit?
             }
         }
     ]
