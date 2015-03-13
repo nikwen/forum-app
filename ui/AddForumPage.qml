@@ -106,10 +106,22 @@ Page {
 
             function cleanUpTrailingChars(url) { //TODO-r: Remove # marks from url
                 var pos
+                var noChange = false
 
-                //Remove trailing slashes from url
-                while ((pos = url.lastIndexOf("/")) !== -1 && pos === url.length - 1) { //-1 check to catch urls which only consist of slashes
-                    url = url.substring(0, url.length - 1)
+                while (!noChange) {
+                    noChange = true
+
+                    //Remove trailing slashes from url
+                    while ((pos = url.lastIndexOf("/")) !== -1 && pos === url.length - 1) { //-1 check to catch urls which only consist of slashes
+                        url = url.substring(0, url.length - 1)
+                        noChange = false
+                    }
+
+                    //Remove sharps (#) from url
+                    if ((pos = url.indexOf("#")) !== -1) {
+                        url = url.substring(0, pos)
+                        noChange = false
+                    }
                 }
 
                 return url
