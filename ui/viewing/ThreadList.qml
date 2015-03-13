@@ -73,7 +73,6 @@ ListView {
 
         parsedThreadModel.clear()
         totalPostCount = -1
-        loadingSpinner.running = true
         threadModel.loadPosts(startNum, count)
     }
 
@@ -211,7 +210,6 @@ ListView {
         id: loadThreadListRequest
 
         onQueryResult: {
-            loadingSpinner.running = false
             threadModel.xml = responseXml
         }
     }

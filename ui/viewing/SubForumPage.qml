@@ -272,7 +272,7 @@ PageWithBottomEdge {
 
     function finishThreadPageCreation() {
         var vBulletinAnnouncement = backend.currentSession.configModel.isVBulletin && forumsList.mode === "ANN"
-        var page = component.createObject(mainView, {"title": selectedTitle, "loadingSpinnerRunning": true, "forum_id": selectedForumId, "vBulletinAnnouncement": vBulletinAnnouncement})
+        var page = component.createObject(mainView, {"title": selectedTitle, "forum_id": selectedForumId, "vBulletinAnnouncement": vBulletinAnnouncement})
         page.current_topic = selectedTopicId //Need to set vBulletinAnnouncement before current_topic!!! Therefore, this is executed after the creation of the Page.
         pageStack.push(page)
     }

@@ -36,8 +36,6 @@ PageWithBottomEdge {
     property string forum_id: "-1"
     property alias vBulletinAnnouncement: threadList.vBulletinAnnouncement
 
-    property alias loadingSpinnerRunning: loadingSpinner.running
-
     property int pageCount: Math.floor(threadList.totalPostCount/backend.postsPerPage + (threadList.totalPostCount % backend.postsPerPage === 0 ? 0 : 1))
 
     bottomEdgePageSource: "MessageComposerPage.qml"
@@ -155,9 +153,11 @@ PageWithBottomEdge {
     }
 
      //TODO-r: Fix bottom edge
-    ActivityIndicator { //TODO-r: Also spin while no UI is visible yet
+    ActivityIndicator {
         id: loadingSpinner
         anchors.centerIn: threadList
+
+        running: threadList.count === 0 //TODO-r: Empty view (when network is switched off while loading)
 
         Component.onCompleted: { //Determines header height and sets offset, then sets flickable
             anchors.verticalCenterOffset = (mainView.height - threadList.height) / 2
@@ -207,5 +207,4 @@ PageWithBottomEdge {
             }
         }
     }
-
 }
