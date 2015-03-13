@@ -209,7 +209,7 @@ PageWithBottomEdge {
     ActivityIndicator { //TODO-r: Empty error view when loading fails in ApiRequest
         id: loadingSpinner
 
-        running: forumsList.model.count === 0 && !forumsList.modelsHaveLoadedCompletely
+        running: forumsList.model.count === 0 && (!forumsList.modelsHaveLoadedCompletely || !backend.currentSession.loginFinished) //!loginFinished for when ForumConfigModel is loading
 
         anchors {
             centerIn: forumsList
