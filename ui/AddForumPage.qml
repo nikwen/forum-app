@@ -41,20 +41,16 @@ Page {
             text: docId !== "" ? i18n.tr("Edit") : i18n.tr("Add")
             onTriggered: {
                 if (nameTextField.text !== "" && urlTextField.text !== "") {
-                    //Remove protocol from url (so that there are no multiple instances of one forum but with different prefixes)
                     var url = urlTextField.text.trim()
-                    var pos = url.indexOf("://")
-                    if (pos === 4 || pos === 5) {
-                        url = url.substring(pos + 3)
-                    }
 
-                    //Remove trailing slashes from url (see above for reasons)
-                    while ((pos = url.lastIndexOf("/")) !== -1 && pos === url.length - 1) { //-1 check to catch urls which only consist of slashes
-                        url = url.substring(0, url.length - 1)
-                    }
+                    //Clean up url (to make sure that there really are no multiple instances of the same forum)
+                    url = cleanUpTrailingChars(url)
 
-                    //Return if the url only consisted of slashes
-                    if (url.trim() === "") {
+                    //Used for comparison below (we do not want the same forum twice with different protocols)
+                    var noProtocolUrl = removeProtocol(url)
+
+                    //Return if the text field did not contain a full url
+                    if (noProtocolUrl.trim() === "") {
                         notification.show(i18n.tr("Error: Url is invalid"))
                         return
                     }
@@ -67,9 +63,14 @@ Page {
                             if (contents["name"] === nameTextField.text) {
                                 notification.show(i18n.tr("Error: Name already exists"))
                                 return
-                            } else if (contents["url"] === url) {
-                                notification.show(i18n.tr("Error: Url already exists"))
-                                return
+                            } else if (contents["url"] !== undefined) {
+                                var existingUrl = cleanUpTrailingChars(contents["url"])
+                                existingUrl = removeProtocol(existingUrl)
+
+                                if (existingUrl === noProtocolUrl) {
+                                    notification.show(i18n.tr("Error: Url already exists"))
+                                    return
+                                }
                             }
                         }
                     }
@@ -92,6 +93,26 @@ Page {
                         notification.show(i18n.tr("Error: Url is empty"))
                     }
                 }
+            }
+
+            function removeProtocol(url) {
+                var pos = url.indexOf("://")
+                if (pos === 4 || pos === 5) {
+                    return url.substring(pos + 3)
+                } else {
+                    return url
+                }
+            }
+
+            function cleanUpTrailingChars(url) { //TODO-r: Remove # marks from url
+                var pos
+
+                //Remove trailing slashes from url
+                while ((pos = url.lastIndexOf("/")) !== -1 && pos === url.length - 1) { //-1 check to catch urls which only consist of slashes
+                    url = url.substring(0, url.length - 1)
+                }
+
+                return url
             }
         }
     ]
