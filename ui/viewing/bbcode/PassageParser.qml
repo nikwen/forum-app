@@ -3,7 +3,7 @@ import QtQuick 2.3
 Item {
     id: passageParser
 
-    readonly property variant tagsWithChildren: [ "quote", "img", "spoiler" ] //lower-case //TODO-r: Implement spoiler
+    readonly property variant tagsWithChildren: [ "quote", "img", "spoiler", "hide" ] //lower-case
 
     Component {
         id: passage

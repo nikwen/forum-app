@@ -62,6 +62,8 @@ Item {
                             return "QuotePassageView.qml"
                         } else if (tag === "img") {
                             return "ImgPassageView.qml"
+                        } else if (tag === "spoiler" || tag === "hide") {
+                            return "SpoilerPassageView.qml"
                         } else {
                             return "PassageView.qml"
                         }
