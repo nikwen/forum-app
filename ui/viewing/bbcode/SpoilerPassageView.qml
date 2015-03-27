@@ -6,7 +6,7 @@ Item {
 
     property var dataItem
 
-    Rectangle {
+    Rectangle { //TODO-r: AbstractButton as base!!!
         id: rectangle
         color: mouseArea.pressed ? "#DDDDDD" : "#EEEEEE" //TODO-r: Color when inside QuotePassageView, same applies to quotes inside quotes
         width: label.width + units.gu(2)

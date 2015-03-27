@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0 as ListItem
+import "../components"
 
 //TODO-r: Solution similar to gallery navigation on m.heise.de
 
@@ -16,12 +17,67 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-    //        width: parent.width
-    //        height: units.gu(6)
-    //        color: "white"
             color: "transparent"
-    //        radius: units.gu(0.5)
-    //        anchors.verticalCenter: parent.verticalCenter
+
+            AbstractButton { //TODO-r: Separate file for Button (with attribute right/left)
+                id: previousButton
+
+                width: units.gu(5)
+
+                anchors {
+                    top: parent.top
+                    bottom: parent.bottom
+                    left: parent.left
+                }
+
+                onClicked: {
+                    if (threadList.firstDisplayedPost > 0) {
+                        threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
+                    }
+                }
+
+                Rectangle {
+                    id: roundedRect
+
+                    anchors {
+                        fill: parent
+
+                        topMargin: units.gu(0.1)
+                        bottomMargin: units.gu(0.1)
+                        leftMargin: units.gu(0.1)
+                    }
+                    color: parent.pressed ? "#F3F3F3" : "transparent"
+                    radius: units.gu(0.8)
+                }
+
+                Rectangle {
+                    anchors {
+                        top: roundedRect.top
+                        bottom: roundedRect.bottom
+                        right: roundedRect.right
+
+                        topMargin: roundedRect.anchors.topMargin
+                        bottomMargin: roundedRect.anchors.bottomMargin
+                        leftMargin: roundedRect.anchors.leftMargin
+                    }
+
+                    width: roundedRect.width - roundedRect.radius
+                    color: roundedRect.color
+                }
+
+
+                Icon {
+                    name: "go-previous"
+                    anchors.centerIn: parent
+                    height: units.gu(3)
+                    width: height
+                }
+            }
+
+            VerticalDivider {
+                dividerHeight: units.gu(4)
+                anchors.horizontalCenter: previousButton.right
+            }
 
             Row {
                 id: buttonsRow
@@ -31,119 +87,33 @@ Item {
 
                 spacing: units.gu(1)
 
-                Row {
-                    anchors.verticalCenter: parent.verticalCenter
 
-                    Icon { //TODO-r: Really height of Label
-                        name: "go-first"
-                        width: height
-                        height: firstLabel.height
+//                onClicked: {
+//                    if (threadList.firstDisplayedPost !== 0) {
+//                        threadList.loadPosts(0, backend.postsPerPage);
+//                    }
+//                }
 
-                        MouseArea { //TODO-r: Center in Row
-                            anchors.fill: parent
 
-                            onClicked: {
-                                if (threadList.firstDisplayedPost !== 0) {
-                                    threadList.loadPosts(0, backend.postsPerPage);
-                                }
-                            }
-                        }
-                    }
+//                onClicked: {
+//                    if (threadList.firstDisplayedPost > 0) {
+//                        threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
+//                    }
+//                }
 
-                    Label {
-                        id: firstLabel
-                        text: i18n.tr("First")
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                }
+//                onClicked: {
+//                    if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
+//                        threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
+//                    }
+//                }
 
-                Row {
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Icon {
-                        name: "go-previous"
-                        width: height
-                        height: backLabel.height
-
-                        MouseArea {
-                            anchors.fill: parent
-
-                            onClicked: {
-                                if (threadList.firstDisplayedPost > 0) {
-                                    threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
-                                }
-                            }
-                        }
-                    }
-
-                    Label {
-                        id: backLabel
-                        text: i18n.tr("Back")
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                }
-
-                Label {
-                    id: pageLabel
-                    anchors.verticalCenter: parent.verticalCenter
-                    fontSize: "large"
-
-                    text: threadList.totalPostCount !== -1 ? (Math.floor(threadList.firstDisplayedPost/backend.postsPerPage + 1) + " / " + pageCount) : ""
-                }
-
-                Row {
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Label {
-                        id: nextLabel
-                        text: i18n.tr("Next")
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-
-                    Icon {
-                        name: "go-next"
-                        width: height
-                        height: nextLabel.height
-
-                        MouseArea {
-                            anchors.fill: parent
-
-                            onClicked: {
-                                if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
-                                    threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Row {
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Label {
-                        id: lastLabel
-                        text: i18n.tr("Last")
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-
-                    Icon {
-                        name: "go-last"
-                        width: height
-                        height: lastLabel.height
-
-                        MouseArea {
-                            anchors.fill: parent
-
-                            onClicked: {
-                                var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
-                                var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
-                                if (beginningLastPage !== threadList.firstDisplayedPost) {
-                                    threadList.loadPosts(beginningLastPage, backend.postsPerPage);
-                                }
-                            }
-                        }
-                    }
-                }
+//                onClicked: {
+//                    var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
+//                    var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
+//                    if (beginningLastPage !== threadList.firstDisplayedPost) {
+//                        threadList.loadPosts(beginningLastPage, backend.postsPerPage);
+//                    }
+//                }
             }
         }
     }
