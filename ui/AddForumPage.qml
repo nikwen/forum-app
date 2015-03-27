@@ -104,7 +104,7 @@ Page {
                 }
             }
 
-            function cleanUpTrailingChars(url) { //TODO-r: Remove # marks from url
+            function cleanUpTrailingChars(url) {
                 var pos
                 var noChange = false
 
@@ -112,7 +112,7 @@ Page {
                     noChange = true
 
                     //Remove trailing slashes from url
-                    while ((pos = url.lastIndexOf("/")) !== -1 && pos === url.length - 1) { //-1 check to catch urls which only consist of slashes
+                    while ((pos = url.lastIndexOf("/")) !== -1 && pos === url.length - 1) { //unequal -1 check to catch urls which only consist of slashes
                         url = url.substring(0, url.length - 1)
                         noChange = false
                     }
