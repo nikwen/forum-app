@@ -111,36 +111,36 @@ UbuntuShape {
                 function formatTime(postDate) {
                     var todaysDate = new Date()
 
-                    var timeDiff = (todaysDate.getTime() - postDate.getTime()) / 1000 //in seconds
-
-                    if (timeDiff < 60) { //Posted within the last minute
-                        return i18n.tr("Just now") //TODO-r: Edited: lower case letter
-                    } else if (timeDiff < 3600) { //Posted within the last hour
-                        var minutes = Math.floor(timeDiff / 60)
-                        return qsTr(i18n.tr("%1 minute ago", "%1 minutes ago", minutes)).arg(minutes)
-                    } else if (timeDiff < 86400) { //Posted within the last 24 hours
-                        var hours = Math.floor(timeDiff / 3600)
-                        return qsTr(i18n.tr("%1 hour ago", "%1 hours ago", hours)).arg(hours)
-                    } else if (timeDiff < 2592000 || (postDate.getMonth() === todaysDate.getMonth() && postDate.getFullYear() === todaysDate.getFullYear())) { //Posted within the last 30 days or this month
-                        var days = Math.floor(timeDiff / 86400)
-                        return qsTr(i18n.tr("%1 day ago", "%1 days ago", days)).arg(days)
+                    if (backend.useAlternativeDateFormat) {
+                        if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
+                            //TRANSLATORS: Refers to the time when a post was made
+                            return qsTr(i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
+                        } else if (postDate.getFullYear() === todaysDate.getFullYear()) { //Posted this year
+                            //TRANSLATORS: Refers to the date when a post was made
+                            return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
+                        } else {
+                            //TRANSLATORS: Refers to the date when a post was made
+                            return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy"))) //TODO-r: Translators comments for format strings
+                        }
                     } else {
-                        //TRANSLATORS: Refers to the date when a post was made. Example: April 2015
-                        return Qt.formatDate(postDate, i18n.tr("MMMM yyyy"))
+                        var timeDiff = (todaysDate.getTime() - postDate.getTime()) / 1000 //in seconds
+
+                        if (timeDiff < 60) { //Posted within the last minute
+                            return i18n.tr("Just now") //TODO-r: Edited: lower case letter
+                        } else if (timeDiff < 3600) { //Posted within the last hour
+                            var minutes = Math.floor(timeDiff / 60)
+                            return qsTr(i18n.tr("%1 minute ago", "%1 minutes ago", minutes)).arg(minutes)
+                        } else if (timeDiff < 86400) { //Posted within the last 24 hours
+                            var hours = Math.floor(timeDiff / 3600)
+                            return qsTr(i18n.tr("%1 hour ago", "%1 hours ago", hours)).arg(hours)
+                        } else if (timeDiff < 2592000 || (postDate.getMonth() === todaysDate.getMonth() && postDate.getFullYear() === todaysDate.getFullYear())) { //Posted within the last 30 days or this month
+                            var days = Math.floor(timeDiff / 86400)
+                            return qsTr(i18n.tr("%1 day ago", "%1 days ago", days)).arg(days)
+                        } else {
+                            //TRANSLATORS: Refers to the date when a post was made. Example: March 2015
+                            return Qt.formatDate(postDate, i18n.tr("MMMM yyyy"))
+                        }
                     }
-
-                    //TODO-r: Settings for alternative date format?
-
-//                    if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
-//                        //TRANSLATORS: Refers to the time when a post was made
-//                        return qsTr(i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
-//                    } else if (postDate.getFullYear() === todaysDate.getFullYear()) {
-//                        //TRANSLATORS: Refers to the date when a post was made
-//                        return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
-//                    } else {
-//                        //TRANSLATORS: Refers to the date when a post was made
-//                        return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy"))) //TODO: Localize (+ translator comments for format strings)!!!
-//                    }
                 }
 
                 function formatUnixTimestamp(time) {

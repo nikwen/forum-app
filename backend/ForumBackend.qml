@@ -34,6 +34,7 @@ Object {
     property int postsPerPage: 10
     property int topicsLoadCount: 20
     property alias signature: settingsBackend.signature
+    property alias useAlternativeDateFormat: settingsBackend.useAlternativeDateFormat
 
     U1db.Index {
         database: db

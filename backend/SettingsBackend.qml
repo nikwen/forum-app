@@ -22,4 +22,5 @@ import Qt.labs.settings 1.0
 
 Settings {
     property string signature: i18n.tr("Sent from my awesome Ubuntu Touch device using the Forum Browser app")
+    property bool useAlternativeDateFormat: false
 }

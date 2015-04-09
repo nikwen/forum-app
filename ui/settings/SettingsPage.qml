@@ -21,6 +21,9 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 import "../components"
 
+//TODO-r: Categories?
+//TODO-r: Flickable?
+
 Page {
     id: settingsPage
     title: i18n.tr("Settings")
@@ -35,6 +38,28 @@ Page {
 
             onClicked: {
                 pageStack.push(Qt.resolvedUrl("EditSignaturePage.qml"))
+            }
+        }
+
+        CheckboxSubtitledListItem {
+            id: useAlternativeDateFormatListItem
+            text: i18n.tr("Alternative date format")
+            subText: backend.useAlternativeDateFormat ? i18n.tr("Will display: At 11:54, On March 7, On April 10, 2015") : i18n.tr("Will display: 28 minutes ago, 14 hours ago, March 2015") //TODO-r: Translators comments: Refer to MessageDelegate use
+
+            onClicked: {
+                checked = !checked
+            }
+
+            onCheckedChanged: {
+                backend.useAlternativeDateFormat = !backend.useAlternativeDateFormat
+            }
+
+            Connections {
+                target: backend
+
+                onUseAlternativeDateFormatChanged: {
+                    useAlternativeDateFormatListItem.checked = backend.useAlternativeDateFormat
+                }
             }
         }
     }
