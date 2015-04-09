@@ -113,14 +113,14 @@ UbuntuShape {
 
                     if (backend.useAlternativeDateFormat) {
                         if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
-                            //TRANSLATORS: Refers to the time when a post was made
+                            //TRANSLATORS: Refers to the time when a post was made. Example: 11:54
                             return qsTr(i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
                         } else if (postDate.getFullYear() === todaysDate.getFullYear()) { //Posted this year
-                            //TRANSLATORS: Refers to the date when a post was made
+                            //TRANSLATORS: Refers to the date when a post was made. Example: Mar. 7
                             return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
                         } else {
-                            //TRANSLATORS: Refers to the date when a post was made
-                            return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy"))) //TODO-r: Translators comments for format strings
+                            //TRANSLATORS: Refers to the date when a post was made. Example: Mar. 7, 2015
+                            return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy")))
                         }
                     } else {
                         var timeDiff = (todaysDate.getTime() - postDate.getTime()) / 1000 //in seconds
