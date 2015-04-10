@@ -42,11 +42,7 @@ Item {
                 id: previousButton
                 previous: true
 
-                onClicked: {
-                    if (threadList.firstDisplayedPost > 0) {
-                        threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
-                    }
-                }
+                onClicked: goToPreviousPage()
             }
 
             Row {
@@ -56,45 +52,13 @@ Item {
                 anchors.centerIn: parent
 
                 spacing: units.gu(1)
-
-
-//                onClicked: {
-//                    if (threadList.firstDisplayedPost !== 0) {
-//                        threadList.loadPosts(0, backend.postsPerPage);
-//                    }
-//                }
-
-
-//                onClicked: {
-//                    if (threadList.firstDisplayedPost > 0) {
-//                        threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
-//                    }
-//                }
-
-//                onClicked: {
-//                    if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
-//                        threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
-//                    }
-//                }
-
-//                onClicked: {
-//                    var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
-//                    var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
-//                    if (beginningLastPage !== threadList.firstDisplayedPost) {
-//                        threadList.loadPosts(beginningLastPage, backend.postsPerPage);
-//                    }
-//                }
             }
 
             NavigationButton {
                 id: nextButton
                 previous: false
 
-                onClicked: {
-                    if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
-                        threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
-                    }
-                }
+                onClicked: goToNextPage()
             }
         }
     }

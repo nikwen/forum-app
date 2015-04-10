@@ -65,6 +65,32 @@ PageWithBottomEdge {
         }
     }
 
+    function goToFirstPage() {
+        if (threadList.firstDisplayedPost !== 0) {
+            threadList.loadPosts(0, backend.postsPerPage);
+        }
+    }
+
+    function goToPreviousPage() {
+        if (threadList.firstDisplayedPost > 0) {
+            threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
+        }
+    }
+
+    function goToNextPage() {
+        if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
+            threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
+        }
+    }
+
+    function goToLastPage() {
+        var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
+        var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
+        if (beginningLastPage !== threadList.firstDisplayedPost) {
+            threadList.loadPosts(beginningLastPage, backend.postsPerPage);
+        }
+    }
+
     head.actions: [
         Action {
             id: reloadAction
