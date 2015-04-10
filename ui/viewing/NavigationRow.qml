@@ -52,6 +52,66 @@ Item {
                 anchors.centerIn: parent
 
                 spacing: units.gu(1)
+
+                AbstractButton { //TODO-r: Separate file
+                    width: label.width + units.gu(1)
+                    height: label.height + units.gu(1)
+
+                    //TODO-r: Indication when pressed
+
+                    Label {
+                        id: label
+                        text: "1"
+                        fontSize: "large"
+                        anchors.centerIn: parent
+                    }
+
+                    onClicked: goToFirstPage()
+                }
+
+                Label {
+                    id: label3
+                    text: "…"
+                    fontSize: "large"
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                AbstractButton { //TODO-r: Separate file
+                    width: label1.width + units.gu(1)
+                    height: label1.height + units.gu(1)
+
+                    //TODO-r: Indication when pressed
+
+                    Label {
+                        id: label1
+                        text: Math.floor(threadList.firstDisplayedPost / 10) + 1
+                        fontSize: "large"
+                        anchors.centerIn: parent
+                    }
+                }
+
+                Label {
+                    id: label4
+                    text: "…"
+                    fontSize: "large"
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                AbstractButton { //TODO-r: Separate file
+                    width: label2.width + units.gu(1)
+                    height: label2.height + units.gu(1)
+
+                    //TODO-r: Indication when pressed
+
+                    Label {
+                        id: label2
+                        text: Math.floor(threadList.totalPostCount / 10) + ((threadList.totalPostCount % backend.postsPerPage) === 0 ? 0 : 1)
+                        fontSize: "large"
+                        anchors.centerIn: parent
+                    }
+
+                    onClicked: goToLastPage()
+                }
             }
 
             NavigationButton {

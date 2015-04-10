@@ -84,7 +84,7 @@ PageWithBottomEdge {
     }
 
     function goToLastPage() {
-        var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
+        var postsOnLastPage = (threadList.totalPostCount % backend.postsPerPage);
         var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
         if (beginningLastPage !== threadList.firstDisplayedPost) {
             threadList.loadPosts(beginningLastPage, backend.postsPerPage);
