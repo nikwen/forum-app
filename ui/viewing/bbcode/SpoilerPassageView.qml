@@ -14,6 +14,12 @@ Item {
 
         anchors.top: parent.top
 
+        Behavior on color {
+            ColorAnimation {
+                duration: UbuntuAnimation.SnapDuration
+            }
+        }
+
         Label {
             id: label
             text: passageView.visible ? i18n.tr("Click to hide content") : i18n.tr("Click to show content")
