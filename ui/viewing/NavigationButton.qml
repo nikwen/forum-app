@@ -50,7 +50,7 @@ AbstractButton {
         }
 
         Binding {
-            target: navigationButton
+            target: roundedRect
             property: previous ? "anchors.leftMargin" : "anchors.rightMargin"
             value: units.gu(0.1)
         }
@@ -60,30 +60,22 @@ AbstractButton {
     }
 
     Rectangle { //Removes rounded corners on the other side
+        id: removeRoundedCornersRect
+
         anchors {
             top: roundedRect.top
             bottom: roundedRect.bottom
-
-            topMargin: roundedRect.anchors.topMargin
-            bottomMargin: roundedRect.anchors.bottomMargin
         }
 
         Binding {
-            target: navigationButton
+            target: removeRoundedCornersRect
             property: previous ? "anchors.right" : "anchors.left"
             value: previous ? roundedRect.right : roundedRect.left
-        }
-
-        Binding {
-            target: navigationButton
-            property: previous ? "anchors.leftMargin" : "anchors.rightMargin"
-            value: previous ? roundedRect.anchors.leftMargin : roundedRect.anchors.rightMargin
         }
 
         width: roundedRect.width - roundedRect.radius
         color: roundedRect.color
     }
-
 
     Icon {
         name: previous ? "go-previous" : "go-next"
