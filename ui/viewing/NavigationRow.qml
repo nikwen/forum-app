@@ -1,3 +1,22 @@
+/*
+* Forum Browser
+*
+* Copyright (c) 2015 Niklas Wenzel <nikwen.developer@gmail.com>
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 import QtQuick 2.3
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0 as ListItem
@@ -19,64 +38,15 @@ Item {
             anchors.fill: parent
             color: "transparent"
 
-            AbstractButton { //TODO-r: Separate file for Button (with attribute right/left)
+            NavigationButton {
                 id: previousButton
-
-                width: units.gu(5)
-
-                anchors {
-                    top: parent.top
-                    bottom: parent.bottom
-                    left: parent.left
-                }
+                previous: true
 
                 onClicked: {
                     if (threadList.firstDisplayedPost > 0) {
                         threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
                     }
                 }
-
-                Rectangle {
-                    id: roundedRect
-
-                    anchors {
-                        fill: parent
-
-                        topMargin: units.gu(0.1)
-                        bottomMargin: units.gu(0.1)
-                        leftMargin: units.gu(0.1)
-                    }
-                    color: parent.pressed ? "#F3F3F3" : "transparent"
-                    radius: units.gu(0.8)
-                }
-
-                Rectangle {
-                    anchors {
-                        top: roundedRect.top
-                        bottom: roundedRect.bottom
-                        right: roundedRect.right
-
-                        topMargin: roundedRect.anchors.topMargin
-                        bottomMargin: roundedRect.anchors.bottomMargin
-                        leftMargin: roundedRect.anchors.leftMargin
-                    }
-
-                    width: roundedRect.width - roundedRect.radius
-                    color: roundedRect.color
-                }
-
-
-                Icon {
-                    name: "go-previous"
-                    anchors.centerIn: parent
-                    height: units.gu(3)
-                    width: height
-                }
-            }
-
-            VerticalDivider {
-                dividerHeight: units.gu(4)
-                anchors.horizontalCenter: previousButton.right
             }
 
             Row {
@@ -114,6 +84,17 @@ Item {
 //                        threadList.loadPosts(beginningLastPage, backend.postsPerPage);
 //                    }
 //                }
+            }
+
+            NavigationButton {
+                id: nextButton
+                previous: false
+
+                onClicked: {
+                    if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
+                        threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
+                    }
+                }
             }
         }
     }
