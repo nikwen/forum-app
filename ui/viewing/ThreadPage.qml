@@ -65,6 +65,15 @@ PageWithBottomEdge {
         }
     }
 
+    function goToPage(pageNumber) { //Starting with 0
+        if (pageNumber >= 0 && pageNumber < pageCount) {
+            var firstPost = pageNumber * backend.postsPerPage
+            if (firstPost !== threadList.firstDisplayedPost) {
+                threadList.loadPosts(firstPost, backend.postsPerPage)
+            }
+        }
+    }
+
     function goToFirstPage() {
         if (threadList.firstDisplayedPost !== 0) {
             threadList.loadPosts(0, backend.postsPerPage);
@@ -136,9 +145,7 @@ PageWithBottomEdge {
             iconName: "view-list-symbolic"
             visible: !vBulletinAnnouncement && threadList.totalPostCount > backend.postsPerPage
             onTriggered: {
-                var popup = PopupUtils.open(pageSelectionDialog, pageLabel)
-                var selected = threadList.firstDisplayedPost / backend.postsPerPage
-                popup.itemSelector.selectedIndex = selected
+                PopupUtils.open(pageSelectionDialog)
             }
         }
     ]
@@ -196,40 +203,51 @@ PageWithBottomEdge {
         anchors.fill: parent
     }
 
-    Component { //TODO-r: Fix
+    Component {
         id: pageSelectionDialog
 
         Dialog {
             id: dialog
-            title: i18n.tr("Go to")
+            title: i18n.tr("Go to page")
 
-            property alias itemSelector: selector
+            TextField {
+                id: goToTextField
+                inputMethodHints: Qt.ImhDigitsOnly
+                placeholderText: i18n.tr("Enter page number")
 
-            ItemSelector {
-                id: selector
-                expanded: true
+                onTextChanged: goToErrorLabel.visible = false
+            }
 
-                containerHeight: itemHeight * Math.min(model.count, 8)
+            Label {
+                id: goToErrorLabel
+                text: i18n.tr("Invalid page number")
+                color: UbuntuColors.red
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                visible: false
+            }
 
-                model: ListModel {
-                    Component.onCompleted: {
-                        for (var i = 0; i < pageCount; i++) {
-                            append({pageText: qsTr(i18n.tr("Page %1 (Post %2 - %3)")).arg(i + 1).arg(i * 10 + 1).arg(Math.min((i + 1) * 10, threadList.totalPostCount))})
-                        }
-                    }
-                }
+            Button {
+                id: goToButton
+                text: i18n.tr("Go")
+                color: UbuntuColors.green
 
-                delegate: OptionSelectorDelegate {
-                    text: pageText
-
-                    onTriggered: {
-                        var firstPost = index * backend.postsPerPage
-                        if (firstPost !== threadList.firstDisplayedPost) {
-                            threadList.loadPosts(firstPost, backend.postsPerPage)
-                        }
+                onClicked: {
+                    if (goToTextField.text > 0 && goToTextField.text <= pageCount) {
+                        goToPage(goToTextField.text - 1)
                         PopupUtils.close(dialog)
+                    } else {
+                        goToErrorLabel.visible = true
                     }
                 }
+            }
+
+            Button {
+                id: goToCancelButton
+                text: i18n.tr("Cancel")
+                color: UbuntuColors.red
+
+                onClicked: PopupUtils.close(dialog)
             }
         }
     }
