@@ -65,7 +65,7 @@ Rectangle {
         fontSize: "medium"
         color: textColor
         horizontalAlignment: Text.AlignHCenter
-        wrapMode: Text.WordWrap
+        wrapMode: Text.Wrap
 
         property real wantedWidth: 0 //Needed for multi-line notifications
 

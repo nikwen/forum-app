@@ -282,7 +282,7 @@ PageWithBottomEdge {
         text: viewSubscriptions ? i18n.tr("You are not subscribed to any topics or forums") : ((forumsList.mode === "") ? i18n.tr("No topics available here") : ((forumsList.mode === "TOP") ? i18n.tr("No stickies available here") : i18n.tr("No announcements available here")))
         visible: forumsList.model.count === 0 && forumsList.modelsHaveLoadedCompletely && (current_forum > 0 || viewSubscriptions)
         elide: Text.ElideRight
-        wrapMode: Text.WordWrap
+        wrapMode: Text.Wrap
         horizontalAlignment: Text.AlignHCenter
         fontSize: "large"
         anchors {

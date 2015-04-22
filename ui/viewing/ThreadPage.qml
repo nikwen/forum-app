@@ -172,7 +172,7 @@ PageWithBottomEdge {
         text: threadPage.title
         fontSize: "x-large"
         maximumLineCount: fontSize === "medium" ? 2 : 1
-        wrapMode: Text.WordWrap
+        wrapMode: Text.Wrap
         elide: Text.ElideRight
 
         onTruncatedChanged: {
