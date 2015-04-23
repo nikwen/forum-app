@@ -58,11 +58,11 @@ ListView {
         postNumber: model.index + firstDisplayedPost + 1
     }
 
-    header: ThreadPageButtonRow {
+    header: NavigationRow {
         visible: parsedThreadModel.count > 0
     }
 
-    footer: ThreadPageButtonRow { //TODO-r: Hard to click buttons with bottom edge hint in front of it
+    footer: NavigationRow { //TODO-r: Hard to click buttons with bottom edge hint in front of it
         visible: parsedThreadModel.count > 0
     }
 
