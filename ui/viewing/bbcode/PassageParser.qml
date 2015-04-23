@@ -25,6 +25,7 @@ Item {
             //The Tapatalk plugin seems to pass all arguments in a standardized form:
             // * [quote uid=123 name="author" post=12345678]
             //Not all arguments have to be supplied by all forums though.
+            //Difficulty here: The following can occur: [quote name=""the viper"" post=57373559] (note the double qoutes and the blank)
             var spacePos = content.indexOf(" ", pos + 1)
             var argumentsStartPos = (spacePos !== -1) ? spacePos + 1 : -1
             var hasArguments = (argumentsStartPos !== -1) && (argumentsStartPos < bracketClosePos)
@@ -37,7 +38,9 @@ Item {
             if (hasArguments) {
                 //Split the arguments string to get the different key/value pairs.
                 var argumentsString = content.substring(argumentsStartPos, bracketClosePos)
-                var argumentsSplitted = argumentsString.split(" ") //TODO-r: Issue when the user name contains a blank
+                var argumentsSplitted = argumentsString.split(" ")
+
+                var previousKey = ""
                 for (var i = 0; i < argumentsSplitted.length; i++) {
                     if (argumentsSplitted[i] === "") {
                         continue
@@ -46,22 +49,27 @@ Item {
                     //Split "key=value" pairs.
                     //Do not use split() method here because that would also split the string if the value contains an equals char.
                     var keyEqualsPos = argumentsSplitted[i].indexOf("=")
-                    if (keyEqualsPos < 0) {
-                        console.log("Error when parsing key/value pair:", argumentsSplitted[i])
-                        continue
-                    }
-                    var key = argumentsSplitted[i].substring(0, keyEqualsPos)
-                    var value = argumentsSplitted[i].substring(keyEqualsPos + 1)
+                    if (keyEqualsPos > 0) { //TODO-r: Document weaknesses (e.g. name contains " me=win"), document how it works
+                        //TODO-r: Require trailing quotation marks for strings?! (Check before going to next key if quotation marks are closed if the argument began with a quotation mark!)
+                        //I.e. move the for...in loop from below into this code block and increment i and append the next element if there is a leading but no trailing quotation mark.
+                        var key = argumentsSplitted[i].substring(0, keyEqualsPos)
+                        var value = argumentsSplitted[i].substring(keyEqualsPos + 1)
 
+                        arguments[key] = value
+                        previousKey = key
+                    } else if (previousKey !== "") {
+                        arguments[previousKey] += " " + argumentsSplitted[i]
+                    }
+                }
+
+                for (key in arguments) {
                     //Remove leading and trailing quotation marks from strings.
-                    while (value.charAt(0) === "\"") {
-                        value = value.substring(1)
+                    if (arguments[key].charAt(0) === "\"") {
+                        arguments[key] = arguments[key].substring(1)
                     }
-                    while (value.charAt(value.length - 1) === "\"") {
-                        value = value.substring(0, value.length - 1)
+                    if (arguments[key].charAt(arguments[key].length - 1) === "\"") {
+                        arguments[key] = arguments[key].substring(0, arguments[key].length - 1)
                     }
-
-                    arguments[key] = value
                 }
             }
 
