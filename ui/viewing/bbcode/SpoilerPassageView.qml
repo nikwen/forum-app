@@ -6,17 +6,23 @@ Item {
 
     property var dataItem
 
-    Rectangle { //TODO-r: AbstractButton as base!!!
-        id: rectangle
-        color: mouseArea.pressed ? "#DDDDDD" : "#EEEEEE" //TODO-r: Color when inside QuotePassageView, same applies to quotes inside quotes
+    AbstractButton {
+        id: showContentButton
         width: label.width + units.gu(2)
         height: label.height + units.gu(2)
 
         anchors.top: parent.top
 
-        Behavior on color {
-            ColorAnimation {
-                duration: UbuntuAnimation.SnapDuration
+        onClicked: passageView.visible = !passageView.visible
+
+        Rectangle {
+            anchors.fill: parent
+            color: showContentButton.pressed ? "#DDDDDD" : "#EEEEEE" //TODO-r: Color when inside QuotePassageView, same applies to quotes inside quotes
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: UbuntuAnimation.SnapDuration
+                }
             }
         }
 
@@ -24,13 +30,6 @@ Item {
             id: label
             text: passageView.visible ? i18n.tr("Click to hide content") : i18n.tr("Click to show content")
             anchors.centerIn: parent
-        }
-
-        MouseArea {
-            id: mouseArea
-            anchors.fill: parent
-
-            onClicked: passageView.visible = !passageView.visible
         }
     }
 
@@ -40,7 +39,7 @@ Item {
         width: parent.width
 
         anchors {
-            top: rectangle.bottom
+            top: showContentButton.bottom
             topMargin: visible ? units.gu(2) : 0
         }
 
