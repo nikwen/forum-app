@@ -10,6 +10,8 @@ Item {
         Passage {}
     }
 
+    //TODO-r: Parse tags with image descriptions (check out git history): [img="lollipop on mi3"] (=> http://forum.xda-developers.com/xiaomi-mi-3/general/lollipop-mi3-guess-yes-t2940083)
+
     function parse(tagType, tagArguments, content) { //Post content which should be parsed
         var oldPos = 0
         var pos = -1
@@ -25,7 +27,7 @@ Item {
             //The Tapatalk plugin seems to pass all arguments in a standardized form:
             // * [quote uid=123 name="author" post=12345678]
             //Not all arguments have to be supplied by all forums though.
-            //Difficulty here: The following can occur: [quote name=""the viper"" post=57373559] (note the double qoutes and the blank)
+            //Difficulty here: The following can occur: [quote name=""the" viper" post=12345678] (note the double qoutes and the blank)
             var spacePos = content.indexOf(" ", pos + 1)
             var argumentsStartPos = (spacePos !== -1) ? spacePos + 1 : -1
             var hasArguments = (argumentsStartPos !== -1) && (argumentsStartPos < bracketClosePos)
@@ -40,29 +42,50 @@ Item {
                 var argumentsString = content.substring(argumentsStartPos, bracketClosePos)
                 var argumentsSplitted = argumentsString.split(" ")
 
-                var previousKey = ""
+                //Iterate over the splitted arguments and add the found key/value pairs to the arguments array.
+                //If a string value starts with a quotation mark, it needs to end with a quotation mark as well.
+                //Everything will be added to the previous value until that trailing quotation mark can be found.
+                //If a trailing quotation mark is already present but the next string is no key/value pair, it
+                //is assumed that the quotation mark is actually part of the value and the new string is appended.
+                //Remaining (unfixable) weakness: Fails if the name contains something that could be parsed as
+                //an argument with a trailing quotation mark before it, e.g. 'Say "hello" title="me"'.
+
+                var currentKey = ""
+                var leadingQuotationMark = false
+                var trailingQuotationMark = false
                 for (var i = 0; i < argumentsSplitted.length; i++) {
-                    if (argumentsSplitted[i] === "") {
+                    //Split "key=value" pairs.
+                    //Do not use the split() method here because that would split the string twice if the value contains an equals char.
+                    var keyEqualsPos = argumentsSplitted[i].indexOf("=")
+
+                    if (currentKey !== "" && (keyEqualsPos <= 0 || (leadingQuotationMark && !trailingQuotationMark))) {
+                        //First part of the argument has already been parsed and
+                        // (a) there has been no trailing but a leading quotation mark yet OR
+                        // (b) the next value cannot be identified as a new "key=value" pair.
+                        arguments[currentKey] += " " + argumentsSplitted[i]
+                    } else if (keyEqualsPos > 0) {
+                        //A new "key=value" pair could be found.
+
+                        currentKey = argumentsSplitted[i].substring(0, keyEqualsPos)
+                        arguments[currentKey] = argumentsSplitted[i].substring(keyEqualsPos + 1)
+
+                        leadingQuotationMark = (arguments[currentKey].charAt(0) === "\"")
+                    } else {
+                        //A parsing error occured.
+
+                        console.log("Failed to parse part \"" + argumentsSplitted[i] + "\" of arguments string \"" + argumentsString + "\"")
+
+                        currentKey = ""
+                        leadingQuotationMark = false
+                        trailingQuotationMark = false
+
                         continue
                     }
 
-                    //Split "key=value" pairs.
-                    //Do not use split() method here because that would also split the string if the value contains an equals char.
-                    var keyEqualsPos = argumentsSplitted[i].indexOf("=")
-                    if (keyEqualsPos > 0) { //TODO-r: Document weaknesses (e.g. name contains " me=win"), document how it works
-                        //TODO-r: Require trailing quotation marks for strings?! (Check before going to next key if quotation marks are closed if the argument began with a quotation mark!)
-                        //I.e. move the for...in loop from below into this code block and increment i and append the next element if there is a leading but no trailing quotation mark.
-                        var key = argumentsSplitted[i].substring(0, keyEqualsPos)
-                        var value = argumentsSplitted[i].substring(keyEqualsPos + 1)
-
-                        arguments[key] = value
-                        previousKey = key
-                    } else if (previousKey !== "") {
-                        arguments[previousKey] += " " + argumentsSplitted[i]
-                    }
+                    trailingQuotationMark = leadingQuotationMark && (arguments[currentKey].charAt(arguments[currentKey].length - 1) === "\"")
                 }
 
-                for (key in arguments) {
+                for (var key in arguments) {
                     //Remove leading and trailing quotation marks from strings.
                     if (arguments[key].charAt(0) === "\"") {
                         arguments[key] = arguments[key].substring(1)
