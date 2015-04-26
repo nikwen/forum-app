@@ -53,64 +53,42 @@ Item {
 
                 spacing: units.gu(1)
 
-                AbstractButton { //TODO-r: Separate file
-                    width: label.width + units.gu(1)
-                    height: label.height + units.gu(1)
+                ListModel {
+                    id: pageModel
 
-                    //TODO-r: Indication when pressed
+                    function fillWithValues() { //TODO-r: Calculate once for both navigation rows?
+                        if (threadList.firstDisplayedPost >= 0 && threadList.totalPostCount > 0) {
+                            clear()
 
-                    Label {
-                        id: label
-                        text: "1"
-                        fontSize: "large"
-                        anchors.centerIn: parent
-                    }
-
-                    onClicked: goToFirstPage()
-                }
-
-                Label {
-                    id: label3
-                    text: "…"
-                    fontSize: "large"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                AbstractButton { //TODO-r: Separate file
-                    width: label1.width + units.gu(1)
-                    height: label1.height + units.gu(1)
-
-                    //TODO-r: Indication when pressed
-
-                    Label {
-                        id: label1
-                        text: Math.floor(threadList.firstDisplayedPost / 10) + 1
-                        fontSize: "large"
-                        anchors.centerIn: parent
+                            append({"ellipsis": false, "pageNumber": 1})
+                            append({"ellipsis": true,  "pageNumber": -1})
+                            append({"ellipsis": false, "pageNumber": Math.floor(threadList.firstDisplayedPost / 10) + 1}) //TODO-r: Properties in threadList for these values?
+                            append({"ellipsis": true,  "pageNumber": -1})
+                            append({"ellipsis": false, "pageNumber": Math.floor(threadList.totalPostCount / 10) + ((threadList.totalPostCount % backend.postsPerPage) === 0 ? 0 : 1)})
+                        }
                     }
                 }
 
-                Label {
-                    id: label4
-                    text: "…"
-                    fontSize: "large"
-                    anchors.verticalCenter: parent.verticalCenter
+                Connections {
+                    target: threadList
+
+                    onFirstDisplayedPostChanged: pageModel.fillWithValues()
+                    onTotalPostCountChanged: pageModel.fillWithValues()
                 }
 
-                AbstractButton { //TODO-r: Separate file
-                    width: label2.width + units.gu(1)
-                    height: label2.height + units.gu(1)
+                Repeater {
+                    model: pageModel
 
-                    //TODO-r: Indication when pressed
+                    delegate: Loader {
+                        sourceComponent: model.ellipsis ? ellipsisComponent : selectPageButton
 
-                    Label {
-                        id: label2
-                        text: Math.floor(threadList.totalPostCount / 10) + ((threadList.totalPostCount % backend.postsPerPage) === 0 ? 0 : 1)
-                        fontSize: "large"
-                        anchors.centerIn: parent
+                        Binding {
+                            target: item
+                            property: "pageNumber"
+                            value: model.pageNumber
+                            when: !model.ellipsis
+                        }
                     }
-
-                    onClicked: goToLastPage()
                 }
             }
 
@@ -119,6 +97,45 @@ Item {
                 previous: false
 
                 onClicked: goToNextPage()
+            }
+        }
+    }
+
+    Component {
+        id: selectPageButton
+
+        AbstractButton {
+            width: label.width + units.gu(1)
+            height: label.height + units.gu(1)
+
+            property int pageNumber
+
+            Rectangle {
+                anchors.fill: parent
+                color: parent.pressed ? "#F3F3F3" : "transparent"
+            }
+
+            Label {
+                id: label
+                text: pageNumber
+                fontSize: "large"
+                anchors.centerIn: parent
+            }
+
+            onClicked: goToPage(pageNumber - 1)
+        }
+    }
+
+    Component {
+        id: ellipsisComponent
+
+        Label {
+            id: ellipsisLabel
+            text: "…"
+            fontSize: "large"
+            anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: units.gu(0.5) //Due to "+ units.gu(1)" in selectPageButton
             }
         }
     }

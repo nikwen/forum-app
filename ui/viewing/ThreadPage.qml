@@ -185,7 +185,7 @@ PageWithBottomEdge {
         }
     }
 
-     //TODO-r: Fix bottom edge
+    //TODO-r: Fix bottom edge (=> Reduce MouseArea's drag.maximumY by the header height and show header on swipe?)
     ActivityIndicator {
         id: loadingSpinner
         anchors.centerIn: threadList
