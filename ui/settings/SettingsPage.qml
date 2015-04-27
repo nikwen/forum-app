@@ -35,15 +35,15 @@ Page {
             id: column
             width: parent.width
 
-            ListItem.Header {
-                text: i18n.tr("Display settings")
-            }
+//            ListItem.Header {
+//                text: i18n.tr("Display settings")
+//            }
 
             CheckboxSubtitledListItem {
                 id: useAlternativeDateFormatListItem
                 text: i18n.tr("Alternative date format")
                 //TRANSLATORS: Setting to switch between the date formats used in MessageDelegate.qml. Please format the example dates accordingly.
-                subText: backend.useAlternativeDateFormat ? i18n.tr("Will display: At 11:54, On March 7, On April 10, 2015") : i18n.tr("Will display: 28 minutes ago, 14 hours ago, March 2015")
+                subText: backend.useAlternativeDateFormat ? i18n.tr("Current format: At 11:54, On March 7, On April 10, 2015") : i18n.tr("Current format: 28 minutes ago, 14 hours ago, March 2015")
                 checked: backend.useAlternativeDateFormat
 
                 onClicked: {
@@ -63,9 +63,9 @@ Page {
                 }
             }
 
-            ListItem.Header {
-                text: i18n.tr("Identity settings")
-            }
+//            ListItem.Header {
+//                text: i18n.tr("Identity settings")
+//            }
 
             OneLineSubtitledListItem {
                 text: i18n.tr("Signature")
