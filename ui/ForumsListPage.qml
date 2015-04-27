@@ -24,7 +24,7 @@ import U1db 1.0 as U1db
 
 Page {
     id: forumsListPage
-    title: i18n.tr("My Forums")
+    title: "Forum Browser"
 
     head.actions: [
         Action {
