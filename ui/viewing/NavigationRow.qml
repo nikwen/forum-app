@@ -57,13 +57,11 @@ Item {
                     id: pageModel
 
                     function fillWithValues() { //TODO-r: Calculate once for both navigation rows (=> shared model)
-                        if (threadList.firstDisplayedPost < 0 || threadList.totalPostCount <= 0) {
+                        if (firstDisplayedPost < 0 || totalPostCount <= 0) {
                             return
                         }
 
                         clear()
-
-                        var pageCount = Math.floor(threadList.totalPostCount / 10) + ((threadList.totalPostCount % backend.postsPerPage) === 0 ? 0 : 1) //TODO-r: Property in threadList
 
                         if (pageCount <= 5) { //TODO-r: Value calculated from width (but with max value)
                             for (var i = 1; i <= pageCount; i++) {
@@ -72,7 +70,7 @@ Item {
                         } else {
                             append({ "ellipsis": false, "pageNumber": 1 })
                             append({ "ellipsis": true,  "pageNumber": -1 })
-                            append({ "ellipsis": false, "pageNumber": Math.floor(threadList.firstDisplayedPost / 10) + 1 }) //TODO-r: Property in threadList
+                            append({ "ellipsis": false, "pageNumber": currentPage })
                             append({ "ellipsis": true,  "pageNumber": -1 })
                             append({ "ellipsis": false, "pageNumber": pageCount })
                         }

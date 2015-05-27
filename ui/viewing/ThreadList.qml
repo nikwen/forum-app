@@ -29,15 +29,18 @@ import "bbcode"
 ListView {
 
     property alias current_topic: threadModel.topic_id
-    property alias firstDisplayedPost: threadModel.firstDisplayedPost
-    property alias lastDisplayedPost: threadModel.lastDisplayedPost
-    property int totalPostCount: -1
     property bool canReply: false
     property bool isClosed: false
     property bool canSubscribe: false
     property bool isSubscribed: false
 
     property bool vBulletinAnnouncement: false
+
+    property alias firstDisplayedPost: threadModel.firstDisplayedPost
+    property alias lastDisplayedPost: threadModel.lastDisplayedPost
+    property int totalPostCount: -1
+    property int currentPage: Math.floor(firstDisplayedPost / 10) + 1
+    property int pageCount: Math.floor(totalPostCount / 10) + ((totalPostCount % backend.postsPerPage) === 0 ? 0 : 1)
 
     anchors {
         leftMargin: units.gu(1)
