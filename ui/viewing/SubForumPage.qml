@@ -206,7 +206,7 @@ PageWithBottomEdge {
         }
     ]
 
-    ActivityIndicator { //TODO-r: Empty error view when loading fails in ApiRequest
+    ActivityIndicator { //TODO-r: Empty error view when loading fails in ApiRequest TODO-r: Empty error view when error in ForumConfigModel
         id: loadingSpinner
 
         running: forumsList.model.count === 0 && (!forumsList.modelsHaveLoadedCompletely || !backend.currentSession.loginFinished) //!loginFinished for when ForumConfigModel is loading
@@ -293,5 +293,4 @@ PageWithBottomEdge {
             margins: units.gu(2)
         }
     }
-
 }
