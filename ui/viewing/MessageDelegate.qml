@@ -65,7 +65,7 @@ UbuntuShape {
 
                 Image {
                     id: avatarImage
-                    source: (avatar === "") ? "../../graphics/contact.svg" : avatar
+                    source: (avatar === "") ? "../../graphics/contact.svg" : avatar //TODO-r: Different (colored) image?
                     width: units.gu(5)
                     height: width
                     anchors.centerIn: parent
