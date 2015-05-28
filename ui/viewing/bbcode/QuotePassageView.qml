@@ -15,13 +15,14 @@ Rectangle {
     }
 
     property alias dataItem: passageView.dataItem
-    property color tintColor: "#F7F7F7" //TODO-r: Darker with every step downwards the hierarchy?!
+    property bool code: false
+    property color tintColor: "#F7F7F7" //TODO-r: Darker with every step downwards the hierarchy?! (important: Also when [code] inside [quote] or the other way round)
 
     Label {
         id: quoteLabel
         wrapMode: Text.Wrap
 
-        text: (dataItem.tagArguments["name"] !== undefined) ? qsTr(i18n.tr("Quote by %1")).arg(dataItem.tagArguments["name"]) : i18n.tr("Quote")
+        text: code ? i18n.tr("Code") : ((dataItem.tagArguments["name"] !== undefined) ? qsTr(i18n.tr("Quote by %1")).arg(dataItem.tagArguments["name"]) : i18n.tr("Quote"))
 
         anchors {
             top: parent.top

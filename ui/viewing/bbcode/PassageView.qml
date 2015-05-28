@@ -57,8 +57,15 @@ Item {
                         value: modelData
                     }
 
+                    Binding {
+                        target: loader.item
+                        property: "code"
+                        value: true
+                        when: modelData.tagType === "code"
+                    }
+
                     function getSourceForTag(tag) {
-                        if (tag === "quote" || tag === "code") { //TODO-r: Separate code view
+                        if (tag === "quote" || tag === "code") {
                             return "QuotePassageView.qml"
                         } else if (tag === "img") {
                             return "ImgPassageView.qml"
