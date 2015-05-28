@@ -30,7 +30,6 @@ XmlListModel {
     query: "/methodResponse/params/param/value/struct"
 
     property bool hasLoaded: false
-    property bool loadError: false
 
     property string version
     property bool isVBulletin: false
@@ -58,15 +57,11 @@ XmlListModel {
             console.log("configModel has loaded")
 
             hasLoaded = true
-        } else if (status === XmlListModel.Error || status === XmlListModel.Null) { //TODO-r: Check if usage of Null is correct here
-            loadError = true
-            hasLoaded = true
         }
     }
 
     function loadConfig() {
         hasLoaded = false
-        loadError = false
         configModel.xml = ""
 
         loadConfigRequest.start()

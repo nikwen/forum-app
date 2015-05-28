@@ -37,7 +37,6 @@ ListView {
     property bool viewSubscriptions: false
 
     readonly property bool modelsHaveLoadedCompletely: categoryModel.hasLoadedCompletely && topicModel.hasLoadedCompletely
-    readonly property bool modelsLoadError: categoryModel.loadError || topicModel.loadError //TODO-r: Error type TODO-r: Test error handling in this file (not in ForumConfigModel, e.g. by turning off Wifi and reloading) TODO-r: Only Toast when error due to loadMore()
 
     clip: true
 
@@ -127,7 +126,6 @@ ListView {
                     categoryModel.xml = responseXml
                 }
             } else {
-                categoryModel.loadError = true
                 categoryModel.loadingFinished()
             }
         }
@@ -138,7 +136,6 @@ ListView {
         objectName: "categoryModel"
 
         property bool hasLoadedCompletely: true
-        property bool loadError: false
 
         property string parentForumId: "-1"
         property bool viewSubscriptions: forumsList.viewSubscriptions
@@ -157,7 +154,7 @@ ListView {
         property int lastFetchedPos
 
         onStatusChanged: {
-            if (status === XmlListModel.Ready) {
+            if (status === 1) {
 //                console.log(xml) //Do not run on XDA home!!! (Too big, will freeze QtCreator)
                 if (!checkingForChildren) {
                     console.debug("categoryModel has: " + count + " items");
@@ -183,9 +180,8 @@ ListView {
                         insertResults()
                     }
                 }
-            } else if (status === XmlListModel.Error) { //TODO-r: Check if usage of Error is enough here (compare ForumConfigModel)
-                loadError = true
-                loadingFinished()
+
+
             }
         }
 
@@ -216,7 +212,7 @@ ListView {
         function loadingFinished() {
             hasLoadedCompletely = true
 
-            if (isForumOverview && !loadError) {
+            if (isForumOverview) {
                 parseFetchedXml()
             }
         }
@@ -240,7 +236,6 @@ ListView {
             console.log("loading categories")
 
             hasLoadedCompletely = false
-            loadError = false
             lastFetchedPos = 0
 
             categoryModel.xml = ""
@@ -325,7 +320,6 @@ ListView {
             if (withoutErrors) {
                 topicModel.xml = responseXml
             } else {
-                topicModel.loadError = true
                 topicModel.loadingFinished()
             }
         }
@@ -336,7 +330,6 @@ ListView {
         objectName: "topicModel"
 
         property bool hasLoadedCompletely: true
-        property bool loadError: false
 
         property int forumId: current_forum
         property bool viewSubscriptions: forumsList.viewSubscriptions
@@ -350,7 +343,7 @@ ListView {
         XmlRole { name: "has_new"; query: "member[name='new_post']/value/boolean/number()" }
 
         onStatusChanged: {
-            if (status === XmlListModel.Ready) {
+            if (status === 1) {
                 if (count > 0) {
                     hasTopics = true //no else needed (and it may interfere with moreLoading)
 
@@ -392,9 +385,6 @@ ListView {
                 }
 
                 loadingFinished()
-            } else if (status === XmlListModel.Error) { //TODO-r: Check if usage of Error is enough here (compare ForumConfigModel)
-                loadError = true
-                loadingFinished()
             }
         }
 
@@ -430,7 +420,6 @@ ListView {
             console.log("loading topics")
 
             hasLoadedCompletely = false
-            loadError = false
 
             topicModel.xml = ""
 
@@ -452,4 +441,7 @@ ListView {
             topicRequest.start()
         }
     }
+
+
+
 }

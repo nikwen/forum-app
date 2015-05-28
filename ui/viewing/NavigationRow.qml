@@ -87,7 +87,7 @@ Item {
                 Repeater {
                     model: pageModel
 
-                    delegate: Loader { //TODO-r: Highlight current
+                    delegate: Loader {
                         sourceComponent: model.ellipsis ? ellipsisComponent : selectPageButton
 
                         Binding {
