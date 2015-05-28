@@ -17,7 +17,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            color: showContentButton.pressed ? "#DDDDDD" : "#EEEEEE" //TODO-r: Color when inside QuotePassageView, same applies to quotes inside quotes
+            color: showContentButton.pressed ? "#DDDDDD" : "#EEEEEE" //TODO-r: Darker when inside QuotePassageView (take background color and apply Qt.darker() to it?)
 
             Behavior on color {
                 ColorAnimation {

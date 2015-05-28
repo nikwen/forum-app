@@ -22,8 +22,6 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../components"
 
-//TODO-r: Solution similar to gallery navigation on m.heise.de
-
 Item {
     width: parent.width
     height: units.gu(8)
@@ -56,23 +54,41 @@ Item {
                 ListModel {
                     id: pageModel
 
-                    function fillWithValues() { //TODO-r: Calculate once for both navigation rows (=> shared model)
+                    function fillWithValues() {
                         if (firstDisplayedPost < 0 || totalPostCount <= 0) {
                             return
                         }
 
                         clear()
 
-                        if (pageCount <= 5) { //TODO-r: Value calculated from width (but with max value)
+                        if (pageCount <= 5) { //TODO-r: Make sure the view is not bigger than the space which is available, e.g. by using a lower font size (like in the header)
                             for (var i = 1; i <= pageCount; i++) {
-                                append({ "ellipsis": false, "pageNumber": i })
+                                append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
+                            }
+                        } else if (currentPage <= 3) {
+                            for (var i = 1; i <= Math.max(currentPage + 1, 3); i++) {
+                                append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
+                            }
+
+                            append({ "ellipsis": true,  "pageNumber": -1, "current": false })
+                            append({ "ellipsis": false, "pageNumber": pageCount, "current": false })
+                        } else if (currentPage >= pageCount - 2) {
+                            append({ "ellipsis": false, "pageNumber": 1, "current": false })
+                            append({ "ellipsis": true,  "pageNumber": -1, "current": false })
+
+                            for (var i = Math.min(pageCount - 2, currentPage - 1); i <= pageCount; i++) {
+                                append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
                             }
                         } else {
-                            append({ "ellipsis": false, "pageNumber": 1 })
-                            append({ "ellipsis": true,  "pageNumber": -1 })
-                            append({ "ellipsis": false, "pageNumber": currentPage })
-                            append({ "ellipsis": true,  "pageNumber": -1 })
-                            append({ "ellipsis": false, "pageNumber": pageCount })
+                            append({ "ellipsis": false, "pageNumber": 1, "current": false })
+                            append({ "ellipsis": true,  "pageNumber": -1, "current": false })
+
+                            for (var i = currentPage - 1; i <= currentPage + 1; i++) {
+                                append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
+                            }
+
+                            append({ "ellipsis": true,  "pageNumber": -1, "current": false })
+                            append({ "ellipsis": false, "pageNumber": pageCount, "current": false })
                         }
                     }
                 }
@@ -96,6 +112,13 @@ Item {
                             value: model.pageNumber
                             when: !model.ellipsis
                         }
+
+                        Binding {
+                            target: item
+                            property: "current"
+                            value: model.current
+                            when: !model.ellipsis
+                        }
                     }
                 }
             }
@@ -112,11 +135,12 @@ Item {
     Component {
         id: selectPageButton
 
-        AbstractButton {
+        AbstractButton { //TODO-r: Make buttons a bit bigger (reduce Row spacing and add margin to Label)
             width: label.width + units.gu(1)
             height: label.height + units.gu(1)
 
             property int pageNumber
+            property bool current: false
 
             Rectangle {
                 anchors.fill: parent
@@ -128,6 +152,7 @@ Item {
                 text: pageNumber
                 fontSize: "large"
                 anchors.centerIn: parent
+                font.underline: current //TODO-r: Line a bit lower (by adding a custom Rectangle component)
             }
 
             onClicked: goToPage(pageNumber - 1)

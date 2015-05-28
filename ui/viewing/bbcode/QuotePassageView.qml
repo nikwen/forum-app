@@ -3,7 +3,6 @@ import Ubuntu.Components 1.1
 import Ubuntu.Layouts 1.0
 
 //TODO: Show only 5 lines + a "show more" label
-//TODO-r: Somewhat smaller margin below quotes
 
 Rectangle {
     id: quoteRect
