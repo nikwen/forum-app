@@ -152,7 +152,7 @@ Item {
                 text: pageNumber
                 fontSize: "large"
                 anchors.centerIn: parent
-                font.underline: current //TODO-r: Line a bit lower (by adding a custom Rectangle component)
+                font.underline: current //TODO-r: Line a bit lower (by adding a custom Rectangle component) OR invert color
             }
 
             onClicked: goToPage(pageNumber - 1)
