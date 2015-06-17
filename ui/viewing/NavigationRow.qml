@@ -116,28 +116,24 @@ Item {
                 Repeater {
                     model: pageModel
 
-                    delegate: Loader {
-                        sourceComponent: model.ellipsis ? ellipsisComponent : selectPageButton
+                    delegate: AbstractButton { //TODO-r: Make buttons a bit bigger (reduce Row spacing and add margin to Label)
+                        width: pageLabel.width + units.gu(1)
+                        height: pageLabel.height + units.gu(1)
 
-                        Binding {
-                            target: item
-                            property: "pageNumber"
-                            value: model.pageNumber
-                            when: !model.ellipsis
+                        Rectangle {
+                            anchors.fill: parent
+                            color: parent.pressed ? "#F3F3F3" : "transparent"
                         }
 
-                        Binding {
-                            target: item
-                            property: "current"
-                            value: model.current
-                            when: !model.ellipsis
+                        Label {
+                            id: pageLabel
+                            text: model.ellipsis ? "…" : model.pageNumber
+                            fontSize: buttonsRow.pageButtonFontSize
+                            anchors.centerIn: parent
+                            font.underline: model.current //TODO-r: Line a bit lower (by adding a custom Rectangle component) OR invert color
                         }
 
-                        Binding {
-                            target: item
-                            property: "fontSize"
-                            value: buttonsRow.pageButtonFontSize
-                        }
+                        onClicked: model.ellipsis ? threadPage.openPageSelectionDialog() : goToPage(model.pageNumber - 1)
                     }
                 }
             }
@@ -147,48 +143,6 @@ Item {
                 previous: false
 
                 onClicked: goToNextPage()
-            }
-        }
-    }
-
-    Component {
-        id: selectPageButton
-
-        AbstractButton { //TODO-r: Make buttons a bit bigger (reduce Row spacing and add margin to Label)
-            width: label.width + units.gu(1)
-            height: label.height + units.gu(1)
-
-            property int pageNumber
-            property bool current: false
-            property alias fontSize: label.fontSize
-
-            Rectangle {
-                anchors.fill: parent
-                color: parent.pressed ? "#F3F3F3" : "transparent"
-            }
-
-            Label {
-                id: label
-                text: pageNumber
-                fontSize: "large"
-                anchors.centerIn: parent
-                font.underline: current //TODO-r: Line a bit lower (by adding a custom Rectangle component) OR invert color
-            }
-
-            onClicked: goToPage(pageNumber - 1)
-        }
-    }
-
-    Component { //TODO-r: Open page selection dialog on click
-        id: ellipsisComponent
-
-        Label {
-            id: ellipsisLabel
-            text: "…"
-            fontSize: "large"
-            anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: units.gu(0.5) //Due to "+ units.gu(1)" in selectPageButton
             }
         }
     }

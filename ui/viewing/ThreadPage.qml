@@ -65,6 +65,10 @@ PageWithBottomEdge {
         }
     }
 
+    function openPageSelectionDialog() {
+        PopupUtils.open(pageSelectionDialog)
+    }
+
     function goToPage(pageNumber) { //Starting with 0
         if (pageNumber >= 0 && pageNumber < pageCount) {
             var firstPost = pageNumber * backend.postsPerPage
@@ -145,7 +149,7 @@ PageWithBottomEdge {
             iconName: "view-list-symbolic"
             visible: !vBulletinAnnouncement && threadList.totalPostCount > backend.postsPerPage
             onTriggered: {
-                PopupUtils.open(pageSelectionDialog)
+                openPageSelectionDialog()
             }
         }
     ]
