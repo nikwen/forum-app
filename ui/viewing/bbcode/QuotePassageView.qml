@@ -15,7 +15,7 @@ Rectangle {
 
     property alias dataItem: passageView.dataItem
     property bool code: false
-    property color tintColor: "#F7F7F7" //TODO-r: Darker with every step downwards the hierarchy?! (important: Also when [code] inside [quote] or the other way round)
+    property color tintColor: "#F7F7F7"
 
     Label {
         id: quoteLabel

@@ -222,7 +222,7 @@ PageWithBottomEdge {
         }
     }
 
-    SubForumList { //TODO-r: Fix bottom edge
+    SubForumList {
         id: forumsList
         anchors.fill: parent
 

@@ -99,7 +99,7 @@ UbuntuShape {
 
             Label {
                 id: time
-                text: formatIsoTime(postTime) + ((editTime !== "") ? qsTr(i18n.tr(" (last edited %1)")).arg(formatUnixTimestamp(editTime)) : "") //TODO-r: "Last edited March 2014" sounds wrong
+                text: formatIsoTime(postTime) + ((editTime !== "") ? (" (" + formatUnixTimestamp(editTime, true) + ")") : "")
                 elide: Text.ElideRight
                 anchors {
                     bottom: iconItem.bottom
@@ -108,53 +108,53 @@ UbuntuShape {
                     leftMargin: units.gu(1)
                 }
 
-                function formatTime(postDate) {
+                function formatTime(postDate, isEditTime) {
                     var todaysDate = new Date()
 
                     if (backend.useAlternativeDateFormat) {
                         if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
                             //TRANSLATORS: Refers to the time when a post was made. Example: 11:54
-                            return qsTr(i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
+                            return qsTr(isEditTime ? i18n.tr("last edited at %1") : i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
                         } else if (postDate.getFullYear() === todaysDate.getFullYear()) { //Posted this year
                             //TRANSLATORS: Refers to the date when a post was made. Example: Mar. 7
-                            return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
+                            return qsTr(isEditTime ? i18n.tr("last edited on %1") : i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
                         } else {
                             //TRANSLATORS: Refers to the date when a post was made. Example: Mar. 7, 2015
-                            return qsTr(i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy")))
+                            return qsTr(isEditTime ? i18n.tr("last edited on %1") : i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy")))
                         }
                     } else {
                         var timeDiff = (todaysDate.getTime() - postDate.getTime()) / 1000 //in seconds
 
                         if (timeDiff < 60) { //Posted within the last minute
-                            return i18n.tr("Just now") //TODO-r: Edited: lower case letter
+                            return isEditTime ? i18n.tr("last edited just now") : i18n.tr("Just now")
                         } else if (timeDiff < 3600) { //Posted within the last hour
                             var minutes = Math.floor(timeDiff / 60)
-                            return qsTr(i18n.tr("%1 minute ago", "%1 minutes ago", minutes)).arg(minutes)
+                            return qsTr(isEditTime ? i18n.tr("last edited %1 minute ago", "last edited %1 minutes ago", minutes) : i18n.tr("%1 minute ago", "%1 minutes ago", minutes)).arg(minutes)
                         } else if (timeDiff < 86400) { //Posted within the last 24 hours
                             var hours = Math.floor(timeDiff / 3600)
-                            return qsTr(i18n.tr("%1 hour ago", "%1 hours ago", hours)).arg(hours)
+                            return qsTr(isEditTime ? i18n.tr("last edited %1 hour ago", "last edited %1 hours ago", hours) : i18n.tr("%1 hour ago", "%1 hours ago", hours)).arg(hours)
                         } else if (timeDiff < 2592000 || (postDate.getMonth() === todaysDate.getMonth() && postDate.getFullYear() === todaysDate.getFullYear())) { //Posted within the last 30 days or this month
                             var days = Math.floor(timeDiff / 86400)
-                            return qsTr(i18n.tr("%1 day ago", "%1 days ago", days)).arg(days)
+                            return qsTr(isEditTime ? i18n.tr("last edited %1 day ago", "last edited %1 days ago", days) : i18n.tr("%1 day ago", "%1 days ago", days)).arg(days)
                         } else {
                             //TRANSLATORS: Refers to the date when a post was made. Example: March 2015
-                            return Qt.formatDate(postDate, i18n.tr("MMMM yyyy"))
+                            return qsTr(isEditTime ? i18n.tr("last edited in %1") : "%1").arg(Qt.formatDate(postDate, i18n.tr("MMMM yyyy")))
                         }
                     }
                 }
 
-                function formatUnixTimestamp(time) {
+                function formatUnixTimestamp(time, isEditTime) {
                     var date = new Date(time * 1000)
-                    return formatTime(date)
+                    return formatTime(date, isEditTime)
                 }
 
-                function formatIsoTime(time) {
+                function formatIsoTime(time, isEditTime) {
                     if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
                         time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
                     }
 
                     var date = new Date(time)
-                    return formatTime(date)
+                    return formatTime(date, isEditTime)
                 }
             }
 
