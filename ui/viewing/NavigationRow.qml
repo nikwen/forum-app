@@ -51,6 +51,19 @@ Item {
 
                 spacing: units.gu(1)
 
+                property int spaceLeft: parent.width - width - previousButton.width - nextButton.width - 3 * spacing
+                property int sizeStep: -1
+                property string pageButtonFontSize: "large"
+
+                onSpaceLeftChanged: {
+                    if (pageButtonFontSize === "large" && spaceLeft < 0) {
+                        sizeStep = width + 2 //So that it does not automatically reset back to medium and to improve performance if the fontSize is "medium" when the component is created
+                        pageButtonFontSize = "medium"
+                    } else if (pageButtonFontSize === "medium" && width + spaceLeft > sizeStep) {
+                        pageButtonFontSize = "large"
+                    }
+                }
+
                 ListModel {
                     id: pageModel
 
@@ -61,7 +74,7 @@ Item {
 
                         clear()
 
-                        if (pageCount <= 5) { //TODO-r: Make sure the view is not bigger than the space which is available, e.g. by using a lower font size (like in the header)
+                        if (pageCount <= 5) {
                             for (var i = 1; i <= pageCount; i++) {
                                 append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
                             }
@@ -119,6 +132,12 @@ Item {
                             value: model.current
                             when: !model.ellipsis
                         }
+
+                        Binding {
+                            target: item
+                            property: "fontSize"
+                            value: buttonsRow.pageButtonFontSize
+                        }
                     }
                 }
             }
@@ -141,6 +160,7 @@ Item {
 
             property int pageNumber
             property bool current: false
+            property alias fontSize: label.fontSize
 
             Rectangle {
                 anchors.fill: parent
@@ -159,7 +179,7 @@ Item {
         }
     }
 
-    Component {
+    Component { //TODO-r: Open page selection dialog on click
         id: ellipsisComponent
 
         Label {
