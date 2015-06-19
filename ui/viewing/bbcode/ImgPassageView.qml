@@ -35,7 +35,7 @@ Item {
         }
 
         Rectangle {
-            height: errorRect.radius
+            radius: errorRect.radius - errorRect.border.width
             color: "#F7F7F7" //TODO: Central place for storing
 
             anchors {

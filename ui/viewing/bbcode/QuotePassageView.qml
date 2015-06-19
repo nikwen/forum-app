@@ -45,7 +45,7 @@ Rectangle {
     }
 
     Rectangle {
-        radius: quoteRect.radius
+        radius: quoteRect.radius - quoteRect.border.width
         color: tintColor
 
         anchors {
@@ -58,7 +58,7 @@ Rectangle {
     }
 
     Rectangle {
-        height: quoteRect.radius
+        height: quoteRect.radius - quoteRect.border.width
         color: tintColor
 
         anchors {
