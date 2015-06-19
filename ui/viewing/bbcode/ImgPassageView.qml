@@ -2,7 +2,6 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 
 //TODO: Enlarge on click (like in scopes)
-//TODO-r: More visually pleasing while loading image and while showing error message, maybe put a grey box around the view in that case (like for quotes)
 
 Item {
     property var dataItem
@@ -23,11 +22,33 @@ Item {
         running: image.status === Image.Loading || dataItem === undefined || dataItem === null || dataItem.text === ""
     }
 
-    Label {
-        id: errorLabel
-        anchors.centerIn: parent
-        visible: image.status === Image.Error
+    Rectangle {
+        id: errorRect
+        width: errorLabel.width + units.gu(4)
+        height: errorLabel.height + units.gu(2)
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: image.status === Image.Error || (image.status === Image.Ready && image.sourceSize.width <= 1 && image.sourceSize.height <= 1)
+        radius: units.gu(0.5)
+        border {
+            width: units.dp(1)
+            color: "#CCCCCC"
+        }
 
-        text: i18n.tr("Could not load image")
+        Rectangle {
+            height: errorRect.radius
+            color: "#F7F7F7" //TODO: Central place for storing
+
+            anchors {
+                fill: parent
+                margins: errorRect.border.width
+            }
+        }
+
+        Label {
+            id: errorLabel
+            anchors.centerIn: parent //TODO-r: Wrap text if width too small
+
+            text: i18n.tr("Could not load image")
+        }
     }
 }
