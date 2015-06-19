@@ -55,7 +55,7 @@ Item {
                 property int sizeStep: -1
                 property string pageButtonFontSize: "large"
 
-                onSpaceLeftChanged: {
+                onSpaceLeftChanged: { //TODO-r: Resize when switching back to page one, reduce size one step further if necessary?, reduce spacing when resizing?, do not overlap buttons even if too big!
                     if (pageButtonFontSize === "large" && spaceLeft < 0) {
                         sizeStep = width + 2 //So that it does not automatically reset back to medium and to improve performance if the fontSize is "medium" when the component is created
                         pageButtonFontSize = "medium"

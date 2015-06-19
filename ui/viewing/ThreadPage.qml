@@ -219,6 +219,9 @@ PageWithBottomEdge {
                 placeholderText: i18n.tr("Enter page number")
 
                 onTextChanged: goToErrorLabel.visible = false
+
+                Keys.onEnterPressed: goToButton.clicked()
+                Keys.onReturnPressed: goToButton.clicked()
             }
 
             Label {
