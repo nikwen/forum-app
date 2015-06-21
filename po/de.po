@@ -17,34 +17,34 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8"
 
 msgid "Edit Forum"
-msgstr "Edit Forum"
+msgstr "Forum bearbeiten"
 
 msgid "Add Forum"
-msgstr "Add Forum"
+msgstr "Forum hinzufügen"
 
 msgid "Edit"
-msgstr "Edit"
+msgstr "Bearbeiten"
 
 msgid "Add"
-msgstr "Add"
+msgstr "Hinzufügen"
 
 msgid "Error: Url is invalid"
-msgstr "Error: Url is invalid"
+msgstr "Fehler: URL ist ungültig"
 
 msgid "Error: Name already exists"
-msgstr "Error: Name already exists"
+msgstr "Fehler: Name ist bereits vorhanden"
 
 msgid "Error: Url already exists"
-msgstr "Error: Url already exists"
+msgstr "Fehler: URL ist bereits vorhanden"
 
 msgid "Error: Name is empty"
-msgstr "Error: Name is empty"
+msgstr "Fehler: Name ist leer"
 
 msgid "Error: Url is empty"
-msgstr "Error: Url is empty"
+msgstr "Fehler: URL ist leer"
 
 msgid "Dismiss"
-msgstr "Dismiss"
+msgstr "Verwerfen"
 
 msgid "Forum-Name:"
 msgstr "Forum-Name:"
@@ -53,94 +53,95 @@ msgid "Forum-Url:"
 msgstr "Forum-Url:"
 
 msgid "Settings"
-msgstr "Settings"
+msgstr "Einstellungen"
 
 msgid "Signature"
-msgstr "Signature"
+msgstr "Signatur"
 
 msgid "Displays a signature below all of your posts…"
-msgstr "Displays a signature below all of your posts…"
+msgstr "Zeigt eine Signatur unter allen Ihren Beiträgen …"
 
 msgid "Forums"
-msgstr "Forums"
+msgstr "Foren"
 
 msgid "Subscriptions"
-msgstr "Subscriptions"
+msgstr "Abonnements"
 
 msgid "Reload"
-msgstr "Reload"
+msgstr "Neu laden"
 
 msgid "Login"
-msgstr "Login"
+msgstr "Anmelden"
 
 msgid "New Topic"
-msgstr "New Topic"
+msgstr "Neues Thema"
 
 msgid "Unsubscribe"
-msgstr "Unsubscribe"
+msgstr "Abonnement aufheben"
 
 msgid "Subscribe"
-msgstr "Subscribe"
+msgstr "Abonieren"
 
 msgid "Subscribed to this subforum"
-msgstr "Subscribed to this subforum"
+msgstr "Dieses Unterforum wurde abonniert"
 
 msgid "Unsubscribed from this subforum"
-msgstr "Unsubscribed from this subforum"
+msgstr "Abonnement für dieses Unterforum gekündigt"
 
 msgid "Standard"
 msgstr "Standard"
 
 msgid "Stickies"
-msgstr "Stickies"
+msgstr "Angeheftet"
 
 msgid "Announcements"
-msgstr "Announcements"
+msgstr "Ankündigungen"
 
 msgid "You are not subscribed to any topics or forums"
-msgstr "You are not subscribed to any topics or forums"
+msgstr "Sie haben noch keine Themen oder Foren abonniert"
 
 msgid "No topics available here"
-msgstr "No topics available here"
+msgstr "Hier sind noch keine Themen zu finden"
 
 msgid "No stickies available here"
-msgstr "No stickies available here"
+msgstr "Hier sind noch keine angehefteten Themen zu finden"
 
 msgid "No announcements available here"
-msgstr "No announcements available here"
+msgstr "Hier sind noch keine Ankündigungen zu finden"
 
 msgid "Edit Signature"
-msgstr "Edit Signature"
+msgstr "Signatur bearbeiten"
 
 msgid "Save"
-msgstr "Save"
+msgstr "Speichern"
 
 msgid "Cancel"
-msgstr "Cancel"
+msgstr "Abbrechen"
 
 msgid "Enter signature or leave blank"
-msgstr "Enter signature or leave blank"
+msgstr "Geben Sie hier Ihre Signatur ein oder lassen Sie das Feld leer"
 
 msgid "User-Name:"
-msgstr "User-Name:"
+msgstr "Benutzername:"
 
 msgid "Password:"
-msgstr "Password:"
+msgstr "Passwort:"
 
 msgid "OK"
 msgstr "OK"
 
 msgid "Sent from my awesome Ubuntu Touch device using the Forum Browser app"
-msgstr "Sent from my awesome Ubuntu Touch device using the Forum Browser app"
+msgstr ""
+"Gesendet von meinem großartigen Ubuntu Touch Gerät mit der Forum Browser App"
 
 msgid "No more threads to load"
-msgstr "No more threads to load"
+msgstr "Keine weiteren Themen zum Laden"
 
 msgid "Logged in as %1"
-msgstr "Logged in as %1"
+msgstr "Angemeldet als %1"
 
 msgid "About Forum Browser"
-msgstr "About Forum Browser"
+msgstr "Über Forum Browser"
 
 msgid "Info:"
 msgstr "Info:"
@@ -149,67 +150,69 @@ msgid "Version:"
 msgstr "Version:"
 
 msgid "Development:"
-msgstr "Development:"
+msgstr "Entwicklung:"
 
 msgid "License:"
-msgstr "License:"
+msgstr "Lizenz:"
 
 msgid "Source code & bug tracker:"
-msgstr "Source code & bug tracker:"
+msgstr "Quellcode & Bugtracker:"
 
 msgid "Github"
 msgstr "Github"
 
 msgid "Uses code from:"
-msgstr "Uses code from:"
+msgstr "Verwendet Code aus:"
 
 msgid "phpjs (MIT License)"
-msgstr "phpjs (MIT License)"
+msgstr "phpjs (MIT-Lizenz)"
 
 msgid "Authors:"
-msgstr "Authors:"
+msgstr "Autoren:"
 
 msgid "Maintainer"
 msgstr "Maintainer"
 
 msgid "XDA Developers app"
-msgstr "XDA Developers app"
+msgstr "XDA Developers App"
 
 msgid "Contact:"
-msgstr "Contact:"
+msgstr "Kontakt:"
 
 msgid "XDA Developers thread"
-msgstr "XDA Developers thread"
+msgstr "XDA Developers Thema"
 
 msgid "Powered by Tapatalk"
-msgstr "Powered by Tapatalk"
+msgstr "Angetrieben durch Tapatalk"
 
 msgid "New Post"
-msgstr "New Post"
+msgstr "Neuer Beitrag"
 
 msgid "Subscribed to this topic"
-msgstr "Subscribed to this topic"
+msgstr "Dieses Thema wurde abonniert"
 
 msgid "Unsubscribed from this topic"
-msgstr "Unsubscribed from this topic"
+msgstr "Abonnement für dieses Thema gekündigt"
 
 msgid "Go To Page"
-msgstr "Go To Page"
+msgstr "Gehe zu Seite"
 
 msgid "Go to"
-msgstr "Go to"
+msgstr "Gehe zu"
 
 msgid "Page %1 (Post %2 - %3)"
-msgstr "Page %1 (Post %2 - %3)"
+msgstr "Seite %1 (Beitrag %2 - %3)"
 
 msgid "My Forums"
-msgstr "My Forums"
+msgstr "Meine Foren"
 
 msgid "About"
-msgstr "About"
+msgstr "Über"
 
 msgid "Swipe up from the bottom to add a forum"
-msgstr "Swipe up from the bottom to add a forum"
+msgstr ""
+"Wischen Sie von der unteren Bildschirmkante nach oben, um ein Forum "
+"hinzuzufügen"
 
 msgid "hh:mm"
 msgstr "hh:mm"
@@ -218,58 +221,60 @@ msgid "dd MMM"
 msgstr "dd MMM"
 
 msgid "dd/MM/yyyy"
-msgstr "dd/MM/yyyy"
+msgstr "dd. MM yyyy"
 
 msgid "%1 user thanked %2 for this useful post"
-msgstr "%1 user thanked %2 for this useful post"
+msgstr "%1 Nutzer hat sich bei %2 für diesen hilfreichen Beitrag bedankt"
 
 msgid "%1 users thanked %2 for this useful post"
-msgstr "%1 users thanked %2 for this useful post"
+msgstr "%1 Nutzer haben sich bei %2 für diesen hilfreichen Beitrag bedankt"
 
 msgid "Action"
-msgstr "Action"
+msgstr "Aktion"
 
 msgid "%1 failed"
-msgstr "%1 failed"
+msgstr "%1 ist fehlgeschlagen"
 
 msgid "Text returned by the server:\n"
-msgstr "Text returned by the server:\n"
+msgstr "Server-Antwort:"
 
 msgid "Error: Could not get Tapatalk API response using the given URL"
-msgstr "Error: Could not get Tapatalk API response using the given URL"
+msgstr ""
+"Fehler: Keine Antwort unter der angegebenen URL von der Tapatalk API "
+"erhalten"
 
 msgid "Error 404: Could not find Tapatalk API for given URL"
-msgstr "Error 404: Could not find Tapatalk API for given URL"
+msgstr "Fehler 404: Tapatalk API unter der angegebenen URL nicht gefunden"
 
 msgid "Connection error"
-msgstr "Connection error"
+msgstr "Verbindungsfehler"
 
 msgid "Submit"
-msgstr "Submit"
+msgstr "Absenden"
 
 msgid "Please enter a message"
-msgstr "Please enter a message"
+msgstr "Bitte geben Sie eine Nachricht ein"
 
 msgid "Back"
-msgstr "Back"
+msgstr "Zurück"
 
 msgid "Subject:"
-msgstr "Subject:"
+msgstr "Betreff:"
 
 msgid "Enter Subject"
-msgstr "Enter Subject"
+msgstr "Betreff eingeben"
 
 msgid "Message:"
-msgstr "Message:"
+msgstr "Nachricht:"
 
 msgid "Enter Message"
-msgstr "Enter Message"
+msgstr "Nachricht eingeben"
 
 msgid "Submitting %1..."
-msgstr "Submitting %1..."
+msgstr "%1 wird gesendet …"
 
 msgid "Post"
-msgstr "Post"
+msgstr "Beitrag"
 
 msgid "Thread"
-msgstr "Thread"
+msgstr "Thema"
