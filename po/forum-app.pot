@@ -1,0 +1,369 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-06-21 15:57+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ui/AddForumPage.qml:26
+msgid "Edit Forum"
+msgstr ""
+
+#: ui/AddForumPage.qml:26 ui/ForumsListPage.qml:32
+msgid "Add Forum"
+msgstr ""
+
+#: ui/AddForumPage.qml:41
+msgid "Edit"
+msgstr ""
+
+#: ui/AddForumPage.qml:41
+msgid "Add"
+msgstr ""
+
+#: ui/AddForumPage.qml:54
+msgid "Error: Url is invalid"
+msgstr ""
+
+#: ui/AddForumPage.qml:64
+msgid "Error: Name already exists"
+msgstr ""
+
+#: ui/AddForumPage.qml:71
+msgid "Error: Url already exists"
+msgstr ""
+
+#: ui/AddForumPage.qml:91
+msgid "Error: Name is empty"
+msgstr ""
+
+#: ui/AddForumPage.qml:93
+msgid "Error: Url is empty"
+msgstr ""
+
+#: ui/AddForumPage.qml:134
+msgid "Dismiss"
+msgstr ""
+
+#: ui/AddForumPage.qml:147
+msgid "Forum-Name:"
+msgstr ""
+
+#: ui/AddForumPage.qml:169
+msgid "Forum-Url:"
+msgstr ""
+
+#: ui/settings/SettingsPage.qml:26 ui/ForumsListPage.qml:38
+msgid "Settings"
+msgstr ""
+
+#: ui/settings/SettingsPage.qml:32
+msgid "Signature"
+msgstr ""
+
+#: ui/settings/SettingsPage.qml:33
+msgid "Displays a signature below all of your posts…"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:30
+msgid "Forums"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:50 ui/viewing/SubForumPage.qml:58
+msgid "Subscriptions"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:79 ui/viewing/ThreadPage.qml:75
+msgid "Reload"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:92 ui/LoginPage.qml:38
+#: backend/ForumBackend.qml:108 ui/viewing/ThreadPage.qml:83
+msgid "Login"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:101 ui/viewing/MessageComposerPage.qml:40
+msgid "New Topic"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:124 ui/viewing/ThreadPage.qml:92
+msgid "Unsubscribe"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:124 ui/viewing/ThreadPage.qml:92
+msgid "Subscribe"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:139
+msgid "Subscribed to this subforum"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:139
+msgid "Unsubscribed from this subforum"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:200
+msgid "Standard"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:200
+msgid "Stickies"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:200
+msgid "Announcements"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:270
+msgid "You are not subscribed to any topics or forums"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:270
+msgid "No topics available here"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:270
+msgid "No stickies available here"
+msgstr ""
+
+#: ui/viewing/SubForumPage.qml:270
+msgid "No announcements available here"
+msgstr ""
+
+#: ui/settings/EditSignaturePage.qml:31
+msgid "Edit Signature"
+msgstr ""
+
+#: ui/settings/EditSignaturePage.qml:40
+msgid "Save"
+msgstr ""
+
+#: ui/settings/EditSignaturePage.qml:52 ui/LoginPage.qml:30
+msgid "Cancel"
+msgstr ""
+
+#: ui/settings/EditSignaturePage.qml:64
+msgid "Enter signature or leave blank"
+msgstr ""
+
+#: ui/LoginPage.qml:89
+msgid "User-Name:"
+msgstr ""
+
+#: ui/LoginPage.qml:111
+msgid "Password:"
+msgstr ""
+
+#: ui/components/ErrorDialog.qml:27
+msgid "OK"
+msgstr ""
+
+#: backend/SettingsBackend.qml:24
+msgid "Sent from my awesome Ubuntu Touch device using the Forum Browser app"
+msgstr ""
+
+#: ui/viewing/SubForumList.qml:399
+msgid "No more threads to load"
+msgstr ""
+
+#: backend/ForumBackend.qml:120
+#, qt-format
+msgid "Logged in as %1"
+msgstr ""
+
+#: ui/AboutPage.qml:26
+msgid "About Forum Browser"
+msgstr ""
+
+#: ui/AboutPage.qml:61
+msgid "Info:"
+msgstr ""
+
+#: ui/AboutPage.qml:65
+msgid "Version:"
+msgstr ""
+
+#: ui/AboutPage.qml:72
+msgid "Development:"
+msgstr ""
+
+#: ui/AboutPage.qml:76
+msgid "License:"
+msgstr ""
+
+#: ui/AboutPage.qml:85
+msgid "Source code & bug tracker:"
+msgstr ""
+
+#: ui/AboutPage.qml:87
+msgid "Github"
+msgstr ""
+
+#: ui/AboutPage.qml:94
+msgid "Uses code from:"
+msgstr ""
+
+#: ui/AboutPage.qml:96
+msgid "phpjs (MIT License)"
+msgstr ""
+
+#: ui/AboutPage.qml:103
+msgid "Authors:"
+msgstr ""
+
+#: ui/AboutPage.qml:109
+msgid "Maintainer"
+msgstr ""
+
+#: ui/AboutPage.qml:116
+msgid "XDA Developers app"
+msgstr ""
+
+#: ui/AboutPage.qml:121
+msgid "Contact:"
+msgstr ""
+
+#: ui/AboutPage.qml:131
+msgid "XDA Developers thread"
+msgstr ""
+
+#: ui/AboutPage.qml:147 ui/ForumsListPage.qml:201
+msgid "Powered by Tapatalk"
+msgstr ""
+
+#: ui/viewing/ThreadPage.qml:42 ui/viewing/MessageComposerPage.qml:40
+msgid "New Post"
+msgstr ""
+
+#: ui/viewing/ThreadPage.qml:107
+msgid "Subscribed to this topic"
+msgstr ""
+
+#: ui/viewing/ThreadPage.qml:107
+msgid "Unsubscribed from this topic"
+msgstr ""
+
+#: ui/viewing/ThreadPage.qml:113
+msgid "Go To Page"
+msgstr ""
+
+#: ui/viewing/ThreadPage.qml:267
+msgid "Go to"
+msgstr ""
+
+#: ui/viewing/ThreadPage.qml:280
+#, qt-format
+msgid "Page %1 (Post %2 - %3)"
+msgstr ""
+
+#: ui/ForumsListPage.qml:27
+msgid "My Forums"
+msgstr ""
+
+#: ui/ForumsListPage.qml:44
+msgid "About"
+msgstr ""
+
+#: ui/ForumsListPage.qml:169
+msgid "Swipe up from the bottom to add a forum"
+msgstr ""
+
+#: ui/viewing/MessageDelegate.qml:111
+msgid "hh:mm"
+msgstr ""
+
+#: ui/viewing/MessageDelegate.qml:113
+msgid "dd MMM"
+msgstr ""
+
+#: ui/viewing/MessageDelegate.qml:115
+msgid "dd/MM/yyyy"
+msgstr ""
+
+#: ui/viewing/MessageDelegate.qml:152
+#, qt-format
+msgid "%1 user thanked %2 for this useful post"
+msgstr ""
+
+#: ui/viewing/MessageDelegate.qml:152
+#, qt-format
+msgid "%1 users thanked %2 for this useful post"
+msgstr ""
+
+#: backend/ApiRequest.qml:26
+msgid "Action"
+msgstr ""
+
+#: backend/ApiRequest.qml:102 ui/viewing/MessageComposerPage.qml:75
+#, qt-format
+msgid "%1 failed"
+msgstr ""
+
+#: backend/ApiRequest.qml:104
+msgid "Text returned by the server:\n"
+msgstr ""
+
+#: backend/ApiRequest.qml:130
+msgid "Error: Could not get Tapatalk API response using the given URL"
+msgstr ""
+
+#: backend/ApiRequest.qml:137
+msgid "Error 404: Could not find Tapatalk API for given URL"
+msgstr ""
+
+#: backend/ApiRequest.qml:137
+msgid "Connection error"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:65
+msgid "Submit"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:76
+msgid "Please enter a message"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:99
+msgid "Back"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:152
+msgid "Subject:"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:167
+msgid "Enter Subject"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:190
+msgid "Message:"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:203
+msgid "Enter Message"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:244
+#, qt-format
+msgid "Submitting %1..."
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:244
+msgid "Post"
+msgstr ""
+
+#: ui/viewing/MessageComposerPage.qml:244
+msgid "Thread"
+msgstr ""
