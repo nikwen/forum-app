@@ -22,8 +22,14 @@ Feature requests
 
 Feature request are handled like bugs. A project member will then mark them as a feature request.
 
+Translating Forum Browser
+=========================
+
+If you want to help translate Forum Browser into your native language, send me an [email](mailto:nikwen.developer@gmail.com) and I will add you to our translation project on LingoHub.
+
 Big thanks to
 =============
 
 * Michael Hall for publishing the [XDA Developers app](https://code.launchpad.net/~xda-app-developers/xda-developers-app/trunk) under the GPL. This project initially started as a fork of that application.
 * [Tapatalk](https://tapatalk.com) for allowing us to use their API.
+* [LingoHub](https://lingohub.com) for letting us use their translation platform for free.
