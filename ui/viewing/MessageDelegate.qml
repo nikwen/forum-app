@@ -23,6 +23,7 @@ import Ubuntu.Components 1.1
 import "bbcode"
 
 UbuntuShape {
+    id: ubuntuShape
 
     width: parent.width
     height: contentRect.height
@@ -185,6 +186,7 @@ UbuntuShape {
         PassageView {
             id: bbRootView
             dataItem: postBody
+            parentBackgroundColor: ubuntuShape.color
 
             anchors {
                 top: titleLabel.bottom

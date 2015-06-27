@@ -7,6 +7,7 @@ import Ubuntu.Layouts 1.0
 Item {
 
     property var dataItem: undefined
+    property color parentBackgroundColor
 
     height: childrenRect.height
 
@@ -46,7 +47,7 @@ Item {
 
                     Loader {
                         id: loader
-                        source: getSourceForTag(modelData.tagType)
+                        source: getSourceForType(getTypeForTag(modelData.tagType))
                         width: parent.width
                         asynchronous: false
                     }
@@ -59,17 +60,36 @@ Item {
 
                     Binding {
                         target: loader.item
+                        property: "parentBackgroundColor"
+                        value: parentBackgroundColor
+                        when: getTypeForTag(modelData.tagType) === "" || getTypeForTag(modelData.tagType) === "spoiler"
+                    }
+
+                    Binding {
+                        target: loader.item
                         property: "code"
                         value: true
                         when: modelData.tagType === "code"
                     }
 
-                    function getSourceForTag(tag) {
+                    function getTypeForTag(tag) {
                         if (tag === "quote" || tag === "code") {
-                            return "QuotePassageView.qml"
+                            return "quote"
                         } else if (tag === "img") {
-                            return "ImgPassageView.qml"
+                            return "img"
                         } else if (tag === "spoiler" || tag === "hide") {
+                            return "spoiler"
+                        } else {
+                            return ""
+                        }
+                    }
+
+                    function getSourceForType(type) {
+                        if (type === "quote") {
+                            return "QuotePassageView.qml"
+                        } else if (type === "img") {
+                            return "ImgPassageView.qml"
+                        } else if (type === "spoiler") {
                             return "SpoilerPassageView.qml"
                         } else {
                             return "PassageView.qml"

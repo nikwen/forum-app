@@ -5,6 +5,7 @@ Item {
     height: childrenRect.height
 
     property var dataItem
+    property color parentBackgroundColor
 
     AbstractButton {
         id: showContentButton
@@ -17,7 +18,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            color: showContentButton.pressed ? "#DDDDDD" : "#EEEEEE" //TODO-r: Darker when inside QuotePassageView (take background color and apply Qt.darker() to it?)
+            color: Qt.darker(parentBackgroundColor, 15.0 / (showContentButton.pressed ? 13.0 : 14.0)) //On a white background these are "#DDDDDD" and "#EEEEEE"
 
             Behavior on color {
                 ColorAnimation {
@@ -44,6 +45,7 @@ Item {
         }
 
         dataItem: parent.dataItem
+        parentBackgroundColor: parent.parentBackgroundColor
         visible: false
 
         Binding {

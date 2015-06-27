@@ -72,6 +72,7 @@ Rectangle {
     PassageView {
         id: passageView
         dataItem: bbRoot
+        parentBackgroundColor: tintColor
 
         anchors {
             top: dividerRect.bottom
