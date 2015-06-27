@@ -43,114 +43,115 @@ Item {
                 onClicked: goToPreviousPage()
             }
 
-            Row {
-                id: buttonsRow
+            Item {
+                id: centerItem
 
-                height: childrenRect.height
-                anchors.centerIn: parent
-
-                property int spaceLeft: parent.width - width - previousButton.width - nextButton.width - 3 * spacing
-                property int sizeStep: -1
-                property string pageButtonFontSize: "large"
-
-                onSpaceLeftChanged: { //TODO-r: reduce size one step further if necessary?, reduce spacing when resizing?, do not overlap buttons even if too big!
-                    if (pageButtonFontSize === "large" && spaceLeft < 0) {
-                        sizeStep = width + 2 //So that it does not automatically reset back to medium and to improve performance if the fontSize is "medium" when the component is created
-                        pageButtonFontSize = "medium"
-                    } else if (pageButtonFontSize === "medium" && width + spaceLeft > sizeStep) {
-                        pageButtonFontSize = "large"
-                    }
+                anchors {
+                    top: parent.top
+                    left: previousButton.right
+                    right: nextButton.left
+                    bottom: parent.bottom
                 }
 
-                ListModel {
-                    id: pageModel
+                Flickable { //TODO-r: Do not go behind VerticalDivider (→ anchors.horizontalCenter)
+                    clip: true
+                    anchors.centerIn: parent
+                    height: parent.height
+                    width: Math.min(parent.width, contentWidth) //TODO-r: Binding loop
+                    contentWidth: buttonsRow.childrenRect.width //TODO-r: Margin
 
-                    function fillWithValues() {
-                        if (firstDisplayedPost < 0 || totalPostCount <= 0) {
-                            return
+                    Row {
+                        id: buttonsRow
+
+                        height: childrenRect.height
+                        anchors.centerIn: parent
+
+                        ListModel { //TODO: Center underlined item by scrolling
+                            id: pageModel
+
+                            function fillWithValues() {
+                                if (firstDisplayedPost < 0 || totalPostCount <= 0) {
+                                    return
+                                }
+
+                                clear()
+
+                                if (pageCount <= 5) {
+                                    for (var i = 1; i <= pageCount; i++) {
+                                        append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
+                                    }
+                                } else if (currentPage <= 3) {
+                                    for (var i = 1; i <= Math.max(currentPage + 1, 3); i++) {
+                                        append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
+                                    }
+
+                                    append({ "ellipsis": true,  "pageNumber": -1, "current": false })
+                                    append({ "ellipsis": false, "pageNumber": pageCount, "current": false })
+                                } else if (currentPage >= pageCount - 2) {
+                                    append({ "ellipsis": false, "pageNumber": 1, "current": false })
+                                    append({ "ellipsis": true,  "pageNumber": -1, "current": false })
+
+                                    for (var i = Math.min(pageCount - 2, currentPage - 1); i <= pageCount; i++) {
+                                        append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
+                                    }
+                                } else {
+                                    append({ "ellipsis": false, "pageNumber": 1, "current": false })
+                                    append({ "ellipsis": true,  "pageNumber": -1, "current": false })
+
+                                    for (var i = currentPage - 1; i <= currentPage + 1; i++) {
+                                        append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
+                                    }
+
+                                    append({ "ellipsis": true,  "pageNumber": -1, "current": false })
+                                    append({ "ellipsis": false, "pageNumber": pageCount, "current": false })
+                                }
+                            }
                         }
 
-                        clear()
+                        Connections {
+                            target: threadList
 
-                        if (pageCount <= 5) {
-                            for (var i = 1; i <= pageCount; i++) {
-                                append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
-                            }
-                        } else if (currentPage <= 3) {
-                            for (var i = 1; i <= Math.max(currentPage + 1, 3); i++) {
-                                append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
-                            }
-
-                            append({ "ellipsis": true,  "pageNumber": -1, "current": false })
-                            append({ "ellipsis": false, "pageNumber": pageCount, "current": false })
-                        } else if (currentPage >= pageCount - 2) {
-                            append({ "ellipsis": false, "pageNumber": 1, "current": false })
-                            append({ "ellipsis": true,  "pageNumber": -1, "current": false })
-
-                            for (var i = Math.min(pageCount - 2, currentPage - 1); i <= pageCount; i++) {
-                                append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
-                            }
-                        } else {
-                            append({ "ellipsis": false, "pageNumber": 1, "current": false })
-                            append({ "ellipsis": true,  "pageNumber": -1, "current": false })
-
-                            for (var i = currentPage - 1; i <= currentPage + 1; i++) {
-                                append({ "ellipsis": false, "pageNumber": i, "current": i === currentPage })
-                            }
-
-                            append({ "ellipsis": true,  "pageNumber": -1, "current": false })
-                            append({ "ellipsis": false, "pageNumber": pageCount, "current": false })
+                            onFirstDisplayedPostChanged: pageModel.fillWithValues()
+                            onTotalPostCountChanged: pageModel.fillWithValues()
                         }
 
-                        //Reset sizing
+                        Repeater {
+                            model: pageModel
 
-                        buttonsRow.sizeStep = -1
-                        buttonsRow.pageButtonFontSize = "large"
-                    }
-                }
+                            delegate: AbstractButton {
+                                width: pageLabel.width + units.gu(1.5)
+                                height: pageLabel.height + units.gu(1.5)
 
-                Connections {
-                    target: threadList
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: parent.pressed ? "#F3F3F3" : "transparent"
+                                }
 
-                    onFirstDisplayedPostChanged: pageModel.fillWithValues()
-                    onTotalPostCountChanged: pageModel.fillWithValues()
-                }
+                                Label {
+                                    id: pageLabel
+                                    text: model.ellipsis ? "…" : model.pageNumber
+                                    fontSize: "large"
+                                    anchors.centerIn: parent
+                                }
 
-                Repeater {
-                    model: pageModel
+                                Rectangle {
+                                    id: underlineRect
+                                    height: units.gu(0.1)
+                                    anchors {
+                                        top: pageLabel.bottom
+                                        left: pageLabel.left
+                                        right: pageLabel.right
+                                        topMargin: units.gu(0.15)
+                                        leftMargin: - units.gu(0.1)
+                                        rightMargin: leftMargin
+                                    }
+                                    visible: model.current
+                                    color: pageLabel.color
+                                }
 
-                    delegate: AbstractButton {
-                        width: pageLabel.width + units.gu(1.5)
-                        height: pageLabel.height + units.gu(1.5)
-
-                        Rectangle {
-                            anchors.fill: parent
-                            color: parent.pressed ? "#F3F3F3" : "transparent"
-                        }
-
-                        Label {
-                            id: pageLabel
-                            text: model.ellipsis ? "…" : model.pageNumber
-                            fontSize: buttonsRow.pageButtonFontSize
-                            anchors.centerIn: parent
-                        }
-
-                        Rectangle {
-                            id: underlineRect
-                            height: units.gu(0.1)
-                            anchors {
-                                top: pageLabel.bottom
-                                left: pageLabel.left
-                                right: pageLabel.right
-                                topMargin: units.gu(0.15)
-                                leftMargin: - units.gu(0.1)
-                                rightMargin: leftMargin
+                                onClicked: model.ellipsis ? threadPage.openPageSelectionDialog() : goToPage(model.pageNumber - 1)
                             }
-                            visible: model.current
-                            color: pageLabel.color
                         }
-
-                        onClicked: model.ellipsis ? threadPage.openPageSelectionDialog() : goToPage(model.pageNumber - 1)
                     }
                 }
             }
