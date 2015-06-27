@@ -52,7 +52,7 @@ Item {
                     right: nextButton.left
                     bottom: parent.bottom
                     leftMargin: units.dp(1) //Half of the width of the NavigationButtons' VerticalDividers so that them and the text do not overlap
-                    rightMargin: leftMargin
+                    rightMargin: anchors.leftMargin
                 }
 
                 Flickable {
@@ -62,7 +62,7 @@ Item {
                     width: Math.min(parent.width, buttonsRowWidthPlusMargins)
                     contentWidth: buttonsRowWidthPlusMargins
 
-                    property real buttonsRowWidthPlusMargins: buttonsRow.width + 2 * buttonsRow.x //Need to declare this here as referring to contentWidth in the width attribute will for some reason result in a binding loop
+                    readonly property real buttonsRowWidthPlusMargins: buttonsRow.width + 2 * buttonsRow.x //Need to declare this here as referring to contentWidth in the width attribute will for some reason result in a binding loop
 
                     Row {
                         id: buttonsRow
@@ -148,7 +148,7 @@ Item {
                                         right: pageLabel.right
                                         topMargin: units.gu(0.15)
                                         leftMargin: - units.gu(0.1)
-                                        rightMargin: leftMargin
+                                        rightMargin: anchors.leftMargin
                                     }
                                     visible: model.current
                                     color: pageLabel.color
