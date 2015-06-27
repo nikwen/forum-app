@@ -193,7 +193,7 @@ PageWithBottomEdge {
         id: loadingSpinner
         anchors.centerIn: threadList
 
-        running: threadList.count === 0 //TODO-r: Empty view (when network is switched off while loading)
+        running: threadList.count === 0 //TODO: Empty view (when network is switched off while loading)
 
         Component.onCompleted: { //Determines header height and sets offset, then sets flickable
             anchors.verticalCenterOffset = (mainView.height - threadList.height) / 2

@@ -65,7 +65,7 @@ UbuntuShape {
 
                 Image {
                     id: avatarImage
-                    source: (avatar === "") ? "../../graphics/contact.svg" : avatar //TODO-r: Different (colored) image?
+                    source: (avatar === "") ? "../../graphics/contact.svg" : avatar //TODO: Use identicon as standard avatar
                     width: units.gu(5)
                     height: width
                     anchors.centerIn: parent
