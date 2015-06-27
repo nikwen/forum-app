@@ -2,7 +2,7 @@ import QtQuick 2.3
 import Ubuntu.Components 1.1
 import Ubuntu.Layouts 1.0
 
-//TODO-r: Wrapping an image or multiple passages with a [url] tag. Maybe remove tag in that case?
+//TODO: Wrapping an image or multiple passages with a [url] tag. Maybe remove tag in that case?
 
 Item {
 

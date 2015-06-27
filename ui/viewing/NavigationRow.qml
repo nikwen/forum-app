@@ -49,8 +49,6 @@ Item {
                 height: childrenRect.height
                 anchors.centerIn: parent
 
-                spacing: units.gu(1)
-
                 property int spaceLeft: parent.width - width - previousButton.width - nextButton.width - 3 * spacing
                 property int sizeStep: -1
                 property string pageButtonFontSize: "large"
@@ -116,9 +114,9 @@ Item {
                 Repeater {
                     model: pageModel
 
-                    delegate: AbstractButton { //TODO-r: Make buttons a bit bigger (reduce Row spacing and add margin to Label)
-                        width: pageLabel.width + units.gu(1)
-                        height: pageLabel.height + units.gu(1)
+                    delegate: AbstractButton {
+                        width: pageLabel.width + units.gu(1.5)
+                        height: pageLabel.height + units.gu(1.5)
 
                         Rectangle {
                             anchors.fill: parent
