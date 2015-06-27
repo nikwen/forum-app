@@ -42,6 +42,9 @@ ListView {
     property int currentPage: Math.floor(firstDisplayedPost / 10) + 1
     property int pageCount: Math.floor(totalPostCount / 10) + ((totalPostCount % backend.postsPerPage) === 0 ? 0 : 1)
 
+    property NavigationRow headerNavigationRow: null
+    property NavigationRow footerNavigationRow: null
+
     anchors {
         leftMargin: units.gu(1)
         rightMargin: units.gu(1)
@@ -63,10 +66,12 @@ ListView {
 
     header: NavigationRow {
         visible: parsedThreadModel.count > 0
+        Component.onCompleted: headerNavigationRow = this
     }
 
     footer: NavigationRow {
         visible: parsedThreadModel.count > 0
+        Component.onCompleted: footerNavigationRow = this
     }
 
     function loadPosts(startNum, count) {
@@ -81,6 +86,11 @@ ListView {
 
     function reload() {
         loadPosts(firstDisplayedPost, backend.postsPerPage) //lastDisplayedPost might not be the latest any more
+    }
+
+    function makeCurrentPageVisibleInNavigationRows() {
+        headerNavigationRow.makeCurrentPageButtonVisible()
+        footerNavigationRow.makeCurrentPageButtonVisible()
     }
 
     model: ListModel {

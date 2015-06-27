@@ -74,6 +74,8 @@ PageWithBottomEdge {
             var firstPost = pageNumber * backend.postsPerPage
             if (firstPost !== threadList.firstDisplayedPost) {
                 threadList.loadPosts(firstPost, backend.postsPerPage)
+            } else {
+                threadList.makeCurrentPageVisibleInNavigationRows()
             }
         }
     }

@@ -26,6 +26,10 @@ Item {
     width: parent.width
     height: units.gu(8)
 
+    function makeCurrentPageButtonVisible() {
+        flickable.makeCurrentPageButtonVisible()
+    }
+
     UbuntuShape {
         width: parent.width
         height: units.gu(6)
@@ -67,7 +71,7 @@ Item {
 
                     onContentWidthChanged: makeCurrentPageButtonVisible() //Called here after calculating the new contentWidth has been done
 
-                    function makeCurrentPageButtonVisible() { // TODO-r: Call when selecting same page in go to page dialog
+                    function makeCurrentPageButtonVisible() {
                         for (var i = 0; i < repeater.count; i++) {
                             var button = repeater.itemAt(i)
                             if (button.current) {
