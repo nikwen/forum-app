@@ -128,7 +128,21 @@ Item {
                             text: model.ellipsis ? "…" : model.pageNumber
                             fontSize: buttonsRow.pageButtonFontSize
                             anchors.centerIn: parent
-                            font.underline: model.current //TODO-r: Line a bit lower (by adding a custom Rectangle component) OR invert color
+                        }
+
+                        Rectangle {
+                            id: underlineRect
+                            height: units.gu(0.1)
+                            anchors {
+                                top: pageLabel.bottom
+                                left: pageLabel.left
+                                right: pageLabel.right
+                                topMargin: units.gu(0.15)
+                                leftMargin: - units.gu(0.1)
+                                rightMargin: leftMargin
+                            }
+                            visible: model.current
+                            color: pageLabel.color
                         }
 
                         onClicked: model.ellipsis ? threadPage.openPageSelectionDialog() : goToPage(model.pageNumber - 1)
