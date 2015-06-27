@@ -51,9 +51,11 @@ Item {
                     left: previousButton.right
                     right: nextButton.left
                     bottom: parent.bottom
+                    leftMargin: units.dp(1) //Half of the width of the NavigationButtons' VerticalDividers so that them and the text do not overlap
+                    rightMargin: leftMargin
                 }
 
-                Flickable { //TODO-r: Do not go behind VerticalDivider (→ anchors.horizontalCenter)
+                Flickable {
                     clip: true
                     anchors.centerIn: parent
                     height: parent.height
@@ -69,7 +71,7 @@ Item {
                         height: childrenRect.height
                         anchors.verticalCenter: parent.verticalCenter
 
-                        ListModel { //TODO: Center underlined item by scrolling
+                        ListModel { //TODO-r: Center underlined item by scrolling (https://forum.qt.io/topic/55054/solved-flickable-flick-doesn-t-work/3)
                             id: pageModel
 
                             function fillWithValues() {
