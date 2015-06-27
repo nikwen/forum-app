@@ -57,14 +57,17 @@ Item {
                     clip: true
                     anchors.centerIn: parent
                     height: parent.height
-                    width: Math.min(parent.width, contentWidth) //TODO-r: Binding loop
-                    contentWidth: buttonsRow.childrenRect.width //TODO-r: Margin
+                    width: Math.min(parent.width, buttonsRowWidthPlusMargins)
+                    contentWidth: buttonsRowWidthPlusMargins
+
+                    property real buttonsRowWidthPlusMargins: buttonsRow.width + 2 * buttonsRow.x //Need to declare this here as referring to contentWidth in the width attribute will for some reason result in a binding loop
 
                     Row {
                         id: buttonsRow
 
+                        x: units.gu(1)
                         height: childrenRect.height
-                        anchors.centerIn: parent
+                        anchors.verticalCenter: parent.verticalCenter
 
                         ListModel { //TODO: Center underlined item by scrolling
                             id: pageModel
