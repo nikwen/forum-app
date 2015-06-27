@@ -56,6 +56,7 @@ Item {
                 }
 
                 Flickable {
+                    id: flickable
                     clip: true
                     anchors.centerIn: parent
                     height: parent.height
@@ -64,6 +65,26 @@ Item {
 
                     readonly property real buttonsRowWidthPlusMargins: buttonsRow.width + 2 * buttonsRow.x //Need to declare this here as referring to contentWidth in the width attribute will for some reason result in a binding loop
 
+                    onContentWidthChanged: makeCurrentPageButtonVisible() //Called here after calculating the new contentWidth has been done
+
+                    function makeCurrentPageButtonVisible() { // TODO-r: Call when selecting same page in go to page dialog
+                        for (var i = 0; i < repeater.count; i++) {
+                            var button = repeater.itemAt(i)
+                            if (button.current) {
+                                var scrollToX = button.x + (button.width - flickable.width) / 2 + buttonsRow.x
+                                var maxX = flickable.contentWidth - flickable.width
+                                if (scrollToX > maxX) {
+                                    flickable.contentX = maxX
+                                } else if (scrollToX < 0) {
+                                    flickable.contentX = 0
+                                } else {
+                                    flickable.contentX = scrollToX
+                                }
+                                break
+                            }
+                        }
+                    }
+
                     Row {
                         id: buttonsRow
 
@@ -71,7 +92,7 @@ Item {
                         height: childrenRect.height
                         anchors.verticalCenter: parent.verticalCenter
 
-                        ListModel { //TODO-r: Center underlined item by scrolling (https://forum.qt.io/topic/55054/solved-flickable-flick-doesn-t-work/3)
+                        ListModel {
                             id: pageModel
 
                             function fillWithValues() {
@@ -121,11 +142,20 @@ Item {
                         }
 
                         Repeater {
+                            id: repeater
                             model: pageModel
 
                             delegate: AbstractButton {
                                 width: pageLabel.width + units.gu(1.5)
                                 height: pageLabel.height + units.gu(1.5)
+
+                                property bool current: model.current
+
+                                onXChanged: {
+                                    if (model.current) {
+                                        flickable.makeCurrentPageButtonVisible() //Called here to cover the case when the contentWidth of the flickable does not change (e.g. when going to the last page and then selecting the one before)
+                                    }
+                                }
 
                                 Rectangle {
                                     anchors.fill: parent
