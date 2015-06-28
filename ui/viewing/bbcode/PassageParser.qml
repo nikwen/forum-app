@@ -10,8 +10,6 @@ Item {
         Passage {}
     }
 
-    //TODO-r: Parse tags with image descriptions (check out git history): [img="lollipop on mi3"] (=> http://forum.xda-developers.com/xiaomi-mi-3/general/lollipop-mi3-guess-yes-t2940083)
-
     function parse(tagType, tagArguments, content) { //Post content which should be parsed
         var oldPos = 0
         var pos = -1
@@ -24,79 +22,95 @@ Item {
             var bracketClosePos = content.indexOf("]", pos + 1)
 
             //Check if the tag has arguments.
-            //The Tapatalk plugin seems to pass all arguments in a standardized form:
+            //The Tapatalk plugin seems to pass most arguments in a standardized form:
             // * [quote uid=123 name="author" post=12345678]
+            //Additionally, the following can be found:
+            // * [img="description"]
             //Not all arguments have to be supplied by all forums though.
             //Difficulty here: The following can occur: [quote name=""the" viper" post=12345678] (note the double qoutes and the blank)
+            var equalsPos = content.indexOf("=", pos + 1)
             var spacePos = content.indexOf(" ", pos + 1)
-            var argumentsStartPos = (spacePos !== -1) ? spacePos + 1 : -1
+            var argumentsStartPos = (spacePos === -1) ? Math.min(equalsPos, bracketClosePos) : ((equalsPos === -1) ? Math.min(spacePos, bracketClosePos) : Math.min(spacePos, equalsPos, bracketClosePos))
             var hasArguments = (argumentsStartPos !== -1) && (argumentsStartPos < bracketClosePos)
+            var hasArgumentNames = hasArguments && (argumentsStartPos === spacePos)
 
             //Get the tag, separated from the arguments
-            var tag = content.substring(pos + 1, hasArguments ? spacePos : bracketClosePos).toLowerCase()
+            var tag = content.substring(pos + 1, hasArguments ? argumentsStartPos : bracketClosePos).toLowerCase()
 
             //Get the arguments of the current tag.
             var arguments = []
             if (hasArguments) {
-                //Split the arguments string to get the different key/value pairs.
-                var argumentsString = content.substring(argumentsStartPos, bracketClosePos)
-                var argumentsSplitted = argumentsString.split(" ")
+                if (hasArgumentNames) {
+                    //Split the arguments string to get the different key/value pairs.
+                    var argumentsString = content.substring(argumentsStartPos + 1, bracketClosePos)
+                    var argumentsSplitted = argumentsString.split(" ")
 
-                //Iterate over the splitted arguments and add the found key/value pairs to the arguments array.
-                //If a string value starts with a quotation mark, it needs to end with a quotation mark as well.
-                //Everything will be added to the previous value until that trailing quotation mark can be found.
-                //If a trailing quotation mark is already present but the next string is no key/value pair, it
-                //is assumed that the quotation mark is actually part of the value and the new string is appended.
-                //Remaining (unfixable) weakness: Fails if the name contains something that could be parsed as
-                //an argument with a trailing quotation mark before it, e.g. 'Say "hello" title="me"'.
+                    //Iterate over the splitted arguments and add the found key/value pairs to the arguments array.
+                    //If a string value starts with a quotation mark, it needs to end with a quotation mark as well.
+                    //Everything will be added to the previous value until that trailing quotation mark can be found.
+                    //If a trailing quotation mark is already present but the next string is no key/value pair, it
+                    //is assumed that the quotation mark is actually part of the value and the new string is appended.
+                    //Remaining (unfixable) weakness: Fails if the name contains something that could be parsed as
+                    //an argument with a trailing quotation mark before it, e.g. 'Say "hello" title="me"'.
 
-                var currentKey = ""
-                var leadingQuotationMark = false
-                var trailingQuotationMark = false
-                for (var i = 0; i < argumentsSplitted.length; i++) {
-                    //Split "key=value" pairs.
-                    //Do not use the split() method here because that would split the string twice if the value contains an equals char.
-                    var keyEqualsPos = argumentsSplitted[i].indexOf("=")
+                    var currentKey = ""
+                    var leadingQuotationMark = false
+                    var trailingQuotationMark = false
+                    for (var i = 0; i < argumentsSplitted.length; i++) {
+                        //Split "key=value" pairs.
+                        //Do not use the split() method here because that would split the string twice if the value contains an equals char.
+                        var keyEqualsPos = argumentsSplitted[i].indexOf("=")
 
-                    if (currentKey !== "" && (keyEqualsPos <= 0 || (leadingQuotationMark && !trailingQuotationMark))) {
-                        //First part of the argument has already been parsed and
-                        // (a) there has been no trailing but a leading quotation mark yet OR
-                        // (b) the next value cannot be identified as a new "key=value" pair.
-                        arguments[currentKey] += " " + argumentsSplitted[i]
-                    } else if (keyEqualsPos > 0) {
-                        //A new "key=value" pair could be found.
+                        if (currentKey !== "" && (keyEqualsPos <= 0 || (leadingQuotationMark && !trailingQuotationMark))) {
+                            //First part of the argument has already been parsed and
+                            // (a) there has been no trailing but a leading quotation mark yet OR
+                            // (b) the next value cannot be identified as a new "key=value" pair.
+                            arguments[currentKey] += " " + argumentsSplitted[i]
+                        } else if (keyEqualsPos > 0) {
+                            //A new "key=value" pair could be found.
 
-                        currentKey = argumentsSplitted[i].substring(0, keyEqualsPos)
-                        arguments[currentKey] = argumentsSplitted[i].substring(keyEqualsPos + 1)
+                            currentKey = argumentsSplitted[i].substring(0, keyEqualsPos)
+                            arguments[currentKey] = argumentsSplitted[i].substring(keyEqualsPos + 1)
 
-                        leadingQuotationMark = (arguments[currentKey].charAt(0) === "\"")
-                    } else {
-                        //A parsing error occured.
+                            leadingQuotationMark = (arguments[currentKey].charAt(0) === "\"")
+                        } else {
+                            //A parsing error occured.
 
-                        console.log("Failed to parse part \"" + argumentsSplitted[i] + "\" of arguments string \"" + argumentsString + "\"")
+                            console.log("Failed to parse part \"" + argumentsSplitted[i] + "\" of arguments string \"" + argumentsString + "\"")
 
-                        currentKey = ""
-                        leadingQuotationMark = false
-                        trailingQuotationMark = false
+                            currentKey = ""
+                            leadingQuotationMark = false
+                            trailingQuotationMark = false
 
-                        continue
+                            continue
+                        }
+
+                        trailingQuotationMark = leadingQuotationMark && (arguments[currentKey].charAt(arguments[currentKey].length - 1) === "\"")
                     }
 
-                    trailingQuotationMark = leadingQuotationMark && (arguments[currentKey].charAt(arguments[currentKey].length - 1) === "\"")
-                }
-
-                for (var key in arguments) {
-                    //Remove leading and trailing quotation marks from strings.
-                    if (arguments[key].charAt(0) === "\"") {
-                        arguments[key] = arguments[key].substring(1)
+                    for (var key in arguments) {
+                        //Remove leading and trailing quotation marks from strings.
+                        if (arguments[key].charAt(0) === "\"") {
+                            arguments[key] = arguments[key].substring(1)
+                        }
+                        if (arguments[key].charAt(arguments[key].length - 1) === "\"") {
+                            arguments[key] = arguments[key].substring(0, arguments[key].length - 1)
+                        }
                     }
-                    if (arguments[key].charAt(arguments[key].length - 1) === "\"") {
-                        arguments[key] = arguments[key].substring(0, arguments[key].length - 1)
+                } else {
+                    //Add the whole string after the equals sign as one argument but remove leading and trailing quotation marks from it.
+                    var argument = content.substring(argumentsStartPos + 1, bracketClosePos);
+                    if (argument.charAt(0) === "\"") {
+                        argument = argument.substring(1)
                     }
+                    if (argument.charAt(argument.length - 1) === "\"") {
+                        argument = argument.substring(0, argument.length - 1)
+                    }
+                    arguments[""] = argument
                 }
             }
 
-            if (arrayContains(tagsWithChildren, tag)) { //else: don't parse
+            if (arrayContains(tagsWithChildren, tag)) { //else: don't parse (also fails when bracketClosePos === -1 due to the substring method when tag is initialized)
                 var endPos = pos
                 var moreStartTags = 1
 

@@ -3,6 +3,8 @@ import Ubuntu.Components 1.1
 
 //TODO: Enlarge on click (like in scopes)
 
+//TODO-r: Display image descriptions when loading fails: [img="lollipop on mi3"] (=> http://forum.xda-developers.com/xiaomi-mi-3/general/lollipop-mi3-guess-yes-t2940083)
+
 Item {
     property var dataItem
 
