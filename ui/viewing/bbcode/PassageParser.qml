@@ -190,7 +190,7 @@ Item {
                 string = trimmedString
             } else if (breakIndex === 0) {
                 string = string.substring(6)
-            } else if (breakLastIndex === string.length - 6) {
+            } else if (breakLastIndex !== -1 && breakIndex === string.length - 6) {
                 string = string.substring(0, breakLastIndex)
             } else { //if nothing changes anymore
                 return string
