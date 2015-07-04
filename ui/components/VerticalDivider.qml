@@ -25,11 +25,12 @@ Rectangle {
 
     property alias dividerHeight: verticalDivider.width
     property real dividerPadding: units.gu(1)
+    property bool rotateClockwise: true
 
     height: (visible) ? units.dp(2) : 0
 
     y: width / 2 + dividerPadding
-    rotation: 90
+    rotation: (rotateClockwise ? 1 : -1) * 90
     transformOrigin: Item.Center
 
     property bool __lightBackground: ColorUtils.luminance(Theme.palette.normal.background) > 0.85

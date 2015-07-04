@@ -87,5 +87,6 @@ AbstractButton {
     VerticalDivider {
         dividerHeight: units.gu(4)
         anchors.horizontalCenter: previous ? parent.right : parent.left
+        rotateClockwise: previous //Fixes a small display issue where the overlay would be shown on top of the divider when previous === false
     }
 }
