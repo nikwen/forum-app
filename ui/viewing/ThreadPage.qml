@@ -25,6 +25,8 @@ import Ubuntu.Components.Popups 1.0
 import "../components"
 import "../../backend"
 
+//TODO: Horizontal swiping
+
 PageWithBottomEdge {
     id: threadPage
     objectName: "threadPage"
@@ -33,8 +35,6 @@ PageWithBottomEdge {
     property alias current_topic: threadList.current_topic
     property string forum_id: "-1"
     property alias vBulletinAnnouncement: threadList.vBulletinAnnouncement
-
-    property alias loadingSpinnerRunning: loadingSpinner.running
 
     property int pageCount: Math.floor(threadList.totalPostCount/backend.postsPerPage + (threadList.totalPostCount % backend.postsPerPage === 0 ? 0 : 1))
 
@@ -51,10 +51,6 @@ PageWithBottomEdge {
         }
     }
 
-    Component.onCompleted: { //TODO: Check if still needed
-        header.show() //Workaround to show the header when it was previously hidden in SubForumPage
-    }
-
     Connections {
         target: pageStack
 
@@ -66,6 +62,47 @@ PageWithBottomEdge {
                 previousPage.destroy()
             }
             previousPage = pageStack.currentPage
+        }
+    }
+
+    function openPageSelectionDialog() {
+        PopupUtils.open(pageSelectionDialog)
+    }
+
+    function goToPage(pageNumber) { //Starting with 0
+        if (pageNumber >= 0 && pageNumber < pageCount) {
+            var firstPost = pageNumber * backend.postsPerPage
+            if (firstPost !== threadList.firstDisplayedPost) {
+                threadList.loadPosts(firstPost, backend.postsPerPage)
+            } else {
+                threadList.makeCurrentPageVisibleInNavigationRows()
+            }
+        }
+    }
+
+    function goToFirstPage() {
+        if (threadList.firstDisplayedPost !== 0) {
+            threadList.loadPosts(0, backend.postsPerPage);
+        }
+    }
+
+    function goToPreviousPage() {
+        if (threadList.firstDisplayedPost > 0) {
+            threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
+        }
+    }
+
+    function goToNextPage() {
+        if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
+            threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
+        }
+    }
+
+    function goToLastPage() {
+        var postsOnLastPage = (threadList.totalPostCount % backend.postsPerPage);
+        var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
+        if (beginningLastPage !== threadList.firstDisplayedPost) {
+            threadList.loadPosts(beginningLastPage, backend.postsPerPage);
         }
     }
 
@@ -114,10 +151,7 @@ PageWithBottomEdge {
             iconName: "view-list-symbolic"
             visible: !vBulletinAnnouncement && threadList.totalPostCount > backend.postsPerPage
             onTriggered: {
-                var popup = PopupUtils.open(pageSelectionDialog, pageLabel)
-                var selected = threadList.firstDisplayedPost / backend.postsPerPage
-                popup.itemSelector.selectedIndex = selected
-//                popup.itemSelector.positionViewAtIndex(selected, ListView.Center) //TODO: Add to UI Toolkit?
+                openPageSelectionDialog()
             }
         }
     ]
@@ -144,7 +178,7 @@ PageWithBottomEdge {
         text: threadPage.title
         fontSize: "x-large"
         maximumLineCount: fontSize === "medium" ? 2 : 1
-        wrapMode: Text.WordWrap
+        wrapMode: Text.Wrap
         elide: Text.ElideRight
 
         onTruncatedChanged: {
@@ -160,103 +194,18 @@ PageWithBottomEdge {
     ActivityIndicator {
         id: loadingSpinner
         anchors.centerIn: threadList
-    }
 
-    Row {
-        id: buttonsRow
+        running: threadList.count === 0 //TODO: Empty view (when network is switched off while loading)
 
-        anchors {
-            top: parent.top
-            topMargin: units.gu(1)
-            bottomMargin: units.gu(1)
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        spacing: units.gu(2)
-
-        Icon {
-            name: "media-skip-backward"
-            width: units.gu(4)
-            height: units.gu(4)
-
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    if (threadList.firstDisplayedPost !== 0) {
-                        threadList.loadPosts(0, backend.postsPerPage);
-                    }
-                }
-            }
-        }
-
-        Icon {
-            name: "media-playback-start-rtl"
-            width: units.gu(4)
-            height: units.gu(4)
-
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    if (threadList.firstDisplayedPost > 0) {
-                        threadList.loadPosts(Math.max(threadList.firstDisplayedPost - backend.postsPerPage, 0), backend.postsPerPage);
-                    }
-                }
-            }
-        }
-
-        Label {
-            id: pageLabel
-            anchors.verticalCenter: parent.verticalCenter
-            fontSize: "large"
-
-            text: threadList.totalPostCount !== -1 ? (Math.floor(threadList.firstDisplayedPost/backend.postsPerPage + 1) + " / " + pageCount) : ""
-        }
-
-        Icon {
-            name: "media-playback-start"
-            width: units.gu(4)
-            height: units.gu(4)
-
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    if (threadList.lastDisplayedPost < threadList.totalPostCount - 1) {
-                        threadList.loadPosts(threadList.lastDisplayedPost + 1, backend.postsPerPage);
-                    }
-                }
-            }
-        }
-
-        Icon {
-            name: "media-skip-forward"
-            width: units.gu(4)
-            height: units.gu(4)
-
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    var postsOnLastPage = ((threadList.totalPostCount) % backend.postsPerPage);
-                    var beginningLastPage = threadList.totalPostCount - (postsOnLastPage === 0 ? backend.postsPerPage : postsOnLastPage);
-                    if (beginningLastPage !== threadList.firstDisplayedPost) {
-                        threadList.loadPosts(beginningLastPage, backend.postsPerPage);
-                    }
-                }
-            }
+        Component.onCompleted: { //Determines header height and sets offset, then sets flickable
+            anchors.verticalCenterOffset = (mainView.height - threadList.height) / 2
+            parent.flickable = threadList
         }
     }
 
     ThreadList {
         id: threadList
-        anchors {
-            top: buttonsRow.bottom
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
+        anchors.fill: parent
     }
 
     Component {
@@ -264,37 +213,50 @@ PageWithBottomEdge {
 
         Dialog {
             id: dialog
-            title: i18n.tr("Go to")
+            title: i18n.tr("Go to page")
 
-            property alias itemSelector: selector
+            TextField {
+                id: goToTextField
+                inputMethodHints: Qt.ImhDigitsOnly
+                placeholderText: i18n.tr("Enter page number")
 
-            ItemSelector {
-                id: selector
-                expanded: true
+                onTextChanged: goToErrorLabel.visible = false
 
-                containerHeight: itemHeight * Math.min(model.count, 8)
+                Keys.onEnterPressed: goToButton.clicked()
+                Keys.onReturnPressed: goToButton.clicked()
+            }
 
-                model: ListModel {
-                    Component.onCompleted: {
-                        for (var i = 0; i < pageCount; i++) {
-                            append({pageText: qsTr(i18n.tr("Page %1 (Post %2 - %3)")).arg(i + 1).arg(i * 10 + 1).arg(Math.min((i + 1) * 10, threadList.totalPostCount))})
-                        }
-                    }
-                }
+            Label {
+                id: goToErrorLabel
+                text: i18n.tr("Invalid page number")
+                color: UbuntuColors.red
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                visible: false
+            }
 
-                delegate: OptionSelectorDelegate {
-                    text: pageText
+            Button {
+                id: goToButton
+                text: i18n.tr("Go")
+                color: UbuntuColors.green
 
-                    onTriggered: {
-                        var firstPost = index * backend.postsPerPage
-                        if (firstPost !== threadList.firstDisplayedPost) {
-                            threadList.loadPosts(firstPost, backend.postsPerPage)
-                        }
+                onClicked: {
+                    if (goToTextField.text > 0 && goToTextField.text <= pageCount) {
+                        goToPage(goToTextField.text - 1)
                         PopupUtils.close(dialog)
+                    } else {
+                        goToErrorLabel.visible = true
                     }
                 }
             }
+
+            Button {
+                id: goToCancelButton
+                text: i18n.tr("Cancel")
+                color: UbuntuColors.red
+
+                onClicked: PopupUtils.close(dialog)
+            }
         }
     }
-
 }

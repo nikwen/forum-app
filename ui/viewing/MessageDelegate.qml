@@ -20,129 +20,181 @@
 
 import QtQuick 2.3
 import Ubuntu.Components 1.1
-import Ubuntu.Components.ListItems 1.0
+import "bbcode"
 
 UbuntuShape {
+    id: ubuntuShape
+
+    width: parent.width
+    height: contentRect.height
+    color: "white"
+
     property string titleText
-    property string content
+    property Passage postBody
     property string avatar
     property string authorText
     property string thanksInfo
     property string postTime
+    property string editTime
+    property int postNumber
 
-    width: parent.width
-    height: contentRect.height
-    anchors {
-        horizontalCenter: parent.horizontalCenter
-    }
-    color: "white"
-
-    Rectangle {
+    Item {
         id: contentRect
+
         width: parent.width
-        height: childrenRect.height + (thanksLabel.visible ? units.gu(1) : -units.gu(1))
-        color: "transparent"
+        height: childrenRect.height + (thanksLabel.visible ? units.gu(4) : units.gu(2))
 
-        Rectangle {
-            id: rect
-            width: units.gu(7)
-            height: units.gu(7)
-            color: "transparent"
-
+        Item {
+            id: headerRect
+            height: childrenRect.height
             anchors {
                 top: parent.top
                 left: parent.left
+                right: parent.right
+                margins: units.gu(2)
             }
 
-            UbuntuShape {
+            Item {
+                id: iconItem
                 width: units.gu(5)
                 height: width
-                anchors.centerIn: parent
-                image: Image {
-                    id: avatarp
-                    source: if(avatar === "") { "../../graphics/contact.svg" } else { avatar }
-                    anchors.fill: parent
-                    onStatusChanged: { if(avatarp.status === Image.Ready || avatar === "") { load_image.running=false; } }
+
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                }
+
+                Image {
+                    id: avatarImage
+                    source: (avatar === "") ? "../../graphics/contact.svg" : avatar //TODO: Use identicon as standard avatar
+                    width: units.gu(5)
+                    height: width
+                    anchors.centerIn: parent
+
+                    onStatusChanged: {
+                        if (avatarImage.status === Image.Error) { //Load default avatar in case of a loading error
+                            avatar = ""
+                        }
+                    }
+                }
+
+                ActivityIndicator {
+                    id: imageActivityIndicator
+                    anchors.centerIn: parent
+                    running: avatarImage.status !== Image.Ready
                 }
             }
-            ActivityIndicator {
-                id: load_image
-                z: 100
-                anchors.centerIn: parent
-                running: true
+
+            Label {
+                id: author
+                text: authorText
+                elide: Text.ElideRight
+                anchors {
+                    top: parent.top
+                    left: iconItem.right
+                    right: postNumberLabel.left
+                    rightMargin: units.gu(1)
+                    leftMargin: units.gu(1)
+                }
+            }
+
+            Label {
+                id: time
+                text: formatIsoTime(postTime) + ((editTime !== "") ? (" (" + formatUnixTimestamp(editTime, true) + ")") : "")
+                elide: Text.ElideRight
+                anchors {
+                    bottom: iconItem.bottom
+                    left: iconItem.right
+                    right: postNumberLabel.right
+                    leftMargin: units.gu(1)
+                }
+
+                function formatTime(postDate, isEditTime) {
+                    var todaysDate = new Date()
+
+                    if (backend.useAlternativeDateFormat) {
+                        if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
+                            //TRANSLATORS: Refers to the time when a post was made. Example: 11:54
+                            return qsTr(isEditTime ? i18n.tr("last edited at %1") : i18n.tr("At %1")).arg(Qt.formatTime(postDate, i18n.tr("hh:mm")))
+                        } else if (postDate.getFullYear() === todaysDate.getFullYear()) { //Posted this year
+                            //TRANSLATORS: Refers to the date when a post was made. Example: Mar. 7
+                            return qsTr(isEditTime ? i18n.tr("last edited on %1") : i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d")))
+                        } else {
+                            //TRANSLATORS: Refers to the date when a post was made. Example: Mar. 7, 2015
+                            return qsTr(isEditTime ? i18n.tr("last edited on %1") : i18n.tr("On %1")).arg(Qt.formatDate(postDate, i18n.tr("MMM d, yyyy")))
+                        }
+                    } else {
+                        var timeDiff = (todaysDate.getTime() - postDate.getTime()) / 1000 //in seconds
+
+                        if (timeDiff < 60) { //Posted within the last minute
+                            return isEditTime ? i18n.tr("last edited just now") : i18n.tr("Just now")
+                        } else if (timeDiff < 3600) { //Posted within the last hour
+                            var minutes = Math.floor(timeDiff / 60)
+                            return qsTr(isEditTime ? i18n.tr("last edited %1 minute ago", "last edited %1 minutes ago", minutes) : i18n.tr("%1 minute ago", "%1 minutes ago", minutes)).arg(minutes)
+                        } else if (timeDiff < 86400) { //Posted within the last 24 hours
+                            var hours = Math.floor(timeDiff / 3600)
+                            return qsTr(isEditTime ? i18n.tr("last edited %1 hour ago", "last edited %1 hours ago", hours) : i18n.tr("%1 hour ago", "%1 hours ago", hours)).arg(hours)
+                        } else if (timeDiff < 2592000 || (postDate.getMonth() === todaysDate.getMonth() && postDate.getFullYear() === todaysDate.getFullYear())) { //Posted within the last 30 days or this month
+                            var days = Math.floor(timeDiff / 86400)
+                            return qsTr(isEditTime ? i18n.tr("last edited %1 day ago", "last edited %1 days ago", days) : i18n.tr("%1 day ago", "%1 days ago", days)).arg(days)
+                        } else {
+                            //TRANSLATORS: Refers to the date when a post was made. Example: March 2015
+                            return qsTr(isEditTime ? i18n.tr("last edited in %1") : "%1").arg(Qt.formatDate(postDate, i18n.tr("MMMM yyyy")))
+                        }
+                    }
+                }
+
+                function formatUnixTimestamp(time, isEditTime) {
+                    var date = new Date(time * 1000)
+                    return formatTime(date, isEditTime)
+                }
+
+                function formatIsoTime(time, isEditTime) {
+                    if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
+                        time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
+                    }
+
+                    var date = new Date(time)
+                    return formatTime(date, isEditTime)
+                }
+            }
+
+            Label {
+                id: postNumberLabel
+                text: "#" + postNumber
+                anchors {
+                    top: parent.top
+                    right: parent.right
+                    rightMargin: units.gu(0.5)
+                }
             }
         }
 
         Label {
-            id: author
-            text: authorText
-            anchors {
-                top: parent.top
-                left: rect.right
-                right: time.right
-                topMargin: units.gu(1)
-                leftMargin: units.gu(1)
-            }
-            color: "black"
-            font.bold: true
-        }
-
-        Label {
-            id: time
-            text: formatTime(postTime)
-            anchors {
-                top: parent.top
-                right: parent.right
-                topMargin: units.gu(1)
-                leftMargin: units.gu(1)
-                rightMargin: units.gu(1)
-            }
-
-            function formatTime(time) {
-                if (time.charAt(4) !== "-") { //Fixes ISO 8601 format if necessary
-                    time = time.substring(0, 4) + "-" + time.substring(4, 6) + "-" + time.substring(6)
-                }
-
-                var postDate = new Date(time)
-
-                var todaysDate = new Date()
-
-                if (Qt.formatDate(postDate, "ddMMyy") === Qt.formatDate(todaysDate, "ddMMyy")) { //Posted today => show only the time
-                    return Qt.formatTime(postDate, i18n.tr("hh:mm"))
-                } else if (postDate.getFullYear() === todaysDate.getFullYear()) {
-                    return Qt.formatDate(postDate, i18n.tr("dd MMM"))
-                } else {
-                    return Qt.formatDate(postDate, i18n.tr("dd/MM/yyyy")) //TODO: Localize!!!
-                }
-            }
-        }
-
-        Label {
-            id: title
+            id: titleLabel
             text: titleText
             wrapMode: Text.Wrap
-            font.italic: true
             visible: titleText !== undefined && titleText !== ""
             anchors {
-                top: author.bottom
-                left: rect.right
+                top: headerRect.bottom
+                left: parent.left
                 right: parent.right
-                leftMargin: units.gu(1)
-                rightMargin: units.gu(1)
+                margins: visible ? units.gu(2) : units.gu(0)
             }
         }
 
-        Label {
-            id: contentLabel
-            text: parseBBCode(content)
-            wrapMode: Text.Wrap
+        PassageView {
+            id: bbRootView
+            dataItem: postBody
+            parentBackgroundColor: ubuntuShape.color
+
             anchors {
-                top: title.visible ? title.bottom : author.bottom
-                left: rect.right
+                top: titleLabel.bottom
+                left: parent.left
                 right: parent.right
-                margins: units.gu(1)
+                margins: units.gu(2)
+                topMargin: titleLabel.visible ? units.gu(2) : units.gu(0)
             }
-            onLinkActivated: Qt.openUrlExternally(link)
         }
 
         Label {
@@ -152,10 +204,10 @@ UbuntuShape {
             text: qsTr((thanksCount === 1) ? i18n.tr("%1 user thanked %2 for this useful post") : i18n.tr("%1 users thanked %2 for this useful post")).arg(thanksCount).arg(authorText)
             fontSize: "small"
             anchors {
-                top: contentLabel.bottom
-                left: rect.right
+                top: bbRootView.bottom
+                left: parent.left
                 right: parent.right
-                margins: visible ? units.gu(1) : 0
+                margins: visible ? units.gu(2) : 0
             }
 
             property int thanksCount: occurrences(thanksInfo, "userid")
@@ -178,23 +230,4 @@ UbuntuShape {
             }
         }
     }
-
-    function parseBBCode(text) {
-        var bb = [];
-        bb[0] = /\[url\](.*?)\[\/url\]/gi;
-        bb[1] = /\[url\="?(.*?)"?\](.*?)\[\/url\]/gi;
-        bb[2] = /\[img\](.*?)\[\/img\]/gi;
-
-        var html =[];
-        html[0] = "<a href=\"$1\">$1</a>";
-        html[1] = "<a href=\"$1\">$2</a>";
-        html[2] = "<img src=\"$1\">";
-
-        for (var i = 0; i < bb.length; i++) {
-            text = text.replace(bb[i], html[i]);
-        }
-
-        return text;
-    }
-
 }

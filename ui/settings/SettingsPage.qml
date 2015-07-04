@@ -19,22 +19,62 @@
 
 import QtQuick 2.3
 import Ubuntu.Components 1.1
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../components"
 
 Page {
     id: settingsPage
     title: i18n.tr("Settings")
 
-    Column {
+    Flickable {
         anchors.fill: parent
 
-        OneLineSubtitledListItem {
-            text: i18n.tr("Signature")
-            subText: (backend.signature !== "") ? backend.signature : i18n.tr("Displays a signature below all of your posts…")
-            progression: true
+        contentHeight: column.height
 
-            onClicked: {
-                pageStack.push(Qt.resolvedUrl("EditSignaturePage.qml"))
+        Column {
+            id: column
+            width: parent.width
+
+//            ListItem.Header {
+//                text: i18n.tr("Display settings")
+//            }
+
+            CheckboxSubtitledListItem {
+                id: useAlternativeDateFormatListItem
+                text: i18n.tr("Alternative date format")
+                //TRANSLATORS: Setting to switch between the date formats used in MessageDelegate.qml. Please format the example dates accordingly.
+                subText: backend.useAlternativeDateFormat ? i18n.tr("Current format: At 11:54, On March 7, On April 10, 2015") : i18n.tr("Current format: 28 minutes ago, 14 hours ago, March 2015")
+                checked: backend.useAlternativeDateFormat
+
+                onClicked: {
+                    checked = !checked
+                }
+
+                onCheckedChanged: {
+                    backend.useAlternativeDateFormat = checked
+                }
+
+                Connections {
+                    target: backend
+
+                    onUseAlternativeDateFormatChanged: {
+                        useAlternativeDateFormatListItem.checked = backend.useAlternativeDateFormat
+                    }
+                }
+            }
+
+//            ListItem.Header {
+//                text: i18n.tr("Identity settings")
+//            }
+
+            OneLineSubtitledListItem {
+                text: i18n.tr("Signature")
+                subText: (backend.signature !== "") ? backend.signature : i18n.tr("Displays a signature below all of your posts…")
+                progression: true
+
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("EditSignaturePage.qml"))
+                }
             }
         }
     }

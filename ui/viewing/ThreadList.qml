@@ -23,14 +23,12 @@ import QtQuick.XmlListModel 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0
 import "../../backend"
+import "bbcode"
 
 
 ListView {
 
     property alias current_topic: threadModel.topic_id
-    property alias firstDisplayedPost: threadModel.firstDisplayedPost
-    property alias lastDisplayedPost: threadModel.lastDisplayedPost
-    property int totalPostCount: -1
     property bool canReply: false
     property bool isClosed: false
     property bool canSubscribe: false
@@ -38,9 +36,16 @@ ListView {
 
     property bool vBulletinAnnouncement: false
 
+    property alias firstDisplayedPost: threadModel.firstDisplayedPost
+    property alias lastDisplayedPost: threadModel.lastDisplayedPost
+    property int totalPostCount: -1
+    property int currentPage: Math.floor(firstDisplayedPost / 10) + 1
+    property int pageCount: Math.floor(totalPostCount / 10) + ((totalPostCount % backend.postsPerPage) === 0 ? 0 : 1)
+
+    property NavigationRow headerNavigationRow: null
+    property NavigationRow footerNavigationRow: null
+
     anchors {
-        topMargin: units.gu(1)
-        bottomMargin: units.gu(1)
         leftMargin: units.gu(1)
         rightMargin: units.gu(1)
     }
@@ -49,30 +54,57 @@ ListView {
     clip: true
 
     delegate: MessageDelegate {
-        titleText: Qt.atob(model.title).trim()
-        content: Qt.atob(model.content).trim()
-        authorText: Qt.atob(model.author).trim()
-        avatar: model.avatar.trim()
-        thanksInfo: model.thanks_info.trim()
-        postTime: model.post_time.trim()
+        titleText: model.title
+        postBody: model.postBody
+        authorText: model.author
+        avatar: model.avatar
+        thanksInfo: model.thanksInfo
+        postTime: model.postTime
+        editTime: model.editTime
+        postNumber: model.index + firstDisplayedPost + 1
+    }
+
+    header: NavigationRow {
+        visible: parsedThreadModel.count > 0
+        Component.onCompleted: headerNavigationRow = this
+    }
+
+    footer: NavigationRow {
+        visible: parsedThreadModel.count > 0
+        Component.onCompleted: footerNavigationRow = this
     }
 
     function loadPosts(startNum, count) {
+        if (!threadModel.hasLoadedCompletely) { //Do nothing if it is already loading
+            return
+        }
+
+        parsedThreadModel.clear()
         totalPostCount = -1
-        loadingSpinner.running = true;
-        threadModel.loadPosts(startNum, count);
+        threadModel.loadPosts(startNum, count)
     }
 
     function reload() {
         loadPosts(firstDisplayedPost, backend.postsPerPage) //lastDisplayedPost might not be the latest any more
     }
 
-    model: XmlListModel {
+    function makeCurrentPageVisibleInNavigationRows() {
+        headerNavigationRow.makeCurrentPageButtonVisible()
+        footerNavigationRow.makeCurrentPageButtonVisible()
+    }
+
+    model: ListModel {
+        id: parsedThreadModel
+    }
+
+    XmlListModel {
         id: threadModel
         objectName: "threadModel"
 
         property int firstDisplayedPost: -1
         property int lastDisplayedPost: -1
+
+        property bool hasLoadedCompletely: true
 
         property string topic_id: "-1"
         query: "/methodResponse/params/param/value/struct/member[name='posts']/value/array/data/value/struct"
@@ -84,9 +116,17 @@ ListView {
         XmlRole { name: "avatar"; query: "member[name='icon_url']/value/string/string()" }
         XmlRole { name: "thanks_info"; query: "member[name='thanks_info']/value/array/data/string()" }
         XmlRole { name: "post_time"; query: "member[name='post_time']/value/dateTime.iso8601/string()" }
+        XmlRole { name: "edit_time"; query: "member[name='edit_time']/value/string/string()" }
 
         onStatusChanged: {
             if (status === 1) {
+                //Parse the fetched posts and append the results to parsedThreadModel
+
+                for (var i = 0; i < count; i++) {
+                    var element = get(i)
+                    parsedThreadModel.append({ "id": element.id, "title": Qt.atob(element.title).trim(), "postBody": passageParser.parse("", [], Qt.atob(element.content)), "author": Qt.atob(element.author).trim(), "avatar": element.avatar.trim(), "thanksInfo": element.thanks_info.trim(), "postTime": element.post_time.trim(), "editTime": element.edit_time.trim() })
+                }
+
                 //Extract the total number of posts from XML
                 //Excerpt from the returned XML: <member><name>total_post_num</name><value><int>3</int></value></member>
 
@@ -152,12 +192,16 @@ ListView {
 
                     isSubscribed = isSubscribedSubstring.trim() === "1"
                 }
+
+                hasLoadedCompletely = true
             }
         }
 
         onTopic_idChanged: loadPosts(0, backend.postsPerPage)
 
         function loadPosts(startNum, count) {
+            hasLoadedCompletely = false
+
             firstDisplayedPost = startNum
             lastDisplayedPost = startNum + count - 1
 
@@ -173,17 +217,18 @@ ListView {
             loadThreadListRequest.start()
         }
 
-
     }
 
     ApiRequest {
         id: loadThreadListRequest
 
         onQueryResult: {
-            loadingSpinner.running = false
             threadModel.xml = responseXml
         }
     }
 
+    PassageParser {
+        id: passageParser
+    }
 
 }

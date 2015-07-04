@@ -127,7 +127,6 @@ Page {
                 var page = component.createObject(mainView, {"current_forum": 0, "title": text})
                 if (page === null) console.log(component.errorString())
                 pageStack.push(page)
-                page.loadingSpinnerRunning = true
             }
 
             onPressAndHold: {
@@ -169,7 +168,7 @@ Page {
         text: i18n.tr("Swipe up from the bottom to add a forum")
         visible: listView.count === 0
         elide: Text.ElideRight
-        wrapMode: Text.WordWrap
+        wrapMode: Text.Wrap
         horizontalAlignment: Text.AlignHCenter
         fontSize: "large"
         anchors {

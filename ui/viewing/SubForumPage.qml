@@ -28,6 +28,7 @@ PageWithBottomEdge {
     id: forumsPage
     objectName: "forumsPage"
     title: i18n.tr("Forums")
+    flickable: null
 
     property bool disableBottomEdge: false
     property alias viewSubscriptions: forumsList.viewSubscriptions //Not via mode for maintainability (e.g. you easily forget to add a && mode === "SUBS" when adding a mode === "" to an if-statement for basic topic list features)
@@ -41,11 +42,12 @@ PageWithBottomEdge {
     property bool selectedCanSubscribe: false
     property bool selectedIsSubscribed: false
 
-    property alias loadingSpinnerRunning: loadingSpinner.running
     property bool showSections: false
 
     property bool isSubscribed: false
     property bool canSubscribe: false
+
+    property real appHeaderHeight: 0
 
     bottomEdgeTitle: i18n.tr("Subscriptions")
     bottomEdgeEnabled: !disableBottomEdge && current_forum >= 0 && backend.currentSession.loggedIn
@@ -53,7 +55,7 @@ PageWithBottomEdge {
 
     onBottomEdgeReleased: {
         if (!isCollapsed) {
-            bottomEdgePage.loadingSpinnerRunning = true
+            bottomEdgePage.appHeaderHeight = appHeaderHeight
             bottomEdgePage.viewSubscriptions = true
             bottomEdgePage.title = i18n.tr("Subscriptions")
             bottomEdgePage.disableBottomEdge = true
@@ -204,15 +206,25 @@ PageWithBottomEdge {
         }
     ]
 
-    ActivityIndicator {
+    ActivityIndicator { //TODO: Empty error view when loading fails in ApiRequest
         id: loadingSpinner
-        anchors.centerIn: forumsList
+
+        running: forumsList.model.count === 0 && (!forumsList.modelsHaveLoadedCompletely || !backend.currentSession.loginFinished) //!loginFinished for when ForumConfigModel is loading
+
+        anchors {
+            centerIn: forumsList
+            verticalCenterOffset: appHeaderHeight / 2
+        }
+
+        Component.onCompleted: { //Determines header height (needed for offset), then sets flickable
+            appHeaderHeight = mainView.height - forumsList.height
+            parent.flickable = forumsList
+        }
     }
 
     SubForumList {
         id: forumsList
-        height: parent.height //No anchors.fill due to bottom edge
-        width: parent.width
+        anchors.fill: parent
 
         mode: (forumsPage.head.sections.selectedIndex === 1) ? "TOP" : ((forumsPage.head.sections.selectedIndex === 2) ? "ANN" : "")
 
@@ -233,7 +245,7 @@ PageWithBottomEdge {
     }
 
     function finishSubForumPageCreation() {
-        var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedForumId, "loadingSpinnerRunning": true, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
+        var page = component.createObject(mainView, {"title": selectedTitle, "current_forum": selectedForumId, "disableBottomEdge": disableBottomEdge, "canSubscribe": selectedCanSubscribe, "isSubscribed": selectedIsSubscribed})
         page.onIsSubscribedChanged.connect(function() { //Change is_subscribed attribute when the subscription state is changed
             for (var i = 0; i < forumsList.model.count; i++) {
                 if (forumsList.model.get(i).id === selectedForumId) {
@@ -260,7 +272,7 @@ PageWithBottomEdge {
 
     function finishThreadPageCreation() {
         var vBulletinAnnouncement = backend.currentSession.configModel.isVBulletin && forumsList.mode === "ANN"
-        var page = component.createObject(mainView, {"title": selectedTitle, "loadingSpinnerRunning": true, "forum_id": selectedForumId, "vBulletinAnnouncement": vBulletinAnnouncement})
+        var page = component.createObject(mainView, {"title": selectedTitle, "forum_id": selectedForumId, "vBulletinAnnouncement": vBulletinAnnouncement})
         page.current_topic = selectedTopicId //Need to set vBulletinAnnouncement before current_topic!!! Therefore, this is executed after the creation of the Page.
         pageStack.push(page)
     }
@@ -268,22 +280,18 @@ PageWithBottomEdge {
     Label {
         id: emptyView
         text: viewSubscriptions ? i18n.tr("You are not subscribed to any topics or forums") : ((forumsList.mode === "") ? i18n.tr("No topics available here") : ((forumsList.mode === "TOP") ? i18n.tr("No stickies available here") : i18n.tr("No announcements available here")))
-        visible: forumsList.model.count === 0 && !loadingSpinnerRunning && (current_forum > 0 || viewSubscriptions)
+        visible: forumsList.model.count === 0 && forumsList.modelsHaveLoadedCompletely && (current_forum > 0 || viewSubscriptions)
         elide: Text.ElideRight
-        wrapMode: Text.WordWrap
+        wrapMode: Text.Wrap
         horizontalAlignment: Text.AlignHCenter
         fontSize: "large"
         anchors {
             verticalCenter: parent.verticalCenter
+            verticalCenterOffset: appHeaderHeight / 2
             left: parent.left
             right: parent.right
             margins: units.gu(2)
         }
-    }
-
-    Scrollbar {
-        flickableItem: forumsList
-        align: Qt.AlignTrailing
     }
 
 }
