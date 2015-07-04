@@ -65,7 +65,7 @@ Page {
             ListItem.Standard {
                 text: i18n.tr("Version:")
                 control: Label {
-                    text: "0.2.5"
+                    text: "0.3.0"
                 }
             }
 
