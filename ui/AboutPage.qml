@@ -44,6 +44,7 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Math.min(parent.width, maxWidth)/2
                 height: Math.min(parent.width, maxWidth)/2
+                radius: "medium"
                 image: Image {
                     source: "../icon.png"
                     smooth: true
