@@ -159,8 +159,8 @@ Page {
         }
     }
 
-    TextArea { // TODO: Hide for new post, toggleable in the settings
-        id: subjectTextField // TODO: ListItem based
+    TextArea { // TODO-r: Hide for new post (→ Column to not have any anchor problems), toggleable in the settings
+        id: subjectTextField // TODO-r: ListItem based
         width: parent.width
         autoSize: true
         maximumLineCount: 1
