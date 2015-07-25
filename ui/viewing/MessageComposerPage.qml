@@ -37,7 +37,7 @@ Page {
     property string mode: "post" //Can be either "post" or "thread"
                                  //Needs to be the first property set!!!
 
-    title: (mode === "post") ? i18n.tr("New Post") : i18n.tr("New Topic")
+    title: (mode === "post") ? i18n.tr("Reply") : i18n.tr("New Topic")
 
     property var dialog
 
@@ -159,8 +159,8 @@ Page {
         }
     }
 
-    TextArea {
-        id: subjectTextField
+    TextArea { // TODO: Hide for new post, toggleable in the settings
+        id: subjectTextField // TODO: ListItem based
         width: parent.width
         autoSize: true
         maximumLineCount: 1
@@ -200,7 +200,7 @@ Page {
         id: messageTextField
         autoSize: false
         maximumLineCount: 0
-        placeholderText: i18n.tr("Enter Message")
+        placeholderText: i18n.tr("Enter Message") // TODO-r: Fix
 
         anchors {
             top: messageHeader.bottom
@@ -213,7 +213,7 @@ Page {
             leftMargin: units.gu(2)
         }
 
-        style: TextAreaStyle {
+        style: TextAreaStyle { // TODO-r: Spacing instead of margin?
             overlaySpacing: 0
             frameSpacing: 0
             background: Item {}

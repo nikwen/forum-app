@@ -39,7 +39,7 @@ PageWithBottomEdge {
     property int pageCount: Math.floor(threadList.totalPostCount/backend.postsPerPage + (threadList.totalPostCount % backend.postsPerPage === 0 ? 0 : 1))
 
     bottomEdgePageSource: "MessageComposerPage.qml"
-    bottomEdgeTitle: i18n.tr("New Post")
+    bottomEdgeTitle: i18n.tr("Reply")
     bottomEdgeEnabled: backend.currentSession.loggedIn && threadList.canReply && !threadList.isClosed && !vBulletinAnnouncement
 
     onBottomEdgeReleased: {
