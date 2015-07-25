@@ -147,81 +147,79 @@ Page {
         }
     }
 
-    ListItem.Header {
-        id: subjectHeader
-        text: i18n.tr("Subject:")
+    Column {
+        anchors.fill: parent
 
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            topMargin: units.gu(1)
+        ListItem.Standard {
+            width: parent.width
+            text: i18n.tr("Enter Subject")
+        }
+
+        TextArea {
+            id: messageTextField
+            autoSize: false
+            maximumLineCount: 0
+            placeholderText: i18n.tr("Enter Message") // TODO-r: Fix
+
+            style: TextAreaStyle { // TODO-r: Spacing instead of margin (units.gu(2))
+                overlaySpacing: 0
+                frameSpacing: 0
+                background: Item {}
+            }
+
+            KeyNavigation.priority: KeyNavigation.BeforeItem
+            KeyNavigation.backtab: subjectTextField
         }
     }
 
-    TextArea { // TODO-r: Hide for new post (→ Column to not have any anchor problems), toggleable in the settings
-        id: subjectTextField // TODO-r: ListItem based
-        width: parent.width
-        autoSize: true
-        maximumLineCount: 1
-        placeholderText: i18n.tr("Enter Subject")
+//    ListItem.Header {
+//        id: subjectHeader
+//        text: i18n.tr("Subject:")
 
-        anchors {
-            top: subjectHeader.bottom
-            right: parent.right
-            left: parent.left
-            topMargin: units.gu(2)
-            rightMargin: units.gu(2)
-            leftMargin: units.gu(2)
-        }
+//        anchors {
+//            top: parent.top
+//            left: parent.left
+//            right: parent.right
+//            topMargin: units.gu(1)
+//        }
+//    }
 
-        style: TextAreaStyle {
-            overlaySpacing: 0
-            frameSpacing: 0
-            background: Item {}
-        }
+//    TextArea { // TODO-r: Hide for new post (→ Column to not have any anchor problems), toggleable in the settings
+//        id: subjectTextField // TODO-r: ListItem based
+//        width: parent.width
+//        autoSize: true
+//        maximumLineCount: 1
+//        placeholderText: i18n.tr("Enter Subject")
 
-        KeyNavigation.priority: KeyNavigation.BeforeItem
-        KeyNavigation.tab: messageTextField
-    }
+//        anchors {
+//            top: subjectHeader.bottom
+//            right: parent.right
+//            left: parent.left
+//            topMargin: units.gu(2)
+//            rightMargin: units.gu(2)
+//            leftMargin: units.gu(2)
+//        }
 
-    ListItem.Header {
-        id: messageHeader
-        text: i18n.tr("Message:")
+//        style: TextAreaStyle {
+//            overlaySpacing: 0
+//            frameSpacing: 0
+//            background: Item {}
+//        }
 
-        anchors {
-            top: subjectTextField.bottom
-            left: parent.left
-            right: parent.right
-        }
-    }
+//        KeyNavigation.priority: KeyNavigation.BeforeItem
+//        KeyNavigation.tab: messageTextField
+//    }
 
-    TextArea {
-        id: messageTextField
-        autoSize: false
-        maximumLineCount: 0
-        placeholderText: i18n.tr("Enter Message") // TODO-r: Fix
+//    ListItem.Header {
+//        id: messageHeader
+//        text: i18n.tr("Message:")
 
-        anchors {
-            top: messageHeader.bottom
-            bottom: parent.bottom
-            right: parent.right
-            left: parent.left
-            topMargin: units.gu(2)
-            bottomMargin: units.gu(1)
-            rightMargin: units.gu(2)
-            leftMargin: units.gu(2)
-        }
-
-        style: TextAreaStyle { // TODO-r: Spacing instead of margin?
-            overlaySpacing: 0
-            frameSpacing: 0
-            background: Item {}
-        }
-
-        KeyNavigation.priority: KeyNavigation.BeforeItem
-        KeyNavigation.backtab: subjectTextField
-    }
+//        anchors {
+//            top: subjectTextField.bottom
+//            left: parent.left
+//            right: parent.right
+//        }
+//    }
 
     Component {
          id: loadingDialog
