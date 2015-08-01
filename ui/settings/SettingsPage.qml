@@ -64,7 +64,7 @@ Page {
                 }
             }
 
-            CheckboxSubtitledListItem { // TODO-r: Center label when no subtext
+            CheckboxSubtitledListItem {
                 id: showSubjectFieldForRepliesListItem
                 text: i18n.tr("Subject field when writing a reply")
                 checked: backend.subjectFieldWhenReplying
@@ -81,7 +81,7 @@ Page {
                     target: backend
 
                     onSubjectFieldWhenReplyingChanged: {
-                        subjectFieldWhenReplying.checked = backend.subjectFieldWhenReplying
+                        showSubjectFieldForRepliesListItem.checked = backend.subjectFieldWhenReplying
                     }
                 }
             }
