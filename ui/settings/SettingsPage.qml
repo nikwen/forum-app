@@ -34,6 +34,7 @@ Page {
         Column {
             id: column
             width: parent.width
+            height: childrenRect.height
 
 //            ListItem.Header {
 //                text: i18n.tr("Display settings")
