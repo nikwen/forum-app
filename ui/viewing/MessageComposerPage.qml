@@ -148,78 +148,62 @@ Page {
     }
 
     Column {
+        id: column
         anchors.fill: parent
 
-        ListItem.Standard {
-            width: parent.width
-            text: i18n.tr("Enter Subject")
+        ListItem.Base {
+            id: subjectListItem
+
+            TextField { // TODO-r: Hide for new post, toggleable in the settings
+                id: subjectTextField
+                placeholderText: i18n.tr("Enter Subject")
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    leftMargin: - units.gu(1) //Margins needed due to the TextFieldStyle
+                    rightMargin: - units.gu(1)
+                    verticalCenter: parent.verticalCenter
+                }
+
+                style: TextFieldStyle {
+                    background: Item {}
+                }
+
+                KeyNavigation.priority: KeyNavigation.BeforeItem
+                KeyNavigation.tab: messageTextField
+            }
         }
 
-        TextArea {
-            id: messageTextField
-            autoSize: false
-            maximumLineCount: 0
-            placeholderText: i18n.tr("Enter Message") // TODO-r: Fix
+        ListItem.Base {
+            height: postCreationPage.height - subjectListItem.height + units.gu(1) //We do not want the lower border to be visible
 
-            style: TextAreaStyle { // TODO-r: Spacing instead of margin (units.gu(2))
-                overlaySpacing: 0
-                frameSpacing: 0
-                background: Item {}
+            Column {
+                anchors.fill: parent
+                anchors.topMargin: units.gu(2)
+                anchors.bottomMargin: units.gu(3)
+
+                TextArea {
+                    id: messageTextField
+                    autoSize: false
+                    maximumLineCount: 0
+                    placeholderText: i18n.tr("Enter Message")
+
+                    width: parent.width
+                    height: parent.height
+
+                    style: TextAreaStyle {
+                        overlaySpacing: 0
+                        frameSpacing: 0
+                        background: Item {}
+                    }
+
+                    KeyNavigation.priority: KeyNavigation.BeforeItem
+                    KeyNavigation.backtab: subjectTextField
+                }
             }
-
-            KeyNavigation.priority: KeyNavigation.BeforeItem
-            KeyNavigation.backtab: subjectTextField
         }
     }
-
-//    ListItem.Header {
-//        id: subjectHeader
-//        text: i18n.tr("Subject:")
-
-//        anchors {
-//            top: parent.top
-//            left: parent.left
-//            right: parent.right
-//            topMargin: units.gu(1)
-//        }
-//    }
-
-//    TextArea { // TODO-r: Hide for new post (→ Column to not have any anchor problems), toggleable in the settings
-//        id: subjectTextField // TODO-r: ListItem based
-//        width: parent.width
-//        autoSize: true
-//        maximumLineCount: 1
-//        placeholderText: i18n.tr("Enter Subject")
-
-//        anchors {
-//            top: subjectHeader.bottom
-//            right: parent.right
-//            left: parent.left
-//            topMargin: units.gu(2)
-//            rightMargin: units.gu(2)
-//            leftMargin: units.gu(2)
-//        }
-
-//        style: TextAreaStyle {
-//            overlaySpacing: 0
-//            frameSpacing: 0
-//            background: Item {}
-//        }
-
-//        KeyNavigation.priority: KeyNavigation.BeforeItem
-//        KeyNavigation.tab: messageTextField
-//    }
-
-//    ListItem.Header {
-//        id: messageHeader
-//        text: i18n.tr("Message:")
-
-//        anchors {
-//            top: subjectTextField.bottom
-//            left: parent.left
-//            right: parent.right
-//        }
-//    }
 
     Component {
          id: loadingDialog
