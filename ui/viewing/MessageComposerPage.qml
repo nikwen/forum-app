@@ -153,8 +153,9 @@ Page {
 
         ListItem.Base {
             id: subjectListItem
+            visible: mode === "thread" || backend.subjectFieldWhenReplying
 
-            TextField { // TODO-r: Hide for new post, toggleable in the settings
+            TextField {
                 id: subjectTextField
                 placeholderText: i18n.tr("Enter Subject")
 
@@ -176,7 +177,7 @@ Page {
         }
 
         ListItem.Base {
-            height: postCreationPage.height - subjectListItem.height + units.gu(1) //We do not want the lower border to be visible
+            height: postCreationPage.height - (subjectListItem.visible ? subjectListItem.height : 0) + units.gu(1) //We do not want the lower border to be visible
 
             Column {
                 anchors.fill: parent
