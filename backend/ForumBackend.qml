@@ -36,6 +36,7 @@ Object {
     property alias signature: settingsBackend.signature
     property alias useAlternativeDateFormat: settingsBackend.useAlternativeDateFormat
     property alias subjectFieldWhenReplying: settingsBackend.subjectFieldWhenReplying
+    property alias discontinuedNoticeShown: settingsBackend.discontinuedNoticeShown
 
     U1db.Index {
         database: db

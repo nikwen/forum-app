@@ -19,6 +19,7 @@
 
 import QtQuick 2.3
 import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
 import U1db 1.0 as U1db
 import "ui"
 import "ui/viewing"
@@ -65,7 +66,12 @@ MainView {
         id: pageStack
 
         Component.onCompleted: {
-            pageStack.push(forumsListPage);
+            pageStack.push(forumsListPage)
+
+            if (!backend.discontinuedNoticeShown) {
+                PopupUtils.open(discontinuedDialog)
+                backend.discontinuedNoticeShown = true
+            }
         }
     }
 
@@ -81,6 +87,10 @@ MainView {
     LoginPage {
         id: loginPage
         visible: false
+    }
+
+    DiscontinuedDialog {
+        id: discontinuedDialog
     }
 
     ForumBackend {

@@ -24,4 +24,6 @@ Settings {
     property string signature: i18n.tr("Sent from my awesome Ubuntu device using the Forum Browser app")
     property bool useAlternativeDateFormat: false
     property bool subjectFieldWhenReplying: false
+
+    property bool discontinuedNoticeShown: false
 }
