@@ -70,7 +70,7 @@ MainView {
 
             if (!backend.discontinuedNoticeShown) {
                 PopupUtils.open(discontinuedDialog)
-//                backend.discontinuedNoticeShown = true
+                backend.discontinuedNoticeShown = true
             }
         }
     }
