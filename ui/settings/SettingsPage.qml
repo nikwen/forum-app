@@ -64,6 +64,28 @@ Page {
                 }
             }
 
+            CheckboxSubtitledListItem {
+                id: showSubjectFieldForRepliesListItem
+                text: i18n.tr("Subject field when writing a reply")
+                checked: backend.subjectFieldWhenReplying
+
+                onClicked: {
+                    checked = !checked
+                }
+
+                onCheckedChanged: {
+                    backend.subjectFieldWhenReplying = checked
+                }
+
+                Connections {
+                    target: backend
+
+                    onSubjectFieldWhenReplyingChanged: {
+                        showSubjectFieldForRepliesListItem.checked = backend.subjectFieldWhenReplying
+                    }
+                }
+            }
+
 //            ListItem.Header {
 //                text: i18n.tr("Identity settings")
 //            }

@@ -35,6 +35,7 @@ Object {
     property int topicsLoadCount: 20
     property alias signature: settingsBackend.signature
     property alias useAlternativeDateFormat: settingsBackend.useAlternativeDateFormat
+    property alias subjectFieldWhenReplying: settingsBackend.subjectFieldWhenReplying
 
     U1db.Index {
         database: db

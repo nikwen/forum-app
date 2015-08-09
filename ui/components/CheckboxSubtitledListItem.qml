@@ -21,54 +21,41 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 ListItem.Base {
     id: subtitledListItem
-    __height: Math.max(middleVisuals.height, units.gu(6))
+    __height: units.gu(6)
 
-    /*!
-      \preliminary
-      The list of strings that will be shown under the label text
-      \qmlproperty string subText
-     */
     property alias subText: subLabel.text
-
     property alias checked: checkBox.checked
 
-    Item  {
+    Column  {
         id: middleVisuals
         anchors {
             left: parent.left
-            right: checkBox.left //NOTE: Changed the anchor here (also removed the example code comments and fixed the imports)
-            rightMargin: units.gu(2) //NOTE: Added this margin
+            right: checkBox.left
+            rightMargin: units.gu(2)
             verticalCenter: parent.verticalCenter
         }
-        height: childrenRect.height + label.anchors.topMargin + subLabel.anchors.bottomMargin
+        height: childrenRect.height
 
         LabelVisual {
             id: label
+            width: parent.width
             text: subtitledListItem.text
             selected: subtitledListItem.selected
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-            }
         }
+
         LabelVisual {
             id: subLabel
+            width: parent.width
             selected: subtitledListItem.selected
             secondary: true
-            anchors {
-
-                left: parent.left
-                right: parent.right
-                top: label.bottom
-            }
             fontSize: "small"
             wrapMode: Text.Wrap
-            maximumLineCount: 1 //NOTE: Changed the line count here
+            visible: subText !== ""
+            maximumLineCount: 1
         }
     }
 
-    CheckBox { //NOTE: Added this CheckBox
+    CheckBox {
         id: checkBox
 
         anchors {

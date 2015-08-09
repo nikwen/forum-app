@@ -37,7 +37,7 @@ Page {
     property string mode: "post" //Can be either "post" or "thread"
                                  //Needs to be the first property set!!!
 
-    title: (mode === "post") ? i18n.tr("New Post") : i18n.tr("New Topic")
+    title: (mode === "post") ? i18n.tr("Reply") : i18n.tr("New Topic")
 
     property var dialog
 
@@ -147,80 +147,63 @@ Page {
         }
     }
 
-    ListItem.Header {
-        id: subjectHeader
-        text: i18n.tr("Subject:")
+    Column {
+        id: column
+        anchors.fill: parent
 
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            topMargin: units.gu(1)
-        }
-    }
+        ListItem.Base {
+            id: subjectListItem
+            visible: mode === "thread" || backend.subjectFieldWhenReplying
 
-    TextArea {
-        id: subjectTextField
-        width: parent.width
-        autoSize: true
-        maximumLineCount: 1
-        placeholderText: i18n.tr("Enter Subject")
+            TextField {
+                id: subjectTextField
+                placeholderText: i18n.tr("Enter Subject")
 
-        anchors {
-            top: subjectHeader.bottom
-            right: parent.right
-            left: parent.left
-            topMargin: units.gu(2)
-            rightMargin: units.gu(2)
-            leftMargin: units.gu(2)
-        }
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    leftMargin: - units.gu(1) //Margins needed due to the TextFieldStyle
+                    rightMargin: - units.gu(1)
+                    verticalCenter: parent.verticalCenter
+                }
 
-        style: TextAreaStyle {
-            overlaySpacing: 0
-            frameSpacing: 0
-            background: Item {}
+                style: TextFieldStyle {
+                    background: Item {}
+                }
+
+                KeyNavigation.priority: KeyNavigation.BeforeItem
+                KeyNavigation.tab: messageTextField
+            }
         }
 
-        KeyNavigation.priority: KeyNavigation.BeforeItem
-        KeyNavigation.tab: messageTextField
-    }
+        ListItem.Base {
+            height: postCreationPage.height - (subjectListItem.visible ? subjectListItem.height : 0) + units.gu(1) //We do not want the lower border to be visible
 
-    ListItem.Header {
-        id: messageHeader
-        text: i18n.tr("Message:")
+            Column {
+                anchors.fill: parent
+                anchors.topMargin: units.gu(2)
+                anchors.bottomMargin: units.gu(3)
 
-        anchors {
-            top: subjectTextField.bottom
-            left: parent.left
-            right: parent.right
+                TextArea {
+                    id: messageTextField
+                    autoSize: false
+                    maximumLineCount: 0
+                    placeholderText: i18n.tr("Enter Message")
+
+                    width: parent.width
+                    height: parent.height
+
+                    style: TextAreaStyle {
+                        overlaySpacing: 0
+                        frameSpacing: 0
+                        background: Item {}
+                    }
+
+                    KeyNavigation.priority: KeyNavigation.BeforeItem
+                    KeyNavigation.backtab: subjectTextField
+                }
+            }
         }
-    }
-
-    TextArea {
-        id: messageTextField
-        autoSize: false
-        maximumLineCount: 0
-        placeholderText: i18n.tr("Enter Message")
-
-        anchors {
-            top: messageHeader.bottom
-            bottom: parent.bottom
-            right: parent.right
-            left: parent.left
-            topMargin: units.gu(2)
-            bottomMargin: units.gu(1)
-            rightMargin: units.gu(2)
-            leftMargin: units.gu(2)
-        }
-
-        style: TextAreaStyle {
-            overlaySpacing: 0
-            frameSpacing: 0
-            background: Item {}
-        }
-
-        KeyNavigation.priority: KeyNavigation.BeforeItem
-        KeyNavigation.backtab: subjectTextField
     }
 
     Component {
