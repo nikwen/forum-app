@@ -19,6 +19,7 @@
 
 import QtQuick 2.3
 import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
 Page {
@@ -67,7 +68,7 @@ Page {
                 control: Label {
                     text: "0.3.0"
                 }
-                onClicked: pageStack.push(discontinuedPage)
+                onClicked: PopupUtils.open(discontinuedDialog)
             }
 
             ListItem.Header {
@@ -89,7 +90,14 @@ Page {
                     text: i18n.tr("Github")
                 }
                 progression: true
-                onClicked: Qt.openUrlExternally("https://github.com/nikwen/forum-app")
+                onClicked: {
+                    var dialog = PopupUtils.open(discontinuedDialog)
+                    var action = function() {
+                        dialog.closed.disconnect(action)
+                        Qt.openUrlExternally("https://github.com/nikwen/forum-app")
+                    }
+                    dialog.closed.connect(action)
+                }
             }
 
             ListItem.Standard {
@@ -126,13 +134,27 @@ Page {
             ListItem.Standard {
                 text: "nikwen.developer@gmail.com"
                 progression: true
-                onClicked: Qt.openUrlExternally("mailto:nikwen.developer@gmail.com")
+                onClicked: {
+                    var dialog = PopupUtils.open(discontinuedDialog)
+                    var action = function() {
+                        dialog.closed.disconnect(action)
+                        Qt.openUrlExternally("mailto:nikwen.developer@gmail.com")
+                    }
+                    dialog.closed.connect(action)
+                }
             }
 
             ListItem.Standard {
                 text: i18n.tr("XDA Developers thread")
                 progression: true
-                onClicked: Qt.openUrlExternally("http://forum.xda-developers.com/ubuntu-touch/apps-games/app-forum-browser-0-1-0-t2867227") //TODO: Open in app
+                onClicked: {
+                    var dialog = PopupUtils.open(discontinuedDialog)
+                    var action = function() {
+                        dialog.closed.disconnect(action)
+                        Qt.openUrlExternally("http://forum.xda-developers.com/ubuntu-touch/apps-games/app-forum-browser-0-1-0-t2867227") //TODO: Open in app
+                    }
+                    dialog.closed.connect(action)
+                }
             }
 
             ListItem.Empty {
