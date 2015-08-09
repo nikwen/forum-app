@@ -66,7 +66,7 @@ Page {
             ListItem.Standard {
                 text: i18n.tr("Version:")
                 control: Label {
-                    text: "0.3.0"
+                    text: "0.3.1"
                 }
                 onClicked: PopupUtils.open(discontinuedDialog)
             }
