@@ -65,7 +65,13 @@ MainView {
         id: pageStack
 
         Component.onCompleted: {
-            pageStack.push(forumsListPage);
+//            pageStack.push(forumsListPage)
+
+            if (!backend.discontinuedNoticeShown) {
+                pageStack.push(discontinuedPage)
+                console.log('discontinued')
+//                backend.discontinuedNoticeShown = true
+            }
         }
     }
 
@@ -81,6 +87,11 @@ MainView {
     LoginPage {
         id: loginPage
         visible: false
+    }
+
+    DiscontinuedPage {
+        id: discontinuedPage
+        visible: true
     }
 
     ForumBackend {

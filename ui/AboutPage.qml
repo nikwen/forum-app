@@ -67,6 +67,7 @@ Page {
                 control: Label {
                     text: "0.3.0"
                 }
+                onClicked: pageStack.push(discontinuedPage)
             }
 
             ListItem.Header {
