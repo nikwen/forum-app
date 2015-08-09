@@ -48,6 +48,10 @@ PageWithBottomEdge {
             bottomEdgePage.forum_id = forum_id
             bottomEdgePage.topic_id = current_topic
             bottomEdgePage.posted.connect(threadList.reload)
+
+            if (threadPage.height < threadPage.width) {
+                notification.show(i18n.tr("Warning: The reply page does not work well in landscape mode"))
+            }
         }
     }
 
