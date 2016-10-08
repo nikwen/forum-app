@@ -132,10 +132,12 @@ Item {
                             queryExecuted(false, "")
                         }
                     }
-
+                } else if (xhr.status === 0) { //XMLHttpRequest sometimes fails directly after login, retry
+                    console.log("XMLHttpRequest finished with status 0, retrying")
+                    runNextQuery()
                 } else {
                     notification.show((xhr.status === 404) ? i18n.tr("Error 404: Could not find Tapatalk API for given URL") : i18n.tr("Connection error"))
-                    console.log((xhr.status === 404) ? "Error 404: Could not find Tapatalk API for given URL" : "Connection error")
+                    console.log((xhr.status === 404) ? "Error 404: Could not find Tapatalk API for given URL" : "Connection error", "Status: " + xhr.status)
                     queryExecuted(false, "")
                 }
             }
